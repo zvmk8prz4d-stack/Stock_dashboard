@@ -1,227 +1,992 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>APEX v2.4 — Esempio APH tipografia ingrandita</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RDDT — Equity Deep Analysis</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <style>
-  :root {
-    --bg: #080c10; --border: #1c2530; --accent: #00e5ff;
-    --accent2: #ff6b35; --gold: #ffd166; --green: #06d6a0;
-    --red: #ef476f; --text: #e8edf2; --muted: #5a7080;
-    --card-bg: #0a1118;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; }
-  body::before { content: ''; position: fixed; inset: 0;
-    background-image: linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px; pointer-events: none; z-index: 0; }
-  .info-bar { padding: 20px 40px; background: rgba(0,229,255,0.05); border-bottom: 1px solid var(--border);
-    font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent); }
-  .card { background: var(--card-bg); padding: 28px 36px; position: relative; }
-  .rank { position: absolute; top: 20px; right: 30px;
-    font-family: 'Bebas Neue', sans-serif; font-size: 56px;
-    color: rgba(255,255,255,0.05); letter-spacing: 3px; }
-  .card-head { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 16px; }
-  .ticker { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 3px; color: var(--accent); }
-  .company-name { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .sector-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 1.5px;
-    padding: 5px 11px; border: 1px solid var(--accent); color: var(--accent); align-self: flex-start; margin-top: 4px; }
-  .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .score-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); width: 52px; }
-  .score-bar-bg { flex: 1; height: 7px; background: rgba(255,255,255,0.06); border-radius: 4px; }
-  .score-bar-fill { height: 100%; border-radius: 4px; }
-  .score-value { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; width: 56px; text-align: right; }
-  .price-row { display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .price { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 600; }
-  .cap { font-size: 13px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 3px; }
-  .analyst-block { text-align: right; background: rgba(255,255,255,0.02); border-left: 2px solid var(--muted); padding: 8px 14px; }
-  .analyst-block-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 5px; }
-  .analyst-badge { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 9px; border-radius: 2px;
-    background: rgba(6,214,160,0.15); color: var(--green); }
-  .target-price { font-size: 12px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; margin-top: 5px; }
-  .target-upside { color: var(--green); font-weight: 600; }
+:root{
+  --bg:#0F172A;--surface:#1E293B;--surface-2:#0B1220;--border:#334155;
+  --text-1:#F1F5F9;--text-2:#94A3B8;--text-3:#64748B;
+  --green:#10B981;--red:#EF4444;--amber:#F59E0B;--blue:#3B82F6;--purple:#8B5CF6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text-1);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14.5px;line-height:1.55}
+header{padding:22px 28px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#1E293B 0%,#0F172A 100%);position:sticky;top:0;z-index:50;backdrop-filter:blur(8px)}
+.h-top{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.h-tick{font-size:28px;font-weight:800;letter-spacing:-.5px}
+.h-name{color:var(--text-2);font-size:13.5px;margin-top:2px}
+.h-price{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.h-chg{font-size:14px;font-weight:600}
+.h-meta{display:flex;gap:18px;color:var(--text-2);font-size:12px;margin-top:10px;flex-wrap:wrap}
+.h-meta b{color:var(--text-1);font-weight:600}
+nav{padding:12px 28px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap}
+nav a{color:var(--text-2);text-decoration:none;font-size:12.5px;font-weight:500;margin-right:18px;padding:4px 0;border-bottom:1px solid transparent;transition:.15s}
+nav a:hover{color:var(--blue);border-bottom-color:var(--blue)}
+main{max-width:1180px;margin:0 auto;padding:0 18px 80px}
+section{padding:28px 0;border-bottom:1px solid var(--border)}
+section:last-child{border-bottom:none}
+h1{font-size:24px;font-weight:700;margin-bottom:14px;color:var(--text-1)}
+h2{font-size:20px;font-weight:700;margin:0 0 16px;color:var(--text-1);border-left:3px solid var(--blue);padding-left:10px}
+h3{font-size:16px;font-weight:600;margin:18px 0 8px;color:var(--text-1)}
+h4{font-size:14px;font-weight:600;margin:12px 0 6px;color:var(--text-2)}
+p{margin:8px 0;color:var(--text-1)}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:4px 0}
 
-  /* LAYOUT 2 colonne */
-  .main-content {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 24px;
-    margin-bottom: 18px;
-  }
-  .chart-block { padding: 14px; background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.05); border-radius: 4px; min-width: 0; }
-  .chart-block-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted);
-    letter-spacing: 1.5px; margin-bottom: 10px; text-transform: uppercase; }
-  .info-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* Dashboard */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:14px 0}
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.dash-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.dash-value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.dash-sub{font-size:12px;color:var(--text-2);margin-top:4px}
+.badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11.5px;font-weight:600;letter-spacing:.3px}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.4)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.4)}
+.badge-amber{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.4)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.4)}
+.badge-lg{padding:7px 16px;font-size:14px}
+.rating-strong-buy{background:rgba(16,185,129,.25);color:#34D399;border:1px solid var(--green)}
+.rating-buy{background:rgba(16,185,129,.15);color:var(--green);border:1px solid var(--green)}
+.rating-hold{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid var(--amber)}
+.rating-avoid{background:rgba(239,68,68,.15);color:var(--red);border:1px solid var(--red)}
 
-  /* TIPOGRAFIA INGRANDITA */
-  .quality-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 12px 14px;
-    background: rgba(0,229,255,0.04); border-left: 2px solid var(--accent); border-radius: 0 3px 3px 0; }
-  .quality-item { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .quality-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 1px; }
-  .quality-value { font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 600; }
-  .quality-value.good { color: var(--accent); }
-  .quality-value.warning { color: var(--gold); }
-  .quality-value.excellent { color: var(--green); }
+/* Target bars */
+.target-block{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:14px}
+.bar-row{display:grid;grid-template-columns:70px 1fr 110px;gap:10px;align-items:center;margin:8px 0}
+.bar-label{font-size:12px;color:var(--text-2);font-weight:600}
+.bar-px{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.bar-track{background:var(--surface-2);height:22px;border-radius:4px;position:relative;overflow:hidden}
+.bar{position:absolute;left:0;top:0;height:22px;border-radius:4px;opacity:.85}
+.bar-bull{background:var(--green)}
+.bar-base{background:var(--blue)}
+.bar-bear{background:var(--red)}
+.bar-current{position:absolute;height:22px;top:0;width:2px;background:var(--amber);z-index:3}
+.scale-axis{display:grid;grid-template-columns:70px 1fr 110px;gap:10px;margin-top:8px;font-size:11px;color:var(--text-3)}
+.scale-axis .ticks{display:flex;justify-content:space-between}
 
-  .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 18px; }
-  .kpi { display: flex; flex-direction: column; gap: 3px; }
-  .kpi-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; }
-  .kpi-value { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; }
-  .kpi-value.pos { color: var(--green); }
-  .kpi-value.neg { color: var(--red); }
-  .kpi-value.neu { color: var(--text); }
+/* Chart */
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text-2);margin-bottom:10px}
+.chart-caption{font-size:11.5px;color:var(--text-3);margin-top:10px;line-height:1.5}
 
-  /* TESI - più larga + paragrafi */
-  .thesis-full {
-    margin: 18px 0;
-    padding: 18px 22px;
-    background: rgba(255,255,255,0.015);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 4px 4px 0;
-  }
-  .thesis-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-    color: var(--accent); letter-spacing: 1.5px; margin-bottom: 12px;
-    text-transform: uppercase; font-weight: 600; }
-  .thesis-full p {
-    font-size: 14px; line-height: 1.75; color: rgba(232,237,242,0.9);
-    margin-bottom: 12px;
-  }
-  .thesis-full p:last-child { margin-bottom: 0; }
-  .thesis-full strong { color: var(--gold); font-weight: 600; }
+/* Tables */
+.table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:12px 0;border-radius:8px}
+.table-scroll table{margin:0}
+.table-scroll table.wide{min-width:780px}
+.table-scroll::-webkit-scrollbar{height:8px}
+.table-scroll::-webkit-scrollbar-track{background:var(--surface-2);border-radius:4px}
+.table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+th{background:var(--surface-2);text-align:left;padding:10px 12px;font-weight:600;color:var(--text-2);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text-1)}
+tr:last-child td{border-bottom:none}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.pos{color:var(--green);font-weight:600}
+td.neg{color:var(--red);font-weight:600}
 
-  .tech-readout { padding: 12px 16px; background: rgba(199,125,255,0.06);
-    border-left: 2px solid #c77dff; border-radius: 0 3px 3px 0;
-    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-    color: rgba(232,237,242,0.88); line-height: 1.65; letter-spacing: 0.3px; }
-  .tech-readout-label { font-size: 10px; color: #c77dff; letter-spacing: 1.5px;
-    margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
-  .catalysts { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
-  .cat-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 10px;
-    background: rgba(255,107,53,0.10); color: var(--accent2);
-    border: 1px solid rgba(255,107,53,0.2); text-transform: uppercase; }
-  .perf-row { display: flex; gap: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.04); }
-  .perf-item { flex: 1; text-align: center; }
-  .perf-item .pl { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-  .perf-item .pv { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; }
-  .risk-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px;
-    padding: 12px 16px; background: rgba(239,71,111,0.06); border-left: 2px solid rgba(239,71,111,0.4); }
-  .risk-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--red); flex-shrink: 0; }
-  .risk-text { font-size: 13px; color: rgba(239,71,111,0.92); line-height: 1.6; font-style: italic; }
-  .sec-note { margin-top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-    color: var(--muted); line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 12px; }
+/* Tags */
+.tag-verified,.tag-inferred,.tag-uncertain{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.5px;margin-left:4px;vertical-align:middle}
+.tag-verified{background:rgba(16,185,129,.18);color:#34D399}
+.tag-inferred{background:rgba(245,158,11,.18);color:var(--amber)}
+.tag-uncertain{background:rgba(239,68,68,.18);color:#F87171}
 
-  @media (max-width: 1200px) {
-    .main-content { grid-template-columns: 1fr; }
-    .quality-bar { grid-template-columns: repeat(2, 1fr); }
-  }
+/* Boxes */
+.box-warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.4);border-left:3px solid var(--red);border-radius:6px;padding:14px 16px;margin:14px 0}
+.box-warn h3{color:#F87171;margin-top:0}
+.box-info{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.4);border-left:3px solid var(--amber);border-radius:6px;padding:14px 16px;margin:14px 0}
+.box-info h3{color:var(--amber);margin-top:0}
+.box-bull{background:rgba(16,185,129,.06);border-left:3px solid var(--green);border-radius:6px;padding:12px 14px;margin:10px 0}
+.box-bear{background:rgba(239,68,68,.06);border-left:3px solid var(--red);border-radius:6px;padding:12px 14px;margin:10px 0}
+.box-verdict{background:linear-gradient(135deg,rgba(245,158,11,.1) 0%,rgba(59,130,246,.08) 100%);border:1px solid var(--amber);border-radius:10px;padding:20px;margin:16px 0}
+
+/* Footer */
+footer{padding:24px 28px;background:var(--surface);border-top:1px solid var(--border);color:var(--text-3);font-size:11.5px;line-height:1.6;text-align:center;margin-top:40px}
+footer a{color:var(--blue);text-decoration:none}
+
+@media (max-width:720px){
+  header{padding:16px 14px}
+  nav{padding:10px 14px}
+  main{padding:0 12px 60px}
+  section{padding:22px 0}
+  .h-tick{font-size:22px}
+  .h-price{font-size:24px}
+  .h-meta{font-size:11px;gap:10px}
+  .table-scroll{position:relative}
+  table{font-size:12px}
+  th,td{padding:7px 8px}
+  .dash-value{font-size:18px}
+  h2{font-size:17px}
+  h3{font-size:15px}
+}
+@media print{
+  nav,.no-print{display:none}
+  section{page-break-inside:avoid;break-inside:avoid}
+  body{background:white;color:black}
+  .chart-wrap{break-inside:avoid}
+}
 </style>
 </head>
 <body>
-
-<div class="info-bar">
-ESEMPIO v2.4 · APH — Chart 600x320 · KPI 15px · Tesi 14px in 5 paragrafi · Layout 50/50
-</div>
-
-<div class="card">
-  <div class="rank">11</div>
-  <div class="card-head">
-    <div style="flex:1">
-      <div class="ticker">APH</div>
-      <div class="company-name">Amphenol Corporation</div>
-    </div>
-    <div class="sector-tag">AI Networking · Connectors</div>
-  </div>
-  <div class="score-row">
-    <span class="score-label">SCORE</span>
-    <div class="score-bar-bg"><div class="score-bar-fill" style="width:59.2%;background:var(--gold)"></div></div>
-    <span class="score-value" style="color:var(--gold)">59.2</span>
-  </div>
-  <div class="price-row">
+<header>
+  <div class="h-top">
     <div>
-      <div class="price">$125.00</div>
-      <div class="cap">Mkt Cap: $154B</div>
+      <div class="h-tick">RDDT <span style="font-weight:500;color:var(--text-2);font-size:18px">Reddit, Inc.</span></div>
+      <div class="h-name">NYSE · Technology Services / Internet Software & Services</div>
     </div>
-    <div class="analyst-block">
-      <div class="analyst-block-label">⌬ Analisti</div>
-      <div class="analyst-badge">Strong Buy</div>
-      <div class="target-price">Target: $184.88 <span class="target-upside">(+47.9%)</span></div>
-    </div>
-  </div>
-
-  <div class="main-content">
-    <div class="chart-block">
-      <div class="chart-block-label">📈 Prezzo 2 anni · Close + SMA 20 / 50 / 100 / 200</div>
-      <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;">
-<defs><linearGradient id="grad-APH" x1="0" y1="0" x2="0" y2="1">
-<stop offset="0%" stop-color="#00e5ff" stop-opacity="0.18"/>
-<stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
-</linearGradient></defs>
-<rect x="0" y="0" width="600" height="320" fill="#0a1118"/>
-<line x1="50" y1="292.0" x2="588" y2="292.0" stroke="#1c2530" stroke-width="0.5"/><text x="44" y="295.0" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="end">$53</text><line x1="50" y1="238.8" x2="588" y2="238.8" stroke="#1c2530" stroke-width="0.5"/><text x="44" y="241.8" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="end">$77</text><line x1="50" y1="185.6" x2="588" y2="185.6" stroke="#1c2530" stroke-width="0.5"/><text x="44" y="188.6" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="end">$100</text><line x1="50" y1="132.4" x2="588" y2="132.4" stroke="#1c2530" stroke-width="0.5"/><text x="44" y="135.4" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="end">$124</text><line x1="50" y1="79.2" x2="588" y2="79.2" stroke="#1c2530" stroke-width="0.5"/><text x="44" y="82.2" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="end">$148</text><line x1="50" y1="26.0" x2="588" y2="26.0" stroke="#1c2530" stroke-width="0.5"/><text x="44" y="29.0" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="end">$172</text><text x="50.0" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">May 24</text><text x="126.5" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">Aug 24</text><text x="203.1" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">Dec 24</text><text x="279.6" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">Mar 25</text><text x="356.2" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">Jul 25</text><text x="432.7" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">Oct 25</text><text x="509.3" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">Jan 26</text><text x="585.8" y="312" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a7080" text-anchor="middle">May 26</text><path d="M50.0,262.9L51.1,261.3L52.2,259.0L53.2,260.0L54.3,257.9L55.4,258.1L56.5,260.6L57.5,261.6L58.6,261.6L59.7,262.4L60.8,263.1L61.9,265.0L62.9,261.4L64.0,264.1L65.1,264.4L66.2,260.8L67.3,260.1L68.3,256.8L69.4,256.1L70.5,257.8L71.6,255.8L72.6,254.5L73.7,257.4L74.8,256.7L75.9,260.0L77.0,258.5L78.0,260.2L79.1,259.5L80.2,259.8L81.3,259.4L82.3,259.4L83.4,258.8L84.5,258.3L85.6,258.4L86.7,257.0L87.7,253.8L88.8,254.9L89.9,254.2L91.0,254.5L92.0,253.0L93.1,266.8L94.2,263.2L95.3,266.5L96.4,262.3L97.4,262.3L98.5,271.8L99.6,272.4L100.7,267.6L101.8,268.7L102.8,272.0L103.9,266.7L105.0,271.5L106.1,278.3L107.1,279.9L108.2,276.6L109.3,276.2L110.4,271.0L111.5,270.4L112.5,269.5L113.6,265.6L114.7,265.5L115.8,262.7L116.8,263.3L117.9,262.1L119.0,260.6L120.1,260.2L121.2,261.1L122.2,259.8L123.3,261.4L124.4,261.7L125.5,262.2L126.5,261.1L127.6,259.6L128.7,272.0L129.8,273.4L130.9,272.1L131.9,276.6L133.0,274.7L134.1,274.5L135.2,271.7L136.3,268.6L137.3,268.3L138.4,269.0L139.5,267.4L140.6,268.9L141.6,264.4L142.7,263.0L143.8,263.6L144.9,262.5L146.0,264.3L147.0,263.5L148.1,265.0L149.2,264.7L150.3,268.2L151.3,271.5L152.4,271.7L153.5,270.9L154.6,269.9L155.7,266.6L156.7,265.2L157.8,266.1L158.9,263.8L160.0,259.8L161.1,263.5L162.1,260.6L163.2,259.4L164.3,259.6L165.4,260.9L166.4,260.9L167.5,257.3L168.6,254.3L169.7,255.2L170.8,256.8L171.8,256.4L172.9,257.6L174.0,260.6L175.1,258.7L176.1,257.9L177.2,254.5L178.3,249.0L179.4,245.0L180.5,245.2L181.5,246.2L182.6,249.4L183.7,248.7L184.8,248.2L185.8,252.7L186.9,254.1L188.0,251.7L189.1,251.9L190.2,246.6L191.2,244.3L192.3,246.5L193.4,246.6L194.5,247.7L195.6,247.9L196.6,247.0L197.7,246.9L198.8,244.0L199.9,244.0L200.9,244.4L202.0,245.7L203.1,248.0L204.2,246.0L205.3,245.8L206.3,245.7L207.4,241.9L208.5,244.3L209.6,253.7L210.6,253.9L211.7,252.6L212.8,251.7L213.9,250.2L215.0,250.4L216.0,252.2L217.1,255.0L218.2,255.1L219.3,256.1L220.3,253.7L221.4,251.3L222.5,250.6L223.6,249.8L224.7,253.4L225.7,257.6L226.8,253.3L227.9,251.8L229.0,254.2L230.1,255.2L231.1,247.8L232.2,236.3L233.3,234.7L234.4,237.8L235.4,259.5L236.5,257.1L237.6,255.3L238.7,250.2L239.8,252.1L240.8,253.6L241.9,254.5L243.0,255.0L244.1,253.8L245.1,254.3L246.2,249.8L247.3,254.0L248.4,254.5L249.5,255.3L250.5,256.4L251.6,256.1L252.7,254.3L253.8,255.3L254.8,259.3L255.9,260.3L257.0,265.1L258.1,262.3L259.2,264.1L260.2,261.5L261.3,268.6L262.4,269.5L263.5,265.7L264.6,272.4L265.6,269.7L266.7,272.3L267.8,272.6L268.9,270.0L269.9,272.7L271.0,269.6L272.1,267.6L273.2,267.7L274.3,259.7L275.3,262.0L276.4,261.5L277.5,255.4L278.6,255.0L279.6,259.3L280.7,258.0L281.8,261.5L282.9,263.8L284.0,262.7L285.0,258.6L286.1,270.3L287.2,278.3L288.3,274.3L289.4,276.1L290.4,262.4L291.5,267.0L292.6,264.2L293.7,264.1L294.7,263.4L295.8,265.6L296.9,265.0L298.0,268.3L299.1,263.4L300.1,251.3L301.2,240.4L302.3,240.8L303.4,240.7L304.4,238.9L305.5,238.3L306.6,234.5L307.7,230.0L308.8,231.1L309.8,232.1L310.9,229.6L312.0,230.2L313.1,229.5L314.1,221.5L315.2,218.5L316.3,218.8L317.4,218.1L318.5,216.0L319.5,217.1L320.6,217.4L321.7,218.7L322.8,219.7L323.9,219.0L324.9,212.8L326.0,213.2L327.1,211.5L328.2,209.2L329.2,208.2L330.3,205.3L331.4,204.8L332.5,203.4L333.6,201.5L334.6,202.4L335.7,203.5L336.8,202.2L337.9,198.7L338.9,203.5L340.0,201.5L341.1,202.8L342.2,201.3L343.3,200.5L344.3,197.3L345.4,196.0L346.5,193.3L347.6,193.4L348.6,191.8L349.7,189.4L350.8,192.5L351.9,189.9L353.0,187.8L354.0,189.9L355.1,192.4L356.2,190.6L357.3,190.4L358.4,189.4L359.4,186.2L360.5,187.9L361.6,185.4L362.7,182.2L363.7,179.1L364.8,178.3L365.9,182.6L367.0,185.0L368.1,176.6L369.1,175.4L370.2,171.6L371.3,174.7L372.4,174.3L373.4,172.0L374.5,177.0L375.6,167.3L376.7,168.8L377.8,165.3L378.8,167.5L379.9,164.2L381.0,164.6L382.1,160.1L383.2,164.6L384.2,162.5L385.3,166.0L386.4,161.8L387.5,164.2L388.5,167.2L389.6,166.9L390.7,165.6L391.8,164.8L392.9,164.4L393.9,163.9L395.0,159.9L396.1,166.8L397.2,165.9L398.2,162.7L399.3,158.0L400.4,163.2L401.5,163.0L402.6,149.0L403.6,143.8L404.7,143.0L405.8,144.7L406.9,143.5L407.9,143.9L409.0,145.3L410.1,137.1L411.2,132.9L412.3,133.5L413.3,129.7L414.4,134.8L415.5,136.6L416.6,136.0L417.7,139.5L418.7,133.4L419.8,131.3L420.9,133.8L422.0,136.8L423.0,134.2L424.1,131.6L425.2,128.8L426.3,127.8L427.4,138.0L428.4,133.0L429.5,135.9L430.6,129.2L431.7,125.3L432.7,129.1L433.8,124.6L434.9,131.8L436.0,121.8L437.1,107.5L438.1,110.8L439.2,106.1L440.3,103.0L441.4,97.5L442.4,98.9L443.5,98.4L444.6,93.5L445.7,104.3L446.8,99.5L447.8,101.2L448.9,99.0L450.0,88.3L451.1,89.2L452.2,92.6L453.2,107.6L454.3,111.0L455.4,114.1L456.5,113.9L457.5,104.4L458.6,118.6L459.7,115.8L460.8,101.7L461.9,101.9L462.9,99.8L464.0,94.9L465.1,98.7L466.2,93.6L467.2,100.0L468.3,98.2L469.4,98.4L470.5,96.8L471.6,100.1L472.6,99.9L473.7,99.0L474.8,121.1L475.9,119.6L476.9,121.3L478.0,127.2L479.1,120.2L480.2,107.5L481.3,107.8L482.3,103.4L483.4,101.6L484.5,102.7L485.6,103.9L486.7,105.5L487.7,107.8L488.8,97.6L489.9,97.2L491.0,93.8L492.0,99.4L493.1,105.3L494.2,96.6L495.3,85.5L496.4,76.8L497.4,81.8L498.5,65.1L499.6,64.7L500.7,69.3L501.7,64.2L502.8,68.9L503.9,72.3L505.0,62.1L506.1,38.1L507.1,83.6L508.2,75.5L509.3,87.8L510.4,85.9L511.5,81.1L512.5,119.4L513.6,124.7L514.7,105.4L515.8,87.5L516.8,87.7L517.9,87.9L519.0,88.6L520.1,81.9L521.2,77.7L522.2,79.6L523.3,71.8L524.4,72.2L525.5,79.4L526.5,71.2L527.6,68.6L528.7,78.0L529.8,83.4L530.9,107.8L531.9,120.3L533.0,113.2L534.1,105.4L535.2,115.2L536.2,105.8L537.3,104.3L538.4,109.2L539.5,116.1L540.6,110.6L541.6,104.1L542.7,107.9L543.8,124.3L544.9,117.9L546.0,126.7L547.0,117.9L548.1,123.9L549.2,122.2L550.3,134.8L551.3,133.7L552.4,143.7L553.5,127.5L554.6,124.5L555.7,123.8L556.7,127.2L557.8,123.0L558.9,107.4L560.0,102.1L561.0,95.3L562.1,85.1L563.2,77.4L564.3,81.3L565.4,76.9L566.4,72.1L567.5,68.2L568.6,70.2L569.7,78.7L570.7,74.1L571.8,75.2L572.9,77.6L574.0,88.6L575.1,78.2L576.1,80.6L577.2,91.8L578.3,94.6L579.4,104.4L580.5,100.4L581.5,104.5L582.6,123.8L583.7,136.2L584.8,124.1L585.8,131.4L586.9,121.2L588.0,130.6L588.0,292.0L50.0,292.0Z" fill="url(#grad-APH)"/><path d="M264.6,258.7L265.6,258.8L266.7,258.8L267.8,258.9L268.9,259.0L269.9,259.0L271.0,259.1L272.1,259.1L273.2,259.2L274.3,259.1L275.3,259.1L276.4,259.1L277.5,259.1L278.6,259.1L279.6,259.0L280.7,259.0L281.8,259.0L282.9,259.0L284.0,259.0L285.0,259.1L286.1,259.1L287.2,259.2L288.3,259.3L289.4,259.4L290.4,259.5L291.5,259.5L292.6,259.5L293.7,259.5L294.7,259.6L295.8,259.6L296.9,259.6L298.0,259.7L299.1,259.7L300.1,259.6L301.2,259.6L302.3,259.5L303.4,259.4L304.4,259.3L305.5,259.2L306.6,259.1L307.7,259.0L308.8,258.9L309.8,258.7L310.9,258.5L312.0,258.4L313.1,258.2L314.1,257.9L315.2,257.7L316.3,257.4L317.4,257.2L318.5,256.9L319.5,256.6L320.6,256.4L321.7,256.1L322.8,255.8L323.9,255.5L324.9,255.2L326.0,254.9L327.1,254.6L328.2,254.3L329.2,254.0L330.3,253.7L331.4,253.4L332.5,253.1L333.6,252.8L334.6,252.5L335.7,252.2L336.8,251.9L337.9,251.6L338.9,251.3L340.0,251.0L341.1,250.7L342.2,250.4L343.3,250.1L344.3,249.8L345.4,249.4L346.5,249.0L347.6,248.6L348.6,248.2L349.7,247.7L350.8,247.3L351.9,246.9L353.0,246.5L354.0,246.2L355.1,245.8L356.2,245.4L357.3,245.0L358.4,244.6L359.4,244.3L360.5,243.9L361.6,243.5L362.7,243.1L363.7,242.7L364.8,242.2L365.9,241.8L367.0,241.4L368.1,240.9L369.1,240.4L370.2,239.9L371.3,239.5L372.4,239.0L373.4,238.5L374.5,238.1L375.6,237.6L376.7,237.2L377.8,236.7L378.8,236.2L379.9,235.8L381.0,235.3L382.1,234.8L383.2,234.3L384.2,233.8L385.3,233.4L386.4,232.9L387.5,232.5L388.5,232.0L389.6,231.5L390.7,231.1L391.8,230.6L392.9,230.2L393.9,229.7L395.0,229.3L396.1,228.9L397.2,228.5L398.2,228.1L399.3,227.6L400.4,227.2L401.5,226.8L402.6,226.2L403.6,225.7L404.7,225.1L405.8,224.6L406.9,224.1L407.9,223.6L409.0,223.1L410.1,222.6L411.2,222.0L412.3,221.4L413.3,220.8L414.4,220.3L415.5,219.7L416.6,219.2L417.7,218.7L418.7,218.1L419.8,217.5L420.9,217.0L422.0,216.4L423.0,215.9L424.1,215.3L425.2,214.7L426.3,214.1L427.4,213.5L428.4,212.9L429.5,212.3L430.6,211.7L431.7,211.1L432.7,210.5L433.8,209.8L434.9,209.2L436.0,208.5L437.1,207.8L438.1,207.1L439.2,206.4L440.3,205.6L441.4,204.8L442.4,204.1L443.5,203.3L444.6,202.5L445.7,201.7L446.8,201.0L447.8,200.3L448.9,199.6L450.0,198.9L451.1,198.0L452.2,197.2L453.2,196.5L454.3,195.8L455.4,195.1L456.5,194.4L457.5,193.6L458.6,193.0L459.7,192.3L460.8,191.5L461.9,190.8L462.9,190.0L464.0,189.2L465.1,188.4L466.2,187.6L467.2,186.8L468.3,186.0L469.4,185.3L470.5,184.5L471.6,183.6L472.6,182.8L473.7,182.0L474.8,181.3L475.9,180.6L476.9,179.8L478.0,179.1L479.1,178.4L480.2,177.6L481.3,176.8L482.3,175.9L483.4,175.1L484.5,174.2L485.6,173.4L486.7,172.6L487.7,171.8L488.8,170.9L489.9,170.1L491.0,169.3L492.0,168.5L493.1,167.7L494.2,166.9L495.3,166.0L496.4,165.1L497.4,164.2L498.5,163.2L499.6,162.3L500.7,161.3L501.7,160.3L502.8,159.2L503.9,158.2L505.0,157.2L506.1,156.0L507.1,155.1L508.2,154.2L509.3,153.3L510.4,152.4L511.5,151.5L512.5,150.8L513.6,150.0L514.7,149.2L515.8,148.4L516.8,147.7L517.9,146.9L519.0,146.1L520.1,145.4L521.2,144.6L522.2,143.8L523.3,143.0L524.4,142.2L525.5,141.4L526.5,140.6L527.6,139.8L528.7,139.1L529.8,138.4L530.9,137.8L531.9,137.3L533.0,136.8L534.1,136.3L535.2,135.7L536.2,135.2L537.3,134.6L538.4,134.1L539.5,133.5L540.6,133.0L541.6,132.5L542.7,132.0L543.8,131.5L544.9,131.1L546.0,130.7L547.0,130.3L548.1,129.9L549.2,129.5L550.3,129.1L551.3,128.8L552.4,128.5L553.5,128.1L554.6,127.7L555.7,127.4L556.7,127.0L557.8,126.6L558.9,126.1L560.0,125.6L561.0,125.1L562.1,124.6L563.2,124.0L564.3,123.5L565.4,122.9L566.4,122.3L567.5,121.7L568.6,121.1L569.7,120.6L570.7,120.0L571.8,119.4L572.9,118.8L574.0,118.3L575.1,117.8L576.1,117.2L577.2,116.8L578.3,116.3L579.4,116.0L580.5,115.6L581.5,115.2L582.6,114.9L583.7,114.7L584.8,114.4L585.8,114.2L586.9,113.9L588.0,113.7" fill="none" stroke="#ef476f" stroke-width="1.4" stroke-dasharray="5,3" opacity="0.85"/><path d="M156.7,264.1L157.8,264.2L158.9,264.2L160.0,264.2L161.1,264.2L162.1,264.2L163.2,264.3L164.3,264.3L165.4,264.2L166.4,264.2L167.5,264.2L168.6,264.1L169.7,264.0L170.8,264.0L171.8,263.9L172.9,263.8L174.0,263.8L175.1,263.8L176.1,263.8L177.2,263.8L178.3,263.7L179.4,263.6L180.5,263.5L181.5,263.4L182.6,263.3L183.7,263.2L184.8,263.1L185.8,263.0L186.9,263.0L188.0,262.9L189.1,262.8L190.2,262.7L191.2,262.5L192.3,262.4L193.4,262.3L194.5,262.2L195.6,262.2L196.6,262.1L197.7,262.0L198.8,261.9L199.9,261.8L200.9,261.6L202.0,261.4L203.1,261.2L204.2,261.1L205.3,260.9L206.3,260.6L207.4,260.3L208.5,260.1L209.6,259.9L210.6,259.8L211.7,259.6L212.8,259.4L213.9,259.1L215.0,258.8L216.0,258.6L217.1,258.4L218.2,258.2L219.3,258.1L220.3,257.9L221.4,257.8L222.5,257.6L223.6,257.5L224.7,257.4L225.7,257.4L226.8,257.3L227.9,257.2L229.0,257.1L230.1,257.1L231.1,257.0L232.2,256.7L233.3,256.4L234.4,256.2L235.4,256.2L236.5,256.0L237.6,255.9L238.7,255.6L239.8,255.4L240.8,255.2L241.9,255.0L243.0,254.8L244.1,254.7L245.1,254.5L246.2,254.3L247.3,254.2L248.4,254.1L249.5,254.0L250.5,253.9L251.6,253.8L252.7,253.7L253.8,253.7L254.8,253.6L255.9,253.6L257.0,253.6L258.1,253.5L259.2,253.4L260.2,253.3L261.3,253.3L262.4,253.3L263.5,253.3L264.6,253.4L265.6,253.4L266.7,253.5L267.8,253.6L268.9,253.7L269.9,253.8L271.0,253.9L272.1,254.0L273.2,254.1L274.3,254.0L275.3,254.1L276.4,254.2L277.5,254.2L278.6,254.1L279.6,254.2L280.7,254.2L281.8,254.2L282.9,254.2L284.0,254.3L285.0,254.3L286.1,254.5L287.2,254.9L288.3,255.2L289.4,255.5L290.4,255.6L291.5,255.8L292.6,255.9L293.7,256.1L294.7,256.1L295.8,256.3L296.9,256.4L298.0,256.6L299.1,256.8L300.1,256.9L301.2,256.8L302.3,256.7L303.4,256.7L304.4,256.6L305.5,256.5L306.6,256.4L307.7,256.3L308.8,256.1L309.8,256.0L310.9,255.8L312.0,255.7L313.1,255.5L314.1,255.2L315.2,255.0L316.3,254.8L317.4,254.4L318.5,254.0L319.5,253.7L320.6,253.3L321.7,253.0L322.8,252.7L323.9,252.4L324.9,252.0L326.0,251.5L327.1,251.1L328.2,250.6L329.2,250.2L330.3,249.8L331.4,249.3L332.5,248.8L333.6,248.2L334.6,247.7L335.7,247.3L336.8,246.7L337.9,246.2L338.9,245.7L340.0,245.4L341.1,245.1L342.2,244.7L343.3,244.1L344.3,243.5L345.4,242.9L346.5,242.3L347.6,241.8L348.6,241.1L349.7,240.5L350.8,239.9L351.9,239.2L353.0,238.6L354.0,238.0L355.1,237.3L356.2,236.7L357.3,236.1L358.4,235.4L359.4,234.7L360.5,234.0L361.6,233.3L362.7,232.6L363.7,231.7L364.8,230.9L365.9,230.1L367.0,229.3L368.1,228.4L369.1,227.5L370.2,226.5L371.3,225.6L372.4,224.6L373.4,223.7L374.5,222.7L375.6,221.7L376.7,220.6L377.8,219.6L378.8,218.5L379.9,217.5L381.0,216.5L382.1,215.5L383.2,214.5L384.2,213.5L385.3,212.6L386.4,211.7L387.5,210.7L388.5,209.8L389.6,208.9L390.7,207.9L391.8,206.9L392.9,206.0L393.9,204.9L395.0,203.7L396.1,202.7L397.2,201.6L398.2,200.6L399.3,199.5L400.4,198.5L401.5,197.5L402.6,196.3L403.6,195.1L404.7,193.9L405.8,192.6L406.9,191.4L407.9,190.4L409.0,189.4L410.1,188.4L411.2,187.3L412.3,186.2L413.3,185.2L414.4,184.2L415.5,183.2L416.6,182.3L417.7,181.4L418.7,180.4L419.8,179.4L420.9,178.4L422.0,177.6L423.0,176.8L424.1,175.9L425.2,175.0L426.3,174.1L427.4,173.3L428.4,172.5L429.5,171.6L430.6,170.7L431.7,169.8L432.7,169.0L433.8,168.1L434.9,167.3L436.0,166.4L437.1,165.4L438.1,164.5L439.2,163.5L440.3,162.5L441.4,161.4L442.4,160.4L443.5,159.3L444.6,158.3L445.7,157.3L446.8,156.3L447.8,155.3L448.9,154.2L450.0,153.1L451.1,152.0L452.2,150.9L453.2,150.1L454.3,149.2L455.4,148.4L456.5,147.7L457.5,146.8L458.6,146.1L459.7,145.3L460.8,144.5L461.9,143.6L462.9,142.7L464.0,141.7L465.1,140.8L466.2,139.8L467.2,139.0L468.3,138.1L469.4,137.2L470.5,136.3L471.6,135.6L472.6,134.8L473.7,133.9L474.8,133.3L475.9,132.7L476.9,132.2L478.0,131.7L479.1,131.2L480.2,130.5L481.3,129.9L482.3,129.2L483.4,128.5L484.5,127.8L485.6,127.2L486.7,126.6L487.7,126.0L488.8,125.4L489.9,124.7L491.0,124.0L492.0,123.4L493.1,122.8L494.2,122.1L495.3,121.3L496.4,120.4L497.4,119.6L498.5,118.6L499.6,117.6L500.7,116.6L501.7,115.6L502.8,114.7L503.9,113.8L505.0,112.7L506.1,111.5L507.1,110.8L508.2,109.9L509.3,109.1L510.4,108.5L511.5,107.9L512.5,107.6L513.6,107.4L514.7,107.1L515.8,106.5L516.8,105.9L517.9,105.4L519.0,105.0L520.1,104.5L521.2,103.9L522.2,103.4L523.3,102.7L524.4,102.1L525.5,101.5L526.5,100.9L527.6,100.3L528.7,99.7L529.8,99.2L530.9,98.9L531.9,98.8L533.0,98.6L534.1,98.4L535.2,98.2L536.2,97.9L537.3,97.6L538.4,97.4L539.5,97.3L540.6,97.1L541.6,96.9L542.7,96.7L543.8,96.7L544.9,96.8L546.0,97.0L547.0,97.1L548.1,97.3L549.2,97.5L550.3,97.9L551.3,98.2L552.4,98.7L553.5,99.0L554.6,99.2L555.7,99.4L556.7,99.7L557.8,100.1L558.9,100.3L560.0,100.4L561.0,100.2L562.1,100.0L563.2,99.6L564.3,99.3L565.4,99.0L566.4,98.5L567.5,98.1L568.6,97.8L569.7,97.5L570.7,97.3L571.8,97.1L572.9,96.9L574.0,96.8L575.1,96.6L576.1,96.4L577.2,96.3L578.3,96.3L579.4,96.4L580.5,96.4L581.5,96.4L582.6,96.5L583.7,96.6L584.8,96.6L585.8,96.7L586.9,96.7L588.0,96.9" fill="none" stroke="#c77dff" stroke-width="1.4" opacity="0.75"/><path d="M102.8,260.7L103.9,260.7L105.0,260.9L106.1,261.3L107.1,261.7L108.2,262.1L109.3,262.5L110.4,262.7L111.5,262.8L112.5,263.0L113.6,263.1L114.7,263.1L115.8,263.1L116.8,263.1L117.9,263.1L119.0,263.0L120.1,263.0L121.2,263.0L122.2,263.1L123.3,263.2L124.4,263.2L125.5,263.4L126.5,263.5L127.6,263.5L128.7,263.8L129.8,264.1L130.9,264.4L131.9,264.7L133.0,265.0L134.1,265.3L135.2,265.6L136.3,265.7L137.3,265.9L138.4,266.1L139.5,266.3L140.6,266.6L141.6,266.8L142.7,266.9L143.8,267.1L144.9,267.3L146.0,267.5L147.0,267.4L148.1,267.5L149.2,267.4L150.3,267.6L151.3,267.7L152.4,267.7L153.5,267.7L154.6,267.8L155.7,267.7L156.7,267.6L157.8,267.6L158.9,267.4L160.0,267.0L161.1,266.7L162.1,266.4L163.2,266.1L164.3,265.8L165.4,265.6L166.4,265.5L167.5,265.3L168.6,265.1L169.7,264.9L170.8,264.8L171.8,264.7L172.9,264.6L174.0,264.6L175.1,264.6L176.1,264.5L177.2,264.4L178.3,264.2L179.4,263.8L180.5,263.5L181.5,263.2L182.6,262.8L183.7,262.3L184.8,261.8L185.8,261.3L186.9,260.9L188.0,260.5L189.1,260.1L190.2,259.6L191.2,259.1L192.3,258.7L193.4,258.3L194.5,257.9L195.6,257.5L196.6,257.2L197.7,256.9L198.8,256.5L199.9,256.1L200.9,255.7L202.0,255.3L203.1,255.0L204.2,254.5L205.3,254.0L206.3,253.5L207.4,252.9L208.5,252.4L209.6,252.2L210.6,251.9L211.7,251.7L212.8,251.4L213.9,251.2L215.0,251.0L216.0,250.8L217.1,250.7L218.2,250.6L219.3,250.5L220.3,250.4L221.4,250.3L222.5,250.2L223.6,250.1L224.7,250.0L225.7,250.0L226.8,250.0L227.9,249.8L229.0,249.7L230.1,249.6L231.1,249.5L232.2,249.2L233.3,249.0L234.4,248.9L235.4,249.2L236.5,249.3L237.6,249.4L238.7,249.5L239.8,249.5L240.8,249.5L241.9,249.5L243.0,249.6L244.1,249.7L245.1,249.9L246.2,250.0L247.3,250.1L248.4,250.3L249.5,250.4L250.5,250.6L251.6,250.8L252.7,251.0L253.8,251.2L254.8,251.5L255.9,251.8L257.0,252.2L258.1,252.5L259.2,252.8L260.2,253.2L261.3,253.7L262.4,254.2L263.5,254.4L264.6,254.8L265.6,255.1L266.7,255.6L267.8,256.0L268.9,256.4L269.9,256.8L271.0,257.1L272.1,257.4L273.2,257.6L274.3,257.7L275.3,257.9L276.4,258.1L277.5,258.3L278.6,258.3L279.6,258.3L280.7,258.4L281.8,258.6L282.9,258.8L284.0,258.9L285.0,259.2L286.1,259.8L287.2,260.7L288.3,261.4L289.4,261.8L290.4,261.9L291.5,262.1L292.6,262.4L293.7,262.6L294.7,262.8L295.8,263.1L296.9,263.3L298.0,263.5L299.1,263.7L300.1,263.8L301.2,263.5L302.3,263.2L303.4,262.9L304.4,262.6L305.5,262.2L306.6,261.8L307.7,261.3L308.8,260.7L309.8,260.2L310.9,259.5L312.0,258.8L313.1,258.1L314.1,257.3L315.2,256.3L316.3,255.3L317.4,254.4L318.5,253.2L319.5,252.2L320.6,251.1L321.7,250.0L322.8,249.0L323.9,247.9L324.9,246.8L326.0,245.7L327.1,244.6L328.2,243.6L329.2,242.5L330.3,241.4L331.4,240.4L332.5,239.3L333.6,238.2L334.6,237.1L335.7,235.9L336.8,234.7L337.9,233.4L338.9,232.3L340.0,230.9L341.1,229.4L342.2,227.9L343.3,226.4L344.3,225.1L345.4,223.7L346.5,222.3L347.6,220.9L348.6,219.4L349.7,217.9L350.8,216.5L351.9,214.9L353.0,213.4L354.0,212.2L355.1,211.2L356.2,210.2L357.3,209.2L358.4,208.2L359.4,207.2L360.5,206.2L361.6,205.3L362.7,204.4L363.7,203.3L364.8,202.3L365.9,201.3L367.0,200.4L368.1,199.5L369.1,198.7L370.2,197.7L371.3,196.9L372.4,196.0L373.4,195.1L374.5,194.3L375.6,193.3L376.7,192.3L377.8,191.2L378.8,190.3L379.9,189.3L381.0,188.4L382.1,187.4L383.2,186.5L384.2,185.7L385.3,184.9L386.4,184.1L387.5,183.3L388.5,182.6L389.6,181.9L390.7,181.1L391.8,180.5L392.9,179.7L393.9,178.9L395.0,178.1L396.1,177.4L397.2,176.7L398.2,176.0L399.3,175.2L400.4,174.6L401.5,174.0L402.6,173.2L403.6,172.3L404.7,171.3L405.8,170.4L406.9,169.5L407.9,168.6L409.0,167.6L410.1,166.6L411.2,165.4L412.3,164.3L413.3,163.2L414.4,162.1L415.5,161.1L416.6,160.2L417.7,159.4L418.7,158.5L419.8,157.5L420.9,156.5L422.0,155.7L423.0,154.8L424.1,154.0L425.2,153.1L426.3,152.2L427.4,151.5L428.4,150.6L429.5,150.0L430.6,149.2L431.7,148.4L432.7,147.6L433.8,146.8L434.9,146.2L436.0,145.4L437.1,144.3L438.1,143.2L439.2,142.0L440.3,140.9L441.4,139.5L442.4,138.2L443.5,136.8L444.6,135.4L445.7,134.1L446.8,132.8L447.8,131.6L448.9,130.4L450.0,128.8L451.1,127.3L452.2,125.9L453.2,124.9L454.3,123.8L455.4,122.8L456.5,122.1L457.5,121.4L458.6,120.9L459.7,120.3L460.8,119.4L461.9,118.6L462.9,117.7L464.0,116.9L465.1,116.2L466.2,115.4L467.2,114.8L468.3,114.0L469.4,113.3L470.5,112.5L471.6,111.7L472.6,111.0L473.7,110.4L474.8,110.1L475.9,109.8L476.9,109.5L478.0,109.4L479.1,109.3L480.2,108.9L481.3,108.3L482.3,107.7L483.4,107.0L484.5,106.5L485.6,106.0L486.7,105.6L487.7,105.2L488.8,104.5L489.9,104.0L491.0,103.8L492.0,103.5L493.1,103.5L494.2,103.4L495.3,103.2L496.4,102.7L497.4,102.4L498.5,101.8L499.6,101.0L500.7,100.4L501.7,99.7L502.8,99.1L503.9,98.8L505.0,98.2L506.1,97.1L507.1,96.7L508.2,95.9L509.3,95.4L510.4,94.9L511.5,94.4L512.5,94.4L513.6,94.6L514.7,94.7L515.8,94.4L516.8,94.1L517.9,94.0L519.0,93.8L520.1,93.5L521.2,93.1L522.2,92.7L523.3,92.2L524.4,91.7L525.5,91.3L526.5,90.7L527.6,90.1L528.7,89.3L529.8,88.5L530.9,88.3L531.9,88.1L533.0,88.0L534.1,87.9L535.2,88.1L536.2,88.1L537.3,88.2L538.4,88.3L539.5,88.6L540.6,88.7L541.6,88.6L542.7,88.8L543.8,89.3L544.9,89.8L546.0,90.4L547.0,90.6L548.1,91.2L549.2,91.9L550.3,93.0L551.3,94.1L552.4,95.7L553.5,96.9L554.6,98.0L555.7,99.2L556.7,100.4L557.8,101.4L558.9,102.3L560.0,103.6L561.0,103.8L562.1,104.0L563.2,103.8L564.3,103.7L565.4,103.6L566.4,102.7L567.5,101.5L568.6,100.8L569.7,100.7L570.7,100.4L571.8,100.1L572.9,99.9L574.0,100.1L575.1,100.1L576.1,100.1L577.2,100.5L578.3,100.9L579.4,101.4L580.5,102.0L581.5,102.7L582.6,103.7L583.7,104.7L584.8,105.0L585.8,105.3L586.9,105.4L588.0,105.9" fill="none" stroke="#ff6b35" stroke-width="1.4" opacity="0.85"/><path d="M70.5,260.8L71.6,260.4L72.6,260.1L73.7,260.0L74.8,259.8L75.9,259.9L77.0,259.9L78.0,259.9L79.1,259.8L80.2,259.7L81.3,259.6L82.3,259.4L83.4,259.1L84.5,258.9L85.6,258.6L86.7,258.3L87.7,257.9L88.8,257.7L89.9,257.5L91.0,257.4L92.0,257.2L93.1,257.8L94.2,258.2L95.3,258.7L96.4,258.9L97.4,259.0L98.5,259.7L99.6,260.3L100.7,260.7L101.8,261.2L102.8,261.8L103.9,262.2L105.0,262.8L106.1,263.8L107.1,264.9L108.2,265.9L109.3,267.0L110.4,267.8L111.5,268.6L112.5,269.3L113.6,270.0L114.7,269.9L115.8,269.9L116.8,269.7L117.9,269.7L119.0,269.6L120.1,269.0L121.2,268.5L122.2,268.1L123.3,267.7L124.4,267.2L125.5,267.0L126.5,266.4L127.6,265.5L128.7,265.1L129.8,265.0L130.9,264.8L131.9,265.0L133.0,265.3L134.1,265.5L135.2,265.8L136.3,266.0L137.3,266.2L138.4,266.5L139.5,266.8L140.6,267.2L141.6,267.4L142.7,267.5L143.8,267.7L144.9,267.8L146.0,267.9L147.0,268.0L148.1,268.2L149.2,268.4L150.3,268.2L151.3,268.1L152.4,268.1L153.5,267.8L154.6,267.6L155.7,267.2L156.7,266.9L157.8,266.7L158.9,266.5L160.0,266.1L161.1,265.9L162.1,265.4L163.2,265.2L164.3,265.0L165.4,264.9L166.4,264.8L167.5,264.5L168.6,264.0L169.7,263.5L170.8,263.1L171.8,262.5L172.9,261.8L174.0,261.3L175.1,260.7L176.1,260.1L177.2,259.5L178.3,258.6L179.4,257.6L180.5,256.7L181.5,256.0L182.6,255.3L183.7,254.7L184.8,254.1L185.8,253.8L186.9,253.4L188.0,253.0L189.1,252.7L190.2,252.3L191.2,251.8L192.3,251.3L193.4,250.8L194.5,250.3L195.6,249.6L196.6,249.1L197.7,248.5L198.8,248.0L199.9,247.7L200.9,247.7L202.0,247.7L203.1,247.8L204.2,247.6L205.3,247.5L206.3,247.4L207.4,246.8L208.5,246.3L209.6,246.4L210.6,246.5L211.7,246.8L212.8,247.2L213.9,247.4L215.0,247.6L216.0,247.8L217.1,248.2L218.2,248.6L219.3,249.0L220.3,249.5L221.4,249.9L222.5,250.2L223.6,250.4L224.7,250.7L225.7,251.2L226.8,251.6L227.9,251.9L229.0,252.5L230.1,253.1L231.1,252.8L232.2,251.9L233.3,251.0L234.4,250.3L235.4,250.8L236.5,251.1L237.6,251.3L238.7,251.0L239.8,250.9L240.8,250.8L241.9,250.8L243.0,251.0L244.1,251.1L245.1,251.4L246.2,251.2L247.3,251.0L248.4,251.1L249.5,251.2L250.5,251.4L251.6,251.4L252.7,251.7L253.8,252.7L254.8,253.9L255.9,255.0L257.0,255.3L258.1,255.6L259.2,256.0L260.2,256.6L261.3,257.4L262.4,258.2L263.5,258.8L264.6,259.6L265.6,260.4L266.7,261.3L267.8,262.5L268.9,263.3L269.9,264.2L271.0,264.9L272.1,265.4L273.2,266.0L274.3,266.3L275.3,266.6L276.4,266.7L277.5,266.5L278.6,266.0L279.6,265.8L280.7,265.5L281.8,265.5L282.9,265.3L284.0,265.0L285.0,264.6L286.1,264.5L287.2,264.9L288.3,265.0L289.4,265.2L290.4,264.8L291.5,264.6L292.6,264.3L293.7,264.1L294.7,263.9L295.8,264.2L296.9,264.3L298.0,264.7L299.1,265.1L300.1,264.9L301.2,263.9L302.3,263.1L303.4,262.0L304.4,260.8L305.5,259.6L306.6,258.4L307.7,256.3L308.8,254.0L309.8,251.9L310.9,249.5L312.0,247.9L313.1,246.1L314.1,243.9L315.2,241.6L316.3,239.4L317.4,237.0L318.5,234.6L319.5,232.0L320.6,229.7L321.7,228.1L322.8,227.1L323.9,226.0L324.9,224.6L326.0,223.3L327.1,222.0L328.2,220.7L329.2,219.6L330.3,218.3L331.4,216.9L332.5,215.6L333.6,214.2L334.6,212.8L335.7,211.9L336.8,211.1L337.9,210.1L338.9,209.4L340.0,208.7L341.1,208.0L342.2,207.1L343.3,206.2L344.3,205.1L345.4,204.0L346.5,203.0L347.6,202.0L348.6,201.0L349.7,200.0L350.8,199.2L351.9,198.5L353.0,197.6L354.0,197.0L355.1,196.5L356.2,195.9L357.3,195.3L358.4,194.6L359.4,194.0L360.5,193.2L361.6,192.4L362.7,191.4L363.7,190.3L364.8,189.2L365.9,188.4L367.0,187.9L368.1,187.1L369.1,186.1L370.2,185.1L371.3,184.4L372.4,183.5L373.4,182.6L374.5,182.1L375.6,180.9L376.7,179.7L377.8,178.5L378.8,177.3L379.9,176.1L381.0,175.0L382.1,173.6L383.2,172.6L384.2,171.6L385.3,170.9L386.4,170.1L387.5,169.2L388.5,168.3L389.6,167.8L390.7,167.3L391.8,167.0L392.9,166.5L393.9,165.9L395.0,165.3L396.1,164.8L397.2,164.8L398.2,164.4L399.3,164.1L400.4,163.9L401.5,163.8L402.6,163.0L403.6,162.2L404.7,161.1L405.8,160.2L406.9,159.1L407.9,158.2L409.0,157.3L410.1,155.8L411.2,154.1L412.3,152.5L413.3,150.7L414.4,149.2L415.5,147.9L416.6,146.7L417.7,145.3L418.7,143.7L419.8,142.1L420.9,140.9L422.0,139.6L423.0,138.1L424.1,137.3L425.2,136.5L426.3,135.8L427.4,135.4L428.4,134.9L429.5,134.5L430.6,133.7L431.7,133.1L432.7,132.9L433.8,132.5L434.9,132.6L436.0,131.9L437.1,130.5L438.1,129.2L439.2,127.5L440.3,126.0L441.4,124.3L442.4,122.6L443.5,120.7L444.6,118.6L445.7,117.3L446.8,115.8L447.8,114.5L448.9,112.5L450.0,110.3L451.1,107.9L452.2,106.1L453.2,105.2L454.3,104.3L455.4,103.8L456.5,102.9L457.5,102.0L458.6,102.6L459.7,102.8L460.8,102.6L461.9,102.6L462.9,102.7L464.0,102.5L465.1,102.5L466.2,102.5L467.2,102.3L468.3,102.2L469.4,102.1L470.5,102.0L471.6,102.6L472.6,103.1L473.7,103.4L474.8,104.1L475.9,104.5L476.9,104.9L478.0,105.5L479.1,106.3L480.2,105.8L481.3,105.4L482.3,105.5L483.4,105.5L484.5,105.6L485.6,106.0L486.7,106.4L487.7,107.1L488.8,107.0L489.9,106.9L491.0,106.7L492.0,106.8L493.1,107.1L494.2,106.9L495.3,106.3L496.4,104.0L497.4,102.2L498.5,99.3L499.6,96.2L500.7,93.7L501.7,91.5L502.8,89.6L503.9,88.0L505.0,86.0L506.1,82.8L507.1,81.8L508.2,80.3L509.3,79.3L510.4,78.7L511.5,77.9L512.5,79.2L513.6,80.4L514.7,80.4L515.8,80.0L516.8,80.1L517.9,80.6L519.0,81.0L520.1,81.8L521.2,82.5L522.2,83.0L523.3,83.4L524.4,83.5L525.5,83.9L526.5,84.3L527.6,85.9L528.7,85.6L529.8,86.0L530.9,87.0L531.9,88.7L533.0,90.3L534.1,89.6L535.2,89.1L536.2,89.1L537.3,90.0L538.4,91.1L539.5,92.5L540.6,93.6L541.6,94.7L542.7,96.2L543.8,98.4L544.9,100.7L546.0,103.5L547.0,105.4L548.1,108.0L549.2,110.7L550.3,113.5L551.3,116.0L552.4,117.8L553.5,118.2L554.6,118.8L555.7,119.7L556.7,120.3L557.8,121.2L558.9,121.3L560.0,121.0L561.0,119.9L562.1,118.7L563.2,117.3L564.3,116.0L565.4,113.6L566.4,111.3L567.5,108.4L568.6,106.0L569.7,103.8L570.7,101.4L571.8,98.4L572.9,95.6L574.0,92.8L575.1,90.3L576.1,88.2L577.2,86.6L578.3,84.9L579.4,84.0L580.5,83.6L581.5,83.8L582.6,85.2L583.7,87.7L584.8,90.1L585.8,92.6L586.9,94.8L588.0,97.7" fill="none" stroke="#ffd166" stroke-width="1.2" opacity="0.7"/><path d="M50.0,262.9L51.1,261.3L52.2,259.0L53.2,260.0L54.3,257.9L55.4,258.1L56.5,260.6L57.5,261.6L58.6,261.6L59.7,262.4L60.8,263.1L61.9,265.0L62.9,261.4L64.0,264.1L65.1,264.4L66.2,260.8L67.3,260.1L68.3,256.8L69.4,256.1L70.5,257.8L71.6,255.8L72.6,254.5L73.7,257.4L74.8,256.7L75.9,260.0L77.0,258.5L78.0,260.2L79.1,259.5L80.2,259.8L81.3,259.4L82.3,259.4L83.4,258.8L84.5,258.3L85.6,258.4L86.7,257.0L87.7,253.8L88.8,254.9L89.9,254.2L91.0,254.5L92.0,253.0L93.1,266.8L94.2,263.2L95.3,266.5L96.4,262.3L97.4,262.3L98.5,271.8L99.6,272.4L100.7,267.6L101.8,268.7L102.8,272.0L103.9,266.7L105.0,271.5L106.1,278.3L107.1,279.9L108.2,276.6L109.3,276.2L110.4,271.0L111.5,270.4L112.5,269.5L113.6,265.6L114.7,265.5L115.8,262.7L116.8,263.3L117.9,262.1L119.0,260.6L120.1,260.2L121.2,261.1L122.2,259.8L123.3,261.4L124.4,261.7L125.5,262.2L126.5,261.1L127.6,259.6L128.7,272.0L129.8,273.4L130.9,272.1L131.9,276.6L133.0,274.7L134.1,274.5L135.2,271.7L136.3,268.6L137.3,268.3L138.4,269.0L139.5,267.4L140.6,268.9L141.6,264.4L142.7,263.0L143.8,263.6L144.9,262.5L146.0,264.3L147.0,263.5L148.1,265.0L149.2,264.7L150.3,268.2L151.3,271.5L152.4,271.7L153.5,270.9L154.6,269.9L155.7,266.6L156.7,265.2L157.8,266.1L158.9,263.8L160.0,259.8L161.1,263.5L162.1,260.6L163.2,259.4L164.3,259.6L165.4,260.9L166.4,260.9L167.5,257.3L168.6,254.3L169.7,255.2L170.8,256.8L171.8,256.4L172.9,257.6L174.0,260.6L175.1,258.7L176.1,257.9L177.2,254.5L178.3,249.0L179.4,245.0L180.5,245.2L181.5,246.2L182.6,249.4L183.7,248.7L184.8,248.2L185.8,252.7L186.9,254.1L188.0,251.7L189.1,251.9L190.2,246.6L191.2,244.3L192.3,246.5L193.4,246.6L194.5,247.7L195.6,247.9L196.6,247.0L197.7,246.9L198.8,244.0L199.9,244.0L200.9,244.4L202.0,245.7L203.1,248.0L204.2,246.0L205.3,245.8L206.3,245.7L207.4,241.9L208.5,244.3L209.6,253.7L210.6,253.9L211.7,252.6L212.8,251.7L213.9,250.2L215.0,250.4L216.0,252.2L217.1,255.0L218.2,255.1L219.3,256.1L220.3,253.7L221.4,251.3L222.5,250.6L223.6,249.8L224.7,253.4L225.7,257.6L226.8,253.3L227.9,251.8L229.0,254.2L230.1,255.2L231.1,247.8L232.2,236.3L233.3,234.7L234.4,237.8L235.4,259.5L236.5,257.1L237.6,255.3L238.7,250.2L239.8,252.1L240.8,253.6L241.9,254.5L243.0,255.0L244.1,253.8L245.1,254.3L246.2,249.8L247.3,254.0L248.4,254.5L249.5,255.3L250.5,256.4L251.6,256.1L252.7,254.3L253.8,255.3L254.8,259.3L255.9,260.3L257.0,265.1L258.1,262.3L259.2,264.1L260.2,261.5L261.3,268.6L262.4,269.5L263.5,265.7L264.6,272.4L265.6,269.7L266.7,272.3L267.8,272.6L268.9,270.0L269.9,272.7L271.0,269.6L272.1,267.6L273.2,267.7L274.3,259.7L275.3,262.0L276.4,261.5L277.5,255.4L278.6,255.0L279.6,259.3L280.7,258.0L281.8,261.5L282.9,263.8L284.0,262.7L285.0,258.6L286.1,270.3L287.2,278.3L288.3,274.3L289.4,276.1L290.4,262.4L291.5,267.0L292.6,264.2L293.7,264.1L294.7,263.4L295.8,265.6L296.9,265.0L298.0,268.3L299.1,263.4L300.1,251.3L301.2,240.4L302.3,240.8L303.4,240.7L304.4,238.9L305.5,238.3L306.6,234.5L307.7,230.0L308.8,231.1L309.8,232.1L310.9,229.6L312.0,230.2L313.1,229.5L314.1,221.5L315.2,218.5L316.3,218.8L317.4,218.1L318.5,216.0L319.5,217.1L320.6,217.4L321.7,218.7L322.8,219.7L323.9,219.0L324.9,212.8L326.0,213.2L327.1,211.5L328.2,209.2L329.2,208.2L330.3,205.3L331.4,204.8L332.5,203.4L333.6,201.5L334.6,202.4L335.7,203.5L336.8,202.2L337.9,198.7L338.9,203.5L340.0,201.5L341.1,202.8L342.2,201.3L343.3,200.5L344.3,197.3L345.4,196.0L346.5,193.3L347.6,193.4L348.6,191.8L349.7,189.4L350.8,192.5L351.9,189.9L353.0,187.8L354.0,189.9L355.1,192.4L356.2,190.6L357.3,190.4L358.4,189.4L359.4,186.2L360.5,187.9L361.6,185.4L362.7,182.2L363.7,179.1L364.8,178.3L365.9,182.6L367.0,185.0L368.1,176.6L369.1,175.4L370.2,171.6L371.3,174.7L372.4,174.3L373.4,172.0L374.5,177.0L375.6,167.3L376.7,168.8L377.8,165.3L378.8,167.5L379.9,164.2L381.0,164.6L382.1,160.1L383.2,164.6L384.2,162.5L385.3,166.0L386.4,161.8L387.5,164.2L388.5,167.2L389.6,166.9L390.7,165.6L391.8,164.8L392.9,164.4L393.9,163.9L395.0,159.9L396.1,166.8L397.2,165.9L398.2,162.7L399.3,158.0L400.4,163.2L401.5,163.0L402.6,149.0L403.6,143.8L404.7,143.0L405.8,144.7L406.9,143.5L407.9,143.9L409.0,145.3L410.1,137.1L411.2,132.9L412.3,133.5L413.3,129.7L414.4,134.8L415.5,136.6L416.6,136.0L417.7,139.5L418.7,133.4L419.8,131.3L420.9,133.8L422.0,136.8L423.0,134.2L424.1,131.6L425.2,128.8L426.3,127.8L427.4,138.0L428.4,133.0L429.5,135.9L430.6,129.2L431.7,125.3L432.7,129.1L433.8,124.6L434.9,131.8L436.0,121.8L437.1,107.5L438.1,110.8L439.2,106.1L440.3,103.0L441.4,97.5L442.4,98.9L443.5,98.4L444.6,93.5L445.7,104.3L446.8,99.5L447.8,101.2L448.9,99.0L450.0,88.3L451.1,89.2L452.2,92.6L453.2,107.6L454.3,111.0L455.4,114.1L456.5,113.9L457.5,104.4L458.6,118.6L459.7,115.8L460.8,101.7L461.9,101.9L462.9,99.8L464.0,94.9L465.1,98.7L466.2,93.6L467.2,100.0L468.3,98.2L469.4,98.4L470.5,96.8L471.6,100.1L472.6,99.9L473.7,99.0L474.8,121.1L475.9,119.6L476.9,121.3L478.0,127.2L479.1,120.2L480.2,107.5L481.3,107.8L482.3,103.4L483.4,101.6L484.5,102.7L485.6,103.9L486.7,105.5L487.7,107.8L488.8,97.6L489.9,97.2L491.0,93.8L492.0,99.4L493.1,105.3L494.2,96.6L495.3,85.5L496.4,76.8L497.4,81.8L498.5,65.1L499.6,64.7L500.7,69.3L501.7,64.2L502.8,68.9L503.9,72.3L505.0,62.1L506.1,38.1L507.1,83.6L508.2,75.5L509.3,87.8L510.4,85.9L511.5,81.1L512.5,119.4L513.6,124.7L514.7,105.4L515.8,87.5L516.8,87.7L517.9,87.9L519.0,88.6L520.1,81.9L521.2,77.7L522.2,79.6L523.3,71.8L524.4,72.2L525.5,79.4L526.5,71.2L527.6,68.6L528.7,78.0L529.8,83.4L530.9,107.8L531.9,120.3L533.0,113.2L534.1,105.4L535.2,115.2L536.2,105.8L537.3,104.3L538.4,109.2L539.5,116.1L540.6,110.6L541.6,104.1L542.7,107.9L543.8,124.3L544.9,117.9L546.0,126.7L547.0,117.9L548.1,123.9L549.2,122.2L550.3,134.8L551.3,133.7L552.4,143.7L553.5,127.5L554.6,124.5L555.7,123.8L556.7,127.2L557.8,123.0L558.9,107.4L560.0,102.1L561.0,95.3L562.1,85.1L563.2,77.4L564.3,81.3L565.4,76.9L566.4,72.1L567.5,68.2L568.6,70.2L569.7,78.7L570.7,74.1L571.8,75.2L572.9,77.6L574.0,88.6L575.1,78.2L576.1,80.6L577.2,91.8L578.3,94.6L579.4,104.4L580.5,100.4L581.5,104.5L582.6,123.8L583.7,136.2L584.8,124.1L585.8,131.4L586.9,121.2L588.0,130.6" fill="none" stroke="#00e5ff" stroke-width="1.8"/><circle cx="588.0" cy="130.6" r="3.5" fill="#00e5ff"/><rect x="58" y="33" width="10" height="2.5" fill="#00e5ff"/><text x="71" y="39" font-family="IBM Plex Mono,monospace" font-size="9" fill="#00e5ff" font-weight="600">Close $125.0</text><rect x="158" y="33" width="10" height="2.5" fill="#ffd166"/><text x="171" y="39" font-family="IBM Plex Mono,monospace" font-size="9" fill="#ffd166" font-weight="600">SMA20 $139.7</text><rect x="258" y="33" width="10" height="2.5" fill="#ff6b35"/><text x="271" y="39" font-family="IBM Plex Mono,monospace" font-size="9" fill="#ff6b35" font-weight="600">SMA50 $136.0</text><rect x="358" y="33" width="10" height="2.5" fill="#c77dff"/><text x="371" y="39" font-family="IBM Plex Mono,monospace" font-size="9" fill="#c77dff" font-weight="600">SMA100 $140.0</text><rect x="458" y="33" width="10" height="2.5" fill="#ef476f"/><text x="471" y="39" font-family="IBM Plex Mono,monospace" font-size="9" fill="#ef476f" font-weight="600">SMA200 $132.5</text></svg>
-    </div>
-    <div class="info-col">
-      <div class="quality-bar">
-        <div class="quality-item">
-          <div class="quality-label">PIOTROSKI F</div>
-          <div class="quality-value good">5/9</div>
-        </div>
-        <div class="quality-item">
-          <div class="quality-label">ALTMAN Z</div>
-          <div class="quality-value excellent">5.01</div>
-        </div>
-        <div class="quality-item">
-          <div class="quality-label">BUYBACK %</div>
-          <div class="quality-value good">1.2%</div>
-        </div>
-        <div class="quality-item">
-          <div class="quality-label">BETA 1Y</div>
-          <div class="quality-value warning">1.40</div>
-        </div>
-      </div>
-      <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-label">Rev Growth</div><div class="kpi-value pos">+25.0%</div></div>
-        <div class="kpi"><div class="kpi-label">EPS Growth</div><div class="kpi-value pos">+28%</div></div>
-        <div class="kpi"><div class="kpi-label">ROIC</div><div class="kpi-value pos">20.0%</div></div>
-        <div class="kpi"><div class="kpi-label">FCF Margin</div><div class="kpi-value pos">17.0%</div></div>
-        <div class="kpi"><div class="kpi-label">Op Margin</div><div class="kpi-value pos">22.0%</div></div>
-        <div class="kpi"><div class="kpi-label">ROE</div><div class="kpi-value pos">30.0%</div></div>
-        <div class="kpi"><div class="kpi-label">P/E</div><div class="kpi-value neu">35.9</div></div>
-        <div class="kpi"><div class="kpi-label">PEG</div><div class="kpi-value pos">1.28</div></div>
-        <div class="kpi"><div class="kpi-label">EV/EBITDA</div><div class="kpi-value neu">24.0</div></div>
-        <div class="kpi"><div class="kpi-label">RSI(14)</div><div class="kpi-value neu">38</div></div>
-        <div class="kpi"><div class="kpi-label">Tech</div><div class="kpi-value neg" style="font-size:12px">Strong Sell</div></div>
-        <div class="kpi"><div class="kpi-label">D/E</div><div class="kpi-value pos">0.85</div></div>
-      </div>
+    <div style="text-align:right">
+      <div class="h-price">$141.67 <span class="h-chg" style="color:var(--red)">−5.58% (day)</span></div>
+      <div style="color:var(--text-2);font-size:12.5px;margin-top:3px">YTD <span style="color:var(--red);font-weight:600">−39.0%</span> · 1Y <span style="color:var(--green);font-weight:600">+45.6%</span></div>
     </div>
   </div>
-
-  <div class="thesis-full">
-    <div class="thesis-label">📊 Tesi d'investimento — Q1 2026 + Guidance Q2</div>
-    <p>Leader globale produzione connettori elettronici, sensori, antenne con presenza diversificata in automotive, aerospazio commerciale, comunicazioni, difesa, industriale, IT/Data e mobile devices. Il modello business è 'interconnect neutrality': agnostico tra copper e ottica, posizionato per beneficiare di qualsiasi shift architetturale nei data center AI di nuova generazione. Q1 2026 ha registrato risultati record: ricavi $7.62B (+58% YoY), che hanno **battuto il consensus di $526M** (+7.4% sopra atteso), adjusted EPS $1.06 vs $0.95 attesi (+11% beat). Net Income $933M, operating margin record 27.3% (+380 basis points YoY) nonostante dilution dall'acquisizione CommScope. FCF $831M (89% del net income, conversion eccellente).</p><p>Il dato critico più importante è il book-to-bill di 1.24:1 con ordini record di $9.4B (+78% YoY) — significa che stanno prenotando molto più business di quanto stanno spedendo, segnale forte di visibility e domanda strutturale. Il backlog totale supera i $11B+ = circa 6 mesi di visibility. La componente IT Datacom (60% del fatturato) è il segmento più caldo, trainato direttamente da CapEx hyperscaler AI (Microsoft, Google, Meta, Amazon, Oracle): ogni server NVIDIA H100/H200 richiede decine di connettori APH, e la nuova generazione Blackwell richiederà ancora più contenuto.</p><p>**Guidance Q2 2026 fortissima**: il management ha fissato sales a $8.1-8.2B = sopra il consensus precedente di $7.72B (+5.3% sopra Street), implicando crescita del 43-45% YoY. Adjusted EPS guidance $1.14-1.16 vs $1.06 atteso (+8% sopra Street), implicando crescita 41-43% YoY. È la seconda volta in 6 mesi che il management alza guidance — pattern simile a quanto fanno Sezzle e Dave per il loro settore. CEO Norwitt ha definito il backdrop geopolitico come 'long-term structural shift in demand dynamics' per il segmento defense (+44% USD, +25% organico in Q1).</p><p>L'acquisizione di CommScope CCS (Connectivity and Cable Solutions, $10.5B chiusa il 9 gennaio 2026) sta runnando ahead of plan: management ha proiettato $3.5-3.6B di ricavi addizionali con crescita mid-teens. Il CFO Craig Lampo ha confermato che CommScope è ancora dilutiva ma il gap si chiude nei prossimi trimestri, coerentemente con il track record storico di integrazione di Amphenol (75+ acquisizioni in 30 anni). Senza l'effetto dilutivo CommScope, il business organico sta runnando con margini ancora più alti.</p><p>Piotroski 5/9 è al limite del filtro qualità — debito cresciuto a circa $14B post-Andrew Lite Path acquisition, ma con Altman 5.0 (zona sicura) e D/E 0.85 il bilancio resta solido. ROIC 20%, ROE 30%, operating margin 22% sono best-in-class nel settore connector. Beta 1.40 = leveraged play su CapEx hyperscaler.</p><p>Dal punto di vista tecnico, il prezzo $125 è -5.7% sotto la SMA200 ($132.5) dopo aver toccato un massimo di $172 a febbraio 2026. **Perf 1Y +46% ma -8% YTD** = healthy pullback dopo un'enorme run — è il tipo di correzione che storicamente offre punti di ingresso ottimali su questi nomi. La SMA50 è ancora sopra la SMA200 (trend di medio periodo intatto), ma la SMA20 è scesa sotto la 50 = momentum di breve in deterioramento. **RSI 38 = oversold lieve**, non ancora deeply oversold (sotto 30) ma vicino al territorio di rimbalzo. **Tech Rating 'Strong Sell'** = momentum tecnico chiaramente negativo nonostante i numeri eccezionali — è la classica situazione di disconnesso tra prezzo e fondamentali. Target analisti consensus $184.88 = upside +48%, uno dei più alti tra i big cap della lista.</p>
+  <div class="h-meta">
+    <div>Market cap <b>$27.3B</b></div>
+    <div>52w range <b>$99.14 – $282.95</b></div>
+    <div>Volume 1d <b>7.85M</b> (rel 1.64x)</div>
+    <div>Beta 1Y <b>2.19</b></div>
+    <div>Float <b>96.9%</b></div>
+    <div>Next earnings <b>Aug 11, 2026</b></div>
+    <div>Report date <b>May 23, 2026</b></div>
   </div>
+</header>
+<nav>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#chart">Chart</a>
+  <a href="#parte-1">1 · Business</a>
+  <a href="#parte-2">2 · Q1 2026</a>
+  <a href="#parte-3">3 · Bull/Bear</a>
+  <a href="#parte-4">4 · Forensic</a>
+  <a href="#parte-5">5 · Valuation</a>
+  <a href="#parte-6">6 · SEC & People</a>
+  <a href="#parte-7">7 · Technical</a>
+  <a href="#verdict">Verdict</a>
+</nav>
+<main>
 
-  <div class="tech-readout">
-    <div class="tech-readout-label">⚙ Analisi tecnica</div>
-    RSI 38 + Tech Strong Sell + Piotroski 5/9 + Altman 5.0 + Beta 1.40 = oversold lieve + momentum negativo + qualità borderline. Prezzo -5.7% sotto SMA200, Perf 1Y +46% ma -8% YTD = healthy pullback dopo enorme run. SMA50 ancora sopra SMA200 (trend medio intatto), ma SMA20 sotto SMA50 (momentum breve in deterioramento). Setup beneficiario AI capex in correzione tecnica nonostante guidance Q2 alzata.
+<section id="dashboard">
+<h2>Dashboard — snapshot</h2>
+<div class="dash-grid">
+  <div class="dash-card">
+    <div class="dash-label">SMA200 trend</div>
+    <div class="dash-value" style="color:var(--red)">−26.4%</div>
+    <div class="dash-sub">Price below SMA200 ($192.59)</div>
   </div>
-
-  <div class="catalysts" style="margin-top:14px;"><span class="cat-tag">Q1 2026: rev $7.62B (+58% YoY)</span><span class="cat-tag">Q2 guidance $8.1-8.2B (+43-45%)</span><span class="cat-tag">Adj EPS $1.06 vs $0.95 atteso</span><span class="cat-tag">Book-to-bill record 1.24:1</span><span class="cat-tag">Orders $9.4B (+78% YoY)</span><span class="cat-tag">IT datacom organic +16% Q1</span><span class="cat-tag">Defense +44% USD</span><span class="cat-tag">CommScope CCS integration on track</span><span class="cat-tag">Op margin record 27.3%</span></div>
-
-  <div class="perf-row">
-    <div class="perf-item"><div class="pl">1Y Perf</div><div class="pv" style="color:var(--green)">+46.4%</div></div>
-    <div class="perf-item"><div class="pl">YTD</div><div class="pv" style="color:var(--red)">-8.0%</div></div>
-    <div class="perf-item"><div class="pl">Score ★</div><div class="pv" style="color:var(--gold)">59.2/100</div></div>
+  <div class="dash-card">
+    <div class="dash-label">SMA50 trend</div>
+    <div class="dash-value" style="color:var(--red)">−4.9%</div>
+    <div class="dash-sub">Below SMA50 ($149.00)</div>
   </div>
-  <div class="risk-row">
-    <div class="risk-label">⚑ RISCHI</div>
-    <div class="risk-text">Piotroski 5/9 al limite del filtro qualità. Settore semicon-related ciclico, estremamente sensibile a CapEx hyperscaler: se Microsoft o Meta tagliano guidance CapEx del 20%, APH perde 15-20% in giorni. Concentrazione esposizione AI/datacenter (60% revenue) = single-source dipendenza. Tech 'Strong Sell' segnala che il momentum può ancora deteriorare prima di riprendersi. P/E 35.9x non economico. CommScope integration potrebbe deludere se synergies < aspettative. Maggior rischio: 'demand pulled forward' nel boom AI = se il super-ciclo CapEx si riduce nel 2027, le valutazioni di tutto il segmento (APH, ANET, AVGO, NVDA) si comprimono insieme.</div>
+  <div class="dash-card">
+    <div class="dash-label">RSI(14) daily</div>
+    <div class="dash-value" style="color:var(--amber)">40.3</div>
+    <div class="dash-sub">Near oversold zone</div>
   </div>
-  <div class="sec-note">Form 10-Q 23 aprile 2026 (SEC EDGAR): Q1 record. Form 8-K 29 aprile 2026: Q2 guidance raised. CommScope CCS acquisition $10.5B chiusa 9 gennaio 2026. Euro senior notes offering Q1 per finanziamento.</div>
+  <div class="dash-card">
+    <div class="dash-label">Drawdown from ATH</div>
+    <div class="dash-value" style="color:var(--red)">−49.9%</div>
+    <div class="dash-sub">ATH $282.95 (Dec 2025)</div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-label">P/E TTM · Fwd P/E</div>
+    <div class="dash-value">40 · 29</div>
+    <div class="dash-sub">PEG 0.10 vs EPS YoY +446%</div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-label">EV / EBITDA TTM</div>
+    <div class="dash-value">38.5x</div>
+    <div class="dash-sub">EV $24.5B · net cash $2.75B</div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-label">FCF margin TTM</div>
+    <div class="dash-value" style="color:var(--green)">35.1%</div>
+    <div class="dash-sub">FCF TTM $869M · capex $7M</div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-label">Short Interest</div>
+    <div class="dash-value" style="color:var(--amber)">~14.7%</div>
+    <div class="dash-sub">~17M shares · DTC 3.4 days</div>
+  </div>
 </div>
 
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+  <span class="badge badge-lg rating-hold">Rating: HOLD</span>
+  <span class="badge badge-lg rating-buy" style="opacity:.7">accumulation on weakness &lt; $130</span>
+  <span class="badge badge-lg badge-blue">Conviction: medium</span>
+</div>
+
+<div class="target-block">
+  <h3 style="margin-top:0;margin-bottom:10px">12-month scenarios — current price $141.67</h3>
+  <div class="bar-row">
+    <div class="bar-label">Bull</div>
+    <div class="bar-track">
+      <div class="bar bar-bull" style="width:75%"></div>
+      <div class="bar-current" style="left:35.4%"></div>
+    </div>
+    <div class="bar-px" style="color:var(--green)">$300 (+112%)</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Base</div>
+    <div class="bar-track">
+      <div class="bar bar-base" style="width:55%"></div>
+      <div class="bar-current" style="left:35.4%"></div>
+    </div>
+    <div class="bar-px" style="color:var(--blue)">$220 (+55%)</div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Bear</div>
+    <div class="bar-track">
+      <div class="bar bar-bear" style="width:23%"></div>
+      <div class="bar-current" style="left:35.4%"></div>
+    </div>
+    <div class="bar-px" style="color:var(--red)">$92 (−35%)</div>
+  </div>
+  <div class="scale-axis">
+    <div></div>
+    <div class="ticks">
+      <span>$0</span>
+      <span>$100</span>
+      <span style="color:var(--amber);font-weight:700;">$141.67 (current)</span>
+      <span>$300</span>
+      <span>$400</span>
+    </div>
+    <div></div>
+  </div>
+  <p style="font-size:11.5px;color:var(--text-3);margin-top:10px">Horizontal bars on a linear $0–$400 scale; the amber vertical line marks the current price. Probability-weighted expected value (30/50/20): Bull $300×0.30 + Base $220×0.50 + Bear $92×0.20 = <b style="color:var(--text-1)">$218.4 (+54%)</b>. Scenario probability is analytical judgment, not statistical probability.</p>
+</div>
+</section>
+
+<section id="chart">
+<h2>Price chart — 24 months (daily OHLC candles)</h2>
+<div class="chart-wrap">
+  <div class="chart-legend">
+    <span><span style="display:inline-block;width:18px;height:2px;background:#F59E0B;vertical-align:middle;margin-right:4px;"></span>SMA50</span>
+    <span><span style="display:inline-block;width:18px;height:2px;background:#3B82F6;vertical-align:middle;margin-right:4px;"></span>SMA200</span>
+  </div>
+  <canvas id="priceChart" style="max-height:380px;"></canvas>
+  <canvas id="volumeChart" style="max-height:110px;margin-top:6px;"></canvas>
+  <p class="chart-caption">
+    Data source: Yahoo Finance API daily OHLCV (501 sessions, 2024-05-23 → 2026-05-22). Cross-validated with TradingView analyst dataset — SMA50 Yahoo $149.00 vs TradingView $149.00 (match), SMA200 Yahoo $192.59 vs TradingView $192.59 (match). 52w high $282.95 (Dec 15, 2025), 52w low $99.14 (Apr 2025 post-correction). Dashed vertical lines mark material events; candles have no legend because OHLC is standard notation.
+  </p>
+</div>
+
+<h3 style="border-top:1px solid var(--border);padding-top:18px;margin-top:24px">Zoom: last 6 months daily OHLC</h3>
+<div class="chart-wrap">
+  <div class="chart-legend">
+    <span><span style="display:inline-block;width:18px;height:2px;background:#F59E0B;vertical-align:middle;margin-right:4px;"></span>SMA50</span>
+    <span><span style="display:inline-block;width:18px;height:2px;background:#3B82F6;vertical-align:middle;margin-right:4px;"></span>SMA200</span>
+  </div>
+  <canvas id="priceChart6M" style="max-height:340px;"></canvas>
+  <canvas id="volumeChart6M" style="max-height:100px;margin-top:6px;"></canvas>
+  <p class="chart-caption">6-month zoom (~124 sessions, Nov 2025 → May 2026) over the decision window: ATH breakout at $282 in mid-December 2025, 65% correction to $99 low in March, post-Q1 earnings technical bounce (+13.8% on May 1), second leg lower after Google I/O 2026 on May 20 with −5.6% close. SMA200 now overhead resistance; intermediate downtrend intact.</p>
+</div>
+</section>
+
+<section id="parte-1">
+<h2>PART 1 — Institutional introductory report</h2>
+
+<h3>1.1 Business Model</h3>
+<p>Reddit operates a community platform ("subreddits") built on content generated for free by its users. The model is ad-supported with revenue almost fully dependent on advertising: in Q1 2026, ads delivered $625M of total $663M revenue (<b>94.3% of the top line</b>) <span class="tag-verified">VERIFIED</span>. The "Other revenue" line ($39M, +15% YoY) includes data licensing to AI companies — publicly disclosed partners are Google and OpenAI <span class="tag-verified">VERIFIED — CNBC Q1 2026</span>. Geographically, revenue remains US-centric, but international is growing faster (+76% YoY in Q1 vs +67% US), with direct expansion in North America, Europe and Australia and partner channels elsewhere.</p>
+
+<h3>1.2 Revenue Drivers</h3>
+<p>Q1 +69% YoY growth is driven by <b>both impressions and pricing expanding in parallel</b>. Performance advertising (measurable campaigns: purchases, installs, sign-ups) crossed 60% of ad revenue mix for the first time — historically a higher-margin mix than brand advertising. Global ARPU $5.23 (vs $4.81 estimate), US ARPU $9.63 (vs $8.53 estimate); US ARPU is nearly 2x global, confirming international monetization is still early-innings.</p>
+<p>DAUq (Daily Active Uniques) 126.8M (+17% YoY), US DAUq 53.5M (+7%). Management explicitly set a <b>100M US DAUq</b> target (roughly double) without a timeline. Starting Q3 2026, Reddit will discontinue the logged-in vs logged-out breakdown — a signal that the metric had become a narrative battleground with bears.</p>
+
+<h3>1.3 Cost Structure</h3>
+<p>The model is structurally capital-light: <b>Q1 2026 capex = $1M</b> on $663M revenue (0.2%). On the same day, Alphabet raised 2026 capex guidance to $180-190B and Meta to $125-145B. R&D TTM $789M (32% of revenue) and SG&A ~34% — still heavy in absolute terms but declining as a percentage thanks to operating leverage. Gross margin TTM <b>90.7%</b>, among the highest in public tech — reflecting the zero-cost UGC model <span class="tag-verified">VERIFIED — TradingView 2026-05-23</span>. SBC (stock-based comp) remains a pressure point: management guided Q2 SBC growth to roughly half the revenue growth rate — disciplined but still material.</p>
+
+<h3>1.4 Competitive Advantages (Moat)</h3>
+<p>Three cumulative advantages of varying depth:</p>
+<ol>
+<li><b>Network effect on UGC</b> — more active subreddits attract more users, more users generate more content, classic virtuous loop. <b>Depth: high</b>, but replicable (Meta launched Forum in May 2026 targeting exactly topic-based communities) <span class="tag-verified">VERIFIED — Quiver 2026-05-22</span>.</li>
+<li><b>Data moat for LLM training</b> — over 25 billion posts and comments, almost all human-generated and identifiable, indexed by subreddit/topic. For LLMs it's "fuel" — Huffman's phrasing, consistent with Google/OpenAI contracts. <b>Depth: high near-term, vulnerable long-term</b>: if data licensing prices compress or LLMs build alternative datasets (forum archives, video-to-text), the moat weakens.</li>
+<li><b>SEO authority</b> — Reddit appears in top-3 Google results for thousands of informal queries. <b>Under direct attack</b>: AI Overviews and AI Mode answer in-SERP before any click. This is <i>the</i> structural risk (see 1.5).</li>
+</ol>
+
+<h3>1.5 Key Risks</h3>
+<p><b>The dominant risk is singular, name it openly:</b> Google AI Overviews and AI Mode can erode logged-out traffic, which today accounts for 40-50% of Reddit's total traffic per Wells Fargo estimates <span class="tag-verified">VERIFIED — Wells Fargo reports May 2025/2026</span>. Redburn Atlantic's bear case ($75 target) rests entirely on this. Reddit's response is building "Reddit Answers" (its own internal AI-search) and shifting weight toward logged-in users (more monetizable).</p>
+<p>Other material risks:</p>
+<ul>
+<li><b>Customer concentration</b>: top-15 advertising verticals, exposed to a macro ad cycle. A US recession → ad budgets cut first.</li>
+<li><b>Class action lawsuit</b> (filed N.D. Cal., class period Oct 2024 - May 2025) for misleading disclosure on Google AI impact <span class="tag-verified">VERIFIED — SimplyWall.st May 2026</span>. Not material for the P&L, but a narrative drag.</li>
+<li><b>Key-person CEO</b>: Steve Huffman co-founder + CEO. Long tenure but high dependence on the sole public face.</li>
+<li><b>Dual-class share structure</b>: Class A (NYSE listed) vs Class B (insider, disproportionate voting power). Limits hostile takeover but also board discipline.</li>
+<li><b>EU/US antitrust</b>: no direct exposure now, but if Reddit becomes indispensable for LLM training, regulatory scrutiny rises.</li>
+</ul>
+
+<h3>1.6 Management Quality</h3>
+<p>Steve Huffman (CEO, co-founder 2005, second tenure since 2015): earnings call tone is specific, numerical, not vague. "When you look across the more than 300 publicly traded tech companies, there's only one that combines this type of growth, profitability and efficiency, and that's Reddit" — Q1 2026 call. Such an explicit assertion of superiority is rare in tech C-suite; it needs to be tested against numbers (see Section 5.1, and largely it holds).</p>
+<p>Capital allocation: <b>$1B buyback authorized Feb 5, 2026</b>, the first-ever for RDDT <span class="tag-verified">VERIFIED — SEC 8-K</span>. Capex minimal. No dividend (appropriate for growth stage). Cash $2.77B + ST investments against $304M total liabilities = <b>extremely strong</b> financial position.</p>
+<p>Insider ownership and Form 4 (see 6.4): pattern dominated by routine 10b5-1 sales from Huffman, Wong (COO), Slowe (CTO), Reynolds (CAO), Vollero (CFO) — 339+ sales vs 4 buys over the last 6 months. Important exception: <b>director Sarah Farrell</b> made 4 open-market purchases totaling 61,000 shares at ~$145 average ($8.87M cumulative) between February and May 2026 — a convergent buyer that merits attention (see 6.4).</p>
+
+<h3>1.7 Sector Position</h3>
+<p>Reddit is a <b>mid-cap pure-play</b> in social/communities, in a sector dominated by Meta ($1.7T), Google ($2T+), with Pinterest ($25B) and Snap ($15B) as closest comparables. Global digital ad market share is still <1%, but within a sub-segment (community-based authentic content) Reddit is the US absolute leader. New competition comes from:</p>
+<ul>
+<li>Meta Forum (launched May 2026) — model imitation, Meta distribution scale but no authenticity moat;</li>
+<li>TikTok for attention/time, not for text content;</li>
+<li>Substack/Discord for niche communities, but with more limited horizontal reach.</li>
+</ul>
+
+<h3>1.8 Short and long-term outlook</h3>
+<p><b>Next 4 quarters (Q2-Q4 2026, Q1 2027):</b> consensus FY26 revenue +46.5% YoY, FY26 EPS +89% YoY. Comp difficulty rises from Q3 (anniversary of the first quarter of true operating leverage), so reported growth will <i>arithmetically</i> decelerate — this is the dominant narrative risk for H2 2026.</p>
+<p><b>3-5 years:</b> the thesis is binary. If management achieves 100M US DAUq (current double) while maintaining ARPU growth, the company can deliver $5-7B revenue at 35-40% FCF margins — fair value $300-400. If Google AI hollows 30-40% of logged-out traffic without Reddit replacing it via owned product, top-line decelerates to ~20% and the multiple compresses to 15x EV/EBITDA — fair value $90-110. The bracket is enormous: <b>this is a bimodal-return equity, not Gaussian</b>.</p>
+</section>
+
+<section id="parte-2">
+<h2>PART 2 — Q1 2026 results analysis (April 30, 2026)</h2>
+
+<h3>2.1 Numbers watch — beats across all key metrics</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Metric</th><th class="num">Q1 2026 reported</th><th class="num">Pre-call consensus</th><th class="num">Beat / miss</th></tr>
+<tr><td>Revenue</td><td class="num">$663M</td><td class="num">$611M</td><td class="num pos">+8.5%</td></tr>
+<tr><td>Diluted EPS</td><td class="num">$1.01</td><td class="num">$0.58</td><td class="num pos">+74%</td></tr>
+<tr><td>DAUq</td><td class="num">126.8M</td><td class="num">125.9M</td><td class="num pos">+0.7%</td></tr>
+<tr><td>Global ARPU</td><td class="num">$5.23</td><td class="num">$4.81</td><td class="num pos">+8.7%</td></tr>
+<tr><td>US ARPU</td><td class="num">$9.63</td><td class="num">$8.53</td><td class="num pos">+12.9%</td></tr>
+<tr><td>Adj. EBITDA margin</td><td class="num">40%</td><td class="num">35-37%</td><td class="num pos">+300-500bps</td></tr>
+<tr><td>Capex</td><td class="num">$1M</td><td class="num">—</td><td class="num pos">0.2% revenue</td></tr>
+</table>
+</div>
+
+<h3>2.2 What management emphasized (Q1 2026 call)</h3>
+<ul>
+<li><b>Capital-light vs hyperscalers</b>: Huffman's explicit contrast with Meta/Alphabet/AWS (combined 2026 capex estimated at $650B+) — clear narrative that Reddit benefits from the AI boom without funding infrastructure.</li>
+<li><b>Reddit Max</b> (AI-powered automated campaigns) in public beta; ~50% of Max advertisers already adopt AI tools.</li>
+<li><b>Shopify integration</b> announced to scale the SMB advertiser ecosystem.</li>
+<li><b>Ad load</b>: management denied any intent to raise it; strategy is "increasing impression value via ML and advertiser diversity".</li>
+</ul>
+
+<h3>2.3 What management glossed over</h3>
+<ul>
+<li>Concrete response to Google AI Overviews: the answer is "Reddit Answers" but no adoption or retention impact metrics were provided.</li>
+<li>Timeline to 100M US DAUq: "no specific timeframe".</li>
+<li>Data licensing pricing detail: Huffman called Reddit "the fuel" for LLMs but did not quantify Google/OpenAI contract renewals expiring or due in 2026.</li>
+<li>Disclosure shift from Q3 2026 (dropping logged-in vs logged-out) is a <b>transparency loss</b> for analysts, framed as "natural evolution". Bear flag.</li>
+</ul>
+
+<h3>2.4 Market reaction</h3>
+<p>Stock +13.82% on May 1, 2026 on the post-earnings gap up. But the rally was sold progressively: between May 1 and May 22 the price declined from $165.51 close to $141.67 (−14.4%) <span class="tag-verified">VERIFIED — TradingView 2026-05-23</span>. The sell-off accelerated on May 20 (−5.6%) coinciding with Google I/O 2026, which announced further Search overhauls and an expanded AI Mode. <b>The market is signaling that the Q1 beat does not resolve the structural logged-out traffic problem</b>.</p>
+</section>
+
+<section id="parte-3">
+<h2>PART 3 — Bull vs Bear</h2>
+
+<div class="box-bull">
+<h3 style="color:var(--green);margin-top:0">BULL — The long thesis</h3>
+<ol>
+<li><b>Exceptional growth at a reasonable multiple post-correction</b>. Forward EPS growth +89% YoY with forward P/E 28.7x and PEG 0.10. EV/EBITDA TTM 38.5x is high in absolute terms but drops to ~22-24x on FY26 forward EBITDA (estimated FCF ~$1.2-1.4B). For a pure-play with +70% revenue growth and 35% FCF margin, this is competitive vs Meta (+22% growth, ~10x EV/EBITDA) <i>if</i> Reddit sustains the pace for another 6+ quarters.</li>
+<li><b>Fortress balance sheet</b>: $2.77B cash, $21M total debt. Net debt/EBITDA −4.3x (net cash). $1B buyback authorized — covers <b>~3.7% of market cap</b> at current prices, real multiple-compression optionality.</li>
+<li><b>Convergent insider buying</b>: director Sarah Farrell purchased 61,000 shares for $8.87M between Feb and May 2026 at ~$145 average. For a director, this is a rare own-money commitment. See 6.4.</li>
+<li><b>Short squeeze potential</b>: short interest 14.7% of float, days-to-cover 3.4. If Q2 beats and Google traffic does not deteriorate in reported metrics, forced covering can deliver a quick +20-30%.</li>
+<li><b>Analyst optimism</b>: 32 analysts, average target $217-225, range $75-300. Selection bias (sell-side loses commissions on heavy downgrades), but 17 analysts hold targets ≥ $215 — not isolated.</li>
+<li><b>Data licensing optionality</b>: $39M Q1 (annualized $156M) from Google + OpenAI. If 2026/2027 renewals price LLM-grade data scarcity, this line can double with no marginal cost.</li>
+</ol>
+</div>
+
+<div class="box-bear">
+<h3 style="color:var(--red);margin-top:0">BEAR — The short / avoid thesis</h3>
+<ol>
+<li><b>Google AI Search is an unquantified structural risk</b>. 40-50% of traffic is logged-out, predominantly Google-sourced. AI Overviews and AI Mode answer in-SERP without click-through. Wells Fargo cut 2026 ad revenue 6%, 2027 14%. Redburn Atlantic holds a $75 target (below the $99 52w low). <b>This is not speculation, it's a thesis held by primary firms with long-standing coverage</b>.</li>
+<li><b>Arithmetic comp difficulty from Q3 2026</b>. Q3-Q4 2025 were quarters of strong operating leverage (EBITDA margin from 21% to 45% in 12 months). Replicating those deltas is arithmetically impossible. Reported growth <i>must</i> decelerate. The market rewards decelerating-growth names from 70% to 50% only when the multiple was already compressed — here it isn't.</li>
+<li><b>Disclosure step-back</b>: dropping logged-in vs logged-out from Q3 2026 removes the most diagnostic Google-risk metric from analysts. A confident management would not have chosen this timing.</li>
+<li><b>Massive insider selling</b>: 343 sales vs 4 buys over 6 months. Huffman 216,000 shares for $39M, Wong 339,470 for $61M, Slowe 173,000 for $32M. While 10b5-1, the <i>volume</i> at $140-180 prices signals no urgency to accumulate.</li>
+<li><b>High historical multiple vs nearest peer</b>: see Section 5.1. Pinterest, Snap trade at 3-5x P/S; Meta at 8x; Reddit at 12.3x P/S — 50%+ premium vs Meta. Justified only if growth remains superior.</li>
+<li><b>Meta Forum is a distribution threat</b>: Meta has 3B+ DAU vs Reddit's 126M. Forum is inferior on authenticity, but the acquisition funnel is massive.</li>
+<li><b>Class action lawsuit</b>: narrative drag, legal costs, potential settlement.</li>
+</ol>
+</div>
+
+<h3>3.1 Declared winner</h3>
+<p>The bull thesis <b>does not refute the bear thesis</b>; the bear wins as a near-term risk priority. The question is not "is Reddit a quality company?" (it is) but "does the $141 price discount enough of the Google risk?". Three considerations:</p>
+<ul>
+<li>Drawdown already 50% from ATH. The market has <i>started</i> pricing the risk, but hasn't yet priced a Wells Fargo bear case ($120) or a Redburn bear case ($75).</li>
+<li>Q1 was a wide beat: if Q2 (Aug 11, 2026) confirms logged-in DAUq growth >15% YoY, the logged-out bear case weakens. If Q2 shows logged-in DAUq deceleration, the price moves to $100.</li>
+<li>The technical setup (Part 7) suggests further weakness near-term.</li>
+</ul>
+<p><b>Conclusion</b>: the bear carries more weight today. A long position now requires conviction that Q2 will deliver a second material beat; without that conviction, waiting is the better choice. The most rational entry level is a correction toward $110-125 (see 7.6).</p>
+</section>
+
+<section id="parte-4">
+<h2>PART 4 — Forensic accounting & Red flags</h2>
+
+<h3>4.1 Earnings quality</h3>
+<p>Net income TTM $708M vs Operating cash flow TTM $876M: <b>OCF > Net income</b>, positive signal. Free cash flow TTM $869M with marginal capex $7M — very high FCF quality. <b>No signal of earnings inflation</b> via aggressive working capital or accruals <span class="tag-verified">VERIFIED — TradingView 2026-05-23</span>.</p>
+<p>Sloan ratio TTM −2.9% (accruals / total assets): <b>negative, high accrual quality</b>. Piotroski F-score TTM 8/9: extremely high. Altman Z-score 53.2: distress probability ~0.</p>
+
+<h3>4.2 Stock-based compensation</h3>
+<p>SBC is the least glorifiable item. Reddit guided Q2 SBC growth at ~50% of revenue growth rate (~35% YoY if revenue grows 70%). On 206M fully diluted shares, share count is flat YoY (+0.2%) — the $1B buyback is offsetting dilution. <b>Sustainable as long as the buyback is active and price stays below ~$250</b>. If the price doubles, $1B = only 1.7% of shares; the buyback becomes cosmetic.</p>
+
+<h3>4.3 Cash flow items</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Item TTM</th><th class="num">USD</th><th class="num">% revenue</th><th>Note</th></tr>
+<tr><td>Operating CF</td><td class="num">$875.6M</td><td class="num">35.4%</td><td>Excellent conversion</td></tr>
+<tr><td>Capex</td><td class="num">$6.8M</td><td class="num">0.3%</td><td>Near zero</td></tr>
+<tr><td>Free CF</td><td class="num">$868.7M</td><td class="num">35.1%</td><td>FCF margin among highest large-cap tech</td></tr>
+<tr><td>CF investing</td><td class="num">−$66.6M</td><td class="num">—</td><td>Mainly ST investments</td></tr>
+<tr><td>CF financing</td><td class="num">−$70.4M</td><td class="num">—</td><td>Active buyback + net option exercises</td></tr>
+</table>
+</div>
+
+<h3>4.4 Receivables / Inventory</h3>
+<p>Receivables turnover 5.66x (DSO ~64 days) — in line with ad-supported peers. No inventory (asset-light business). Current ratio 12.7x — excessively prudent, suggesting opportunistic leverage if management ever pursued M&A.</p>
+
+<div class="box-warn">
+<h3>⚠️ Red flags worth investigating before buying</h3>
+<ol>
+<li><b>Data licensing concentration</b>: $39M Q1 "Other revenue" does not break out Google vs OpenAI vs others. If one party is 70%+ of the line and the contract expires in 2026/2027, there is a binary risk not visible in public filings. <b>To ask IR</b>.</li>
+<li><b>Stated vs revealed behavior on logged-in / logged-out mix</b>: management frames the decision to stop disclosing it as "natural evolution"; the timing coincidence with the peak scrutiny on Google AI risk is almost certainly non-random.</li>
+<li><b>Class action lawsuit</b> (Northern District of California): class period Oct 2024 - May 2025. Outcome of the motion to dismiss will be material. <b>Track PACER docket</b>.</li>
+<li><b>Insider 10b5-1 plans</b>: everyone sells. Even if "pre-arranged", the <i>number</i> of active plans (Huffman, Wong, Slowe, Reynolds, Vollero) and the <i>monthly continuity</i> of sales indicates personal-risk management behavior from management itself — not a bullish signal about their own future return expectations.</li>
+<li><b>Buyback timing</b>: $1B authorized Feb 5, 2026 at historical average ~$170 (1 month before stock crashed to $99-120 in March-April). Buyback execution in the lows would be excellent allocation; if executed mostly above $150 it would be suboptimal. <b>To verify in Q2 2026 10-Q</b>.</li>
+</ol>
+</div>
+
+<h3>4.5 Filing red flags</h3>
+<p>No 10-K/A (amendment), no NT filing (late), no public SEC comment letters as of 2026-05-23 <span class="tag-verified">VERIFIED — SEC EDGAR</span>. Auditor: Deloitte & Touche LLP, clean opinion in FY2025 10-K <span class="tag-inferred">INFERRED — standard practice, to confirm in filing</span>. No material weakness declared in controls.</p>
+</section>
+
+<section id="parte-5">
+<h2>PART 5 — Valuation</h2>
+
+<h3>5.1 Multiples vs peer</h3>
+<div class="table-scroll">
+<table class="wide">
+<tr><th>Ticker</th><th>Company</th><th class="num">Mkt cap</th><th class="num">P/E TTM</th><th class="num">Fwd P/E</th><th class="num">EV/EBITDA</th><th class="num">EV/Sales</th><th class="num">P/S</th><th class="num">Rev growth YoY</th><th class="num">EBITDA mgn</th><th class="num">FCF mgn</th><th class="num">YTD</th></tr>
+<tr><td><b>RDDT</b></td><td><b>Reddit</b></td><td class="num">$27.3B</td><td class="num">40.2</td><td class="num">28.7</td><td class="num">38.5</td><td class="num">9.9</td><td class="num">12.3</td><td class="num pos">+70.6%</td><td class="num">25.8%</td><td class="num">35.1%</td><td class="num neg">−39.0%</td></tr>
+<tr><td>META</td><td>Meta Platforms</td><td class="num">$1,700B</td><td class="num">28.5</td><td class="num">24.5</td><td class="num">17.5</td><td class="num">8.2</td><td class="num">8.4</td><td class="num">+22%</td><td class="num">48%</td><td class="num">22%</td><td class="num">+8%</td></tr>
+<tr><td>PINS</td><td>Pinterest</td><td class="num">$24B</td><td class="num">24.8</td><td class="num">18.2</td><td class="num">15.5</td><td class="num">5.3</td><td class="num">5.7</td><td class="num">+16%</td><td class="num">22%</td><td class="num">27%</td><td class="num neg">−12%</td></tr>
+<tr><td>SNAP</td><td>Snap Inc</td><td class="num">$14B</td><td class="num">n/a</td><td class="num">42</td><td class="num">35</td><td class="num">2.5</td><td class="num">2.7</td><td class="num">+12%</td><td class="num">8%</td><td class="num">9%</td><td class="num neg">−18%</td></tr>
+<tr><td>GOOGL</td><td>Alphabet</td><td class="num">$2,400B</td><td class="num">26.5</td><td class="num">22.0</td><td class="num">18.0</td><td class="num">7.0</td><td class="num">7.5</td><td class="num">+15%</td><td class="num">36%</td><td class="num">25%</td><td class="num">+12%</td></tr>
+<tr><td>SPOT</td><td>Spotify</td><td class="num">$120B</td><td class="num">85</td><td class="num">55</td><td class="num">62</td><td class="num">6.8</td><td class="num">6.8</td><td class="num">+17%</td><td class="num">11%</td><td class="num">12%</td><td class="num">+25%</td></tr>
+</table>
+</div>
+<p style="font-size:12px;color:var(--text-3);margin-top:4px">RDDT data from TradingView analyst dataset 2026-05-23. Peer data from Yahoo Finance / TradingView consensus estimates May 2026 <span class="tag-verified">VERIFIED</span> for RDDT, <span class="tag-inferred">INFERRED</span> for peer (Wall Street consensus multiples, possible spread between sources of 5-10%).</p>
+
+<p><b>Read</b>: RDDT trades at a substantial premium (P/S 12.3x vs peer median ~6.8x) <i>purely on the growth premium</i> (+70.6% vs peer median ~17%). Three consequences:</p>
+<ol>
+<li>If growth drops to 30% YoY within 4 quarters (physiological deceleration), P/S compresses to 7-8x → fair value $80-95.</li>
+<li>If growth stays above 45% YoY for 4-6 quarters, P/S at 10-12x is justified → fair value $200-240.</li>
+<li>If Q2 beats but Q3 disappoints (the classic re-rating trap), price moves to $100-110 before Q4.</li>
+</ol>
+
+<h3>5.2 Multiples vs own history</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Metric</th><th class="num">Current</th><th class="num">Median 12M</th><th>Note</th></tr>
+<tr><td>P/E TTM</td><td class="num">40.2</td><td class="num">~55</td><td>Compressing</td></tr>
+<tr><td>EV/EBITDA TTM</td><td class="num">38.5</td><td class="num">~55</td><td>Compressing</td></tr>
+<tr><td>P/S TTM</td><td class="num">12.3</td><td class="num">~17</td><td>Compressing</td></tr>
+<tr><td>Fwd P/E</td><td class="num">28.7</td><td class="num">~35</td><td>More reasonable</td></tr>
+</table>
+</div>
+
+<h3>5.3 DCF sensitivity (simplified)</h3>
+<p>FCF model: terminal growth 3%, WACC 10%, FY26 FCF estimated $1.3B, 5-yr growth 35%/25%/15%/12%/10%, then terminal.</p>
+<div class="table-scroll">
+<table>
+<tr><th>Scenario</th><th class="num">5Y avg growth</th><th class="num">FCF FY30</th><th class="num">Fair value</th><th class="num">vs $141.67</th></tr>
+<tr><td>Bull</td><td class="num">22%</td><td class="num">$2.9B</td><td class="num pos">$310</td><td class="num pos">+119%</td></tr>
+<tr><td>Base</td><td class="num">17%</td><td class="num">$2.3B</td><td class="num">$215</td><td class="num pos">+52%</td></tr>
+<tr><td>Bear</td><td class="num">8%</td><td class="num">$1.5B</td><td class="num neg">$95</td><td class="num neg">−33%</td></tr>
+</table>
+</div>
+<p style="font-size:12px;color:var(--text-3)">DCF is <span class="tag-inferred">INFERRED</span> — subjective assumptions (WACC, terminal, growth). Useful for range, not precision.</p>
+
+<h3>5.4 Reconciliation with analyst average target</h3>
+<p>Average analyst target $217-225 (32 analysts coverage). DCF base $215 and EV multiple-based base $220 converge. <b>Consensus is not unreasonable</b>; the issue is dispersion (range $75-300).</p>
+
+<h3>5.5 12-month target scenarios — expected value</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Scenario</th><th class="num">Probability</th><th class="num">Target</th><th class="num">Return vs $141.67</th><th>Trigger</th></tr>
+<tr><td>Bull</td><td class="num">30%</td><td class="num pos">$300</td><td class="num pos">+112%</td><td>Q2 + Q3 material beat, Reddit Answers traction, $1B buyback executed on drawdown</td></tr>
+<tr><td>Base</td><td class="num">50%</td><td class="num">$220</td><td class="num pos">+55%</td><td>Q2 moderate beat, growth decelerates orderly from 70% to 45%</td></tr>
+<tr><td>Bear</td><td class="num">20%</td><td class="num neg">$92</td><td class="num neg">−35%</td><td>Q2 miss on logged-in DAUq, visible Google AI hit, ad revenue guidance cut</td></tr>
+</table>
+</div>
+<p><b>Expected value</b> = 0.30 × $300 + 0.50 × $220 + 0.20 × $92 = <b>$218.4 (+54% vs current)</b>.</p>
+<p>Expected value is positive, but dispersion is high (implied SD ~$75). <b>A favorable risk/reward exists only at lower prices</b>; see Part 7 for the operational setup.</p>
+</section>
+
+<section id="parte-6">
+<h2>PART 6 — SEC Intelligence & Influential People</h2>
+
+<h3>6.1 FY2025 10-K summary (filed Feb 5, 2026)</h3>
+<p>10-K filed with SEC on Feb 5, 2026, accompanied by 8-K earnings release and $1B buyback authorization. Reddit CIK: 0001713445. Auditor: Deloitte & Touche. <b>Highlights</b>:</p>
+<ul>
+<li>FY25 revenue $2.20B (+69% YoY), net income $530M, Adj. EBITDA $845M (38% margin).</li>
+<li>2,555 employees as of Dec 31, 2025 (of which 1,981 in the US).</li>
+<li>Outstanding shares: 139.6M Class A + 51.4M Class B (as of Feb 4, 2026). Class A float ~95%.</li>
+</ul>
+
+<h3>6.2 Material 8-Ks last 12 months</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Event</th><th>Materiality</th></tr>
+<tr><td>2026-05-07</td><td>Form 4 insider (Huffman trust exercise + sell)</td><td>Low — routine 10b5-1</td></tr>
+<tr><td>2026-04-30</td><td>Q1 2026 earnings 8-K + 10-Q</td><td>High — material beat</td></tr>
+<tr><td>2026-02-05</td><td>FY25 earnings + $1B buyback authorization</td><td>High — first capital return</td></tr>
+<tr><td>2026-02-12</td><td>Form 4 Sarah Farrell director purchase (50,500 sh)</td><td>High — convergent buyer</td></tr>
+<tr><td>2025-08-01</td><td>Q2 2025 earnings</td><td>Medium</td></tr>
+</table>
+</div>
+
+<h3>6.3 Compensation and governance (FY2025 DEF 14A)</h3>
+<p>Dual-class share structure: Class B (insider) carries 10 votes per share, Class A 1 vote. Insider voting control >50% despite minority economic ownership. Limits hostile takeover but reduces shareholder activism discipline.</p>
+<p>CEO 2025 compensation: specifics in 2026 proxy (filed within 120 days of year-end, to consult). Economic insider ownership: ~3% (Huffman 411,195 + 1.26M options as of Feb 27, 2026, via XYZ Revocable Trust).</p>
+
+<h3>6.4 Insider activity (Form 4, last 6 months)</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Insider</th><th>Role</th><th>Action</th><th class="num">Shares</th><th class="num">USD value</th></tr>
+<tr><td>2026-05-18</td><td>Jennifer Wong</td><td>COO</td><td>10b5-1 sell + opt ex</td><td class="num">39,167</td><td class="num neg">~$6.2M @ $154-160</td></tr>
+<tr><td>2026-05-07</td><td>Steve Huffman</td><td>CEO</td><td>10b5-1 sell + opt ex (GRAT trust)</td><td class="num">18,000</td><td class="num neg">~$3.0M @ $168-177</td></tr>
+<tr><td>2026-04-15</td><td>Steve Huffman</td><td>CEO</td><td>10b5-1 sell</td><td class="num">3,300</td><td class="num neg">~$525K</td></tr>
+<tr><td>2026-02-27</td><td>Steve Huffman</td><td>CEO</td><td>10b5-1 sell + opt ex</td><td class="num">17,900</td><td class="num neg">~$2.6M @ $144-150</td></tr>
+<tr><td>2026-02-18</td><td>Steve Huffman</td><td>CEO</td><td>10b5-1 sell</td><td class="num">18,000</td><td class="num neg">~$2.5M @ $138.81 avg</td></tr>
+<tr><td><b>2026-02-10/11</b></td><td><b>Sarah Farrell</b></td><td><b>Director</b></td><td><b>Open-market BUY</b></td><td class="num pos"><b>50,500</b></td><td class="num pos"><b>$7.48M @ $148.16 avg</b></td></tr>
+<tr><td>(other dates)</td><td>Sarah Farrell</td><td>Director</td><td>Open-market BUY (4 trades total)</td><td class="num pos">61,000 (cum.)</td><td class="num pos">$8.87M cum.</td></tr>
+<tr><td>2026-02-10</td><td>Christopher Slowe</td><td>CTO</td><td>10b5-1 sell</td><td class="num">11,464</td><td class="num neg">~$1.72M</td></tr>
+</table>
+</div>
+<p><b>Aggregate pattern</b>: 4 purchases vs 339 sales over the last 6 months. <b>6m cumulative sales</b>: Wong 339,470 sh ($61.9M), Huffman 216,000 sh ($38.1M), Slowe 145,000 sh ($27.1M), Reynolds 16,755 sh ($3.5M), Vollero 12,887 sh ($3.3M). Purchases: all from Sarah Farrell, 61,000 sh total ($8.87M). <b>Interpretive note</b>: C-suite sales are 10b5-1 pre-arranged. Farrell is the <i>only</i> insider who put own capital on the market at $140-150 prices, after the crash from $282 → $99 → recovery. It carries weight, but is not sufficient to flip the quantitative reading dominated by Huffman/Wong/Slowe.</p>
+
+<h3>6.5 Institutional ownership (13F Q1 2026)</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Holder</th><th>Q1 2026 action</th><th class="num">Shares delta</th><th class="num">Estimated value</th></tr>
+<tr><td>FMR LLC (Fidelity)</td><td>Cut</td><td class="num neg">−7,002,549 (−70.6%)</td><td class="num">$942.9M</td></tr>
+<tr><td>Coatue Management</td><td>Cut</td><td class="num neg">−2,760,350 (−49.7%)</td><td class="num">$371.7M</td></tr>
+<tr><td>Viking Global Investors</td><td>NEW position</td><td class="num pos">+2,551,617 (new)</td><td class="num">$343.6M</td></tr>
+<tr><td>Goldman Sachs Group</td><td>Add</td><td class="num pos">+2,082,281 (+173.4%)</td><td class="num">$280.4M</td></tr>
+<tr><td>AllianceBernstein</td><td>Add</td><td class="num pos">+1,758,591 (+56.5%)</td><td class="num">$236.8M</td></tr>
+<tr><td>Marshall Wace</td><td>Add</td><td class="num pos">+1,303,731 (+109.5%)</td><td class="num">$175.5M</td></tr>
+</table>
+</div>
+<p>Read: <b>capital rotation underway</b>. Growth-focused legacy hedge funds (Fidelity, Coatue) heavily trimmed in Q1 (capturing ATH). Viking Global opened a full new position; Goldman, AllianceBernstein, Marshall Wace doubled/tripled. This is a typical re-allocation pattern across funds with different theses and timelines, not distribution panic. Short interest 14.7% of float (~17M shares), DTC 3.4 days — <b>elevated but stable</b>, not rising.</p>
+
+<h3>6.6 Filing anomalies</h3>
+<p>No 10-K/A, no NT 10-Q/K, no public SEC comment letters. Clean auditor opinion (Deloitte). No material weakness declared.</p>
+
+<h3>6.7 Influential People Tracking</h3>
+
+<div class="box-info">
+<h3>⚠️ Required disclaimer</h3>
+<p>The information in this section is <b>qualitative context, not an entry trigger</b>. Politicians' filings lag up to 45 days; 13F arrive 45 days after quarter-end; public statements from CEOs or famous investors are often talking-book (commenting on portfolios already built). Use to integrate the fundamental thesis already formed in Parts 1-5, never as the primary reason to buy. The "famous person buys → I buy too" narrative bias is one of the most common ways to lose money.</p>
+</div>
+
+<h4>6.7.A — US Politicians & Government officials</h4>
+<p>Trump gate execution (4 web_search queries + Trump family + cabinet, 2026-05-23):</p>
+<ul style="font-size:12.5px;color:var(--text-2)">
+<li>Trump Q1 2026 disclosure (filed 2026-05-15, 113 pages, 3,642 transactions $220-750M cumulative): no explicit mention of RDDT/Reddit in tickers listed in CNBC, Las Vegas Sun, Democracy Now, Popular Information coverage <span class="tag-verified">VERIFIED via 4 web_search 2026-05-23</span>.</li>
+<li>Trump family (Donald Jr, Eric, Ivanka, Kushner): no RDDT trade reported in accessible public filings <span class="tag-verified">VERIFIED</span>.</li>
+<li>Cabinet (Lutnick, Bessent, Rubio): no RDDT trade reported <span class="tag-verified">VERIFIED</span>.</li>
+<li>Congressional (Pelosi, Crenshaw, Tuberville, Gottheimer, Mullin via QuiverQuant scan): no material RDDT transactions over the last 12 months <span class="tag-verified">VERIFIED</span>.</li>
+</ul>
+<p><b>6.7.A summary</b>: No material political transactions detected over the last 12 months. Reddit is absent from US politicians' public portfolios with mandatory disclosure. <b>Signal: neutral</b>.</p>
+
+<h4>6.7.B — Sector CEOs and leadership</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Person</th><th>Role</th><th>Context</th><th>Summary (≤30 words)</th></tr>
+<tr><td>2026-04-30</td><td>Steve Huffman</td><td>CEO Reddit</td><td>Q1 2026 earnings call</td><td>"Only one tech company combines this growth, profitability and efficiency: Reddit." Explicit comparison vs hyperscaler capex</td></tr>
+<tr><td>2026-04-30</td><td>Jen Wong</td><td>COO Reddit</td><td>Q1 2026 earnings call</td><td>Performance ads now >60% of total mix. "Value not volume" strategy on ad load</td></tr>
+<tr><td>2026-05-20</td><td>Sundar Pichai</td><td>CEO Alphabet</td><td>Google I/O 2026 keynote</td><td>Search overhaul announced with expanded AI Mode — interpreted by the market as a headwind for content publishers</td></tr>
+</table>
+</div>
+
+<h4>6.7.C — Institutional investors with public voice</h4>
+<p>No high-profile investor with public voice (Buffett, Burry, Ackman, Druckenmiller, Wood, Einhorn, Marks) has explicitly cited RDDT over the last 6 months nor holds a documented 13F position <span class="tag-verified">VERIFIED via web_search 2026-05-23</span>. Top 10 institutional ownership is dominated by classic growth-tilted funds (FMR, Coatue) in net distribution and new entrants (Viking) in accumulation (see 6.5). The absence of concentrated activist presence is <b>neutral</b> — reducing both squeeze upside and visible institutional short downside.</p>
+
+<h4>6.7.D — Short reports and high-profile analyst calls</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Firm</th><th>Call</th><th>Target</th></tr>
+<tr><td>2026-05-01</td><td>Piper Sandler</td><td>Overweight reiterated (post Q1)</td><td class="num">$215</td></tr>
+<tr><td>2026-05-01</td><td>Wells Fargo</td><td>Equal Weight reiterated</td><td class="num">$150</td></tr>
+<tr><td>2026-05-01</td><td>Cantor Fitzgerald</td><td>Buy</td><td class="num">$206</td></tr>
+<tr><td>2026-05-01</td><td>Evercore ISI</td><td>Outperform</td><td class="num pos">$300</td></tr>
+<tr><td>2026-05-01</td><td>Truist</td><td>Buy (raised from $260)</td><td class="num">$265</td></tr>
+<tr><td>2026-05-01</td><td>Goldman Sachs</td><td>Neutral (raised from $180)</td><td class="num">$200</td></tr>
+<tr><td>2026-05-01</td><td>Raymond James</td><td>Market Perform (raised)</td><td class="num">$180</td></tr>
+<tr><td>2026-03-17</td><td>Redburn Atlantic</td><td>Sell (reiterated)</td><td class="num neg">$75</td></tr>
+<tr><td>2025/2026</td><td>Wells Fargo (downgrade hist)</td><td>Equal Weight (from Buy, Google AI rationale)</td><td class="num">$115-150 (revisions)</td></tr>
+</table>
+</div>
+<p>No institutional short report (Hindenburg, Muddy Waters, Citron, Kerrisdale, Spruce Point, Wolfpack, Culper) published on RDDT in the last 12 months <span class="tag-verified">VERIFIED via web_search 2026-05-23</span>.</p>
+
+<h4>6.7.E — Synthesis and weighting</h4>
+<p>Institutional pattern <b>incoherent</b>: net rotation in Q1 2026 but no distribution panic; C-suite routine selling but one director (Farrell) put $8.87M cash to market. Leader public statements (Huffman) are confident yet defensive on Google AI — the timing coincidence of the disclosure change (Q3 2026) with the peak risk-scrutiny moment is a small bear flag. This section <b>supports the existing thesis</b> (Part 3 — bear prevailing near-term, bull long-term if executed): introduces a note of doubt on management's disclosure timing, but does not overturn the rating.</p>
+</section>
+
+<section id="parte-7">
+<h2>PART 7 — Technical setup and operational plan</h2>
+
+<h3>7.1 Primary trend</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Timeframe</th><th>Reference</th><th>State</th></tr>
+<tr><td>Daily</td><td>Price $141.67 vs SMA200 $192.59</td><td class="neg">−26.4% below, primary downtrend</td></tr>
+<tr><td>Daily</td><td>Price vs SMA50 $149.00</td><td class="neg">−4.9% below, intermediate downtrend</td></tr>
+<tr><td>Daily</td><td>Price vs SMA21 $156.40</td><td class="neg">−10.4% below, recent negative momentum</td></tr>
+<tr><td>Weekly</td><td>Estimated weekly EMA40</td><td class="neg">Below, weekly downtrend confirmed</td></tr>
+</table>
+</div>
+<p>TradingView technical rating: <b>Strong Sell</b> 1D / 1W / 1M. <b>Technical verdict</b>: downtrend across all operational timeframes.</p>
+
+<h3>7.2 Key levels</h3>
+<ul>
+<li><b>Primary resistance</b>: SMA200 $192.59 (must break to reverse trend). Above: gap to $200+, then $230 area of Q4 2025 13F accumulation.</li>
+<li><b>Intermediate resistance</b>: SMA50 $149.00, SMA21 $156.40.</li>
+<li><b>Immediate support</b>: $140.67 (May 22 daily low), $140.38 (Bollinger lower 20).</li>
+<li><b>Structural support</b>: $124.88 (Bollinger lower 50), $119.27 (3M low).</li>
+<li><b>Major support</b>: <b>$99.14</b> (52w low April 2025, post-correction). Break → free-fall toward Redburn $75 area.</li>
+<li><b>ATH</b>: $282.95 (Dec 15, 2025). Top psychological resistance.</li>
+</ul>
+
+<h3>7.3 Momentum</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Indicator</th><th class="num">Value</th><th>Read</th></tr>
+<tr><td>RSI(14) daily</td><td class="num">40.3</td><td>Neutral-low zone, not yet oversold</td></tr>
+<tr><td>RSI(14) weekly</td><td class="num">42.6</td><td>Neutral-low</td></tr>
+<tr><td>Stoch(14,1,3) %K daily</td><td class="num">2.7</td><td>Extremely short-term oversold</td></tr>
+<tr><td>MACD(12,26) line vs signal</td><td class="num">−0.97 vs +1.25</td><td>Recent bearish crossover</td></tr>
+<tr><td>CCI(20) daily</td><td class="num">−143.4</td><td>Oversold</td></tr>
+<tr><td>Williams %R daily</td><td class="num">−97.3</td><td>Extreme oversold</td></tr>
+</table>
+</div>
+<p>Several oscillators signal <b>short-term oversold</b>; possible technical bounce 1-3 sessions out. But weekly RSI 42.6 and MACD bearish crossover do not confirm intermediate-trend reversal — only a technical bounce.</p>
+
+<h3>7.4 Relative strength</h3>
+<p>RDDT YTD <span style="color:var(--red);font-weight:600">−39.0%</span> vs SPY ~flat YTD 2026 and QQQ ~+2% YTD 2026 (standard market benchmarks). Relative strength dramatically underperforming (~−40% absolute, −42% relative to QQQ). 1Y: RDDT +45.6% vs SPY +10-12% area — still long-term outperformance, but compressing rapidly.</p>
+
+<h3>7.5 Volume</h3>
+<p>Volume 1d 7.85M (rel volume 1.64x 30d average). 1W volume 29.3M (+42% vs week average), 1M volume 95.6M (+13% vs month average). <b>Read</b>: active distribution on the May 20 break, but no panic — volume elevated but not capitulation-extreme (e.g. 4-5x average).</p>
+
+<h3>7.6 Operational setup (6-24 month horizon)</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Parameter</th><th>Value</th></tr>
+<tr><td>Primary entry zone</td><td class="pos">$110 – $125 (test of weekly SMA200 area and daily Bollinger lower 50, possible rotation completion)</td></tr>
+<tr><td>Secondary entry zone (more cautious)</td><td class="pos">$99 – $105 (52w low retest, post-Q2 capitulation if miss)</td></tr>
+<tr><td>Structural stop</td><td class="neg">Weekly close below $92 — Bull/Base thesis invalidation, Bear scenario recognized (Redburn $75 target)</td></tr>
+<tr><td>Target T1</td><td>$190 (SMA200 retest, +52% from entry $125)</td></tr>
+<tr><td>Target T2</td><td>$240 (13F accumulation area retest, +92%)</td></tr>
+<tr><td>Target T3 / Bull case</td><td>$300 (consensus high, +140%)</td></tr>
+<tr><td>R/R expected from $125 with stop $92</td><td>$65 upside (to $190) vs $33 downside = 2.0x; <b>marginal</b></td></tr>
+<tr><td>R/R expected from $105 with stop $92</td><td>$85 upside (to $190) vs $13 downside = 6.5x; <b>excellent</b></td></tr>
+<tr><td>Suggested sizing</td><td>1-3% of strategic capital in base scenario; 4-5% if entry on confirmed $99-105 capitulation</td></tr>
+<tr><td>LEAPS alternative</td><td>Jan-2028 calls strike $130-150, variable premium pricing; verify delta and IV30 before execution</td></tr>
+</table>
+</div>
+<p><b>Synthesis read</b>: the technical setup does not favor entry at the current $141.67 price. Wait for confirmation in one of the two entry zones, or have fundamental conviction strong enough to accept short-term drawdown. The risk/reward asymmetry becomes institutionally attractive only below $110.</p>
+</section>
+
+<section id="verdict">
+<div class="box-verdict">
+<h2 style="border:none;padding:0;margin-bottom:14px">FINAL VERDICT</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+  <span class="badge badge-lg rating-hold">Rating: HOLD</span>
+  <span class="badge badge-lg badge-blue">Conviction: medium</span>
+  <span class="badge badge-lg badge-amber">Horizon: 12-24 months</span>
+</div>
+
+<h3 style="margin-top:0">3-sentence summary</h3>
+<p>Reddit is a high-quality company with exceptional economics (FCF margin 35%, ROIC 26%, net-cash balance sheet $2.75B) but the structural logged-out traffic risk from Google AI is not yet fully discounted in the current $141.67 price. The bearish technical setup (below SMA50 and SMA200) and the Q2 2026 (Aug 11) binary catalyst make heavy entry premature now. A strategic position is built in scale at $125 → $105 → $99, with sizing growing at lower levels, never exceeding 5% of long-term capital given the bimodal distribution of expected returns.</p>
+
+<h3>Invalidation conditions</h3>
+<ul>
+<li><b>Bull invalidated if</b>: weekly close below $92 (break of $99.14 52w low with momentum).</li>
+<li><b>Bear invalidated if</b>: Q2 2026 (Aug 11) shows logged-in DAUq > +18% YoY and material ad revenue beat; then the Google AI bear case loses near-term substance.</li>
+</ul>
+
+<h3>Catalyst calendar next 6 months</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Event</th><th>Materiality</th></tr>
+<tr><td>Aug 11, 2026</td><td>Q2 2026 earnings — first quarter without logged-in/out disclosure</td><td>Critical</td></tr>
+<tr><td>2026-Q3</td><td>Q2 10-Q with $1B buyback execution detail</td><td>High</td></tr>
+<tr><td>2026-Q4</td><td>Q3 2026 earnings (~Nov) — first quarter with difficult comps</td><td>High</td></tr>
+<tr><td>2026-Q4</td><td>Class action N.D. Cal. developments (motion to dismiss / discovery)</td><td>Medium</td></tr>
+<tr><td>2026-Q4</td><td>Potential Google/OpenAI data licensing renewals (IR timing not disclosed)</td><td>High</td></tr>
+<tr><td>2027-Q1</td><td>Q4 2026 / FY26 results + FY27 guidance</td><td>Critical</td></tr>
+</table>
+</div>
+
+<h3>Final notes</h3>
+<p>Positions on this horizon (12-24 months) should be sized and managed separately from short-term tactical capital. The bimodal distribution of expected returns (Section 1.8) implies that this is <i>not</i> a "core" allocation — it is a satellite, high-beta allocation, with thesis and precise stop levels. Verify live prices and updated fundamental data immediately before any operational execution.</p>
+</div>
+</section>
+
+</main>
+
+<footer>
+<p><b>Sources consulted (2026-05-23)</b>: TradingView analyst dataset · SEC EDGAR (10-K FY2025, 10-Q Q1 2026, 8-K, Form 4) · Yahoo Finance API · CNBC · Reuters · Seeking Alpha · Benzinga · Quiver Quantitative · CapitolTrades · OGE.gov disclosures · ProPublica Trump Disclosures DB · Wells Fargo / Redburn Atlantic / Needham / Morgan Stanley / Goldman Sachs / Piper Sandler / Truist research notes · The Motley Fool earnings transcripts · TheNextWeb · Popular Information · Las Vegas Sun · Democracy Now.</p>
+<p style="margin-top:8px"><b>Disclaimer</b>: Static snapshot based on data as of 2026-05-23. For live candle chart and real-time indicators, consult TradingView. This document does not constitute financial advice, investment recommendation, or solicitation to buy or sell financial instruments. Every investment decision must be preceded by independent analysis and assessment of one's own risk profile. Past performance is no guarantee of future results.</p>
+</footer>
+
+<script>
+// Dati embedded — Yahoo Finance API daily 2024-05-23 → 2026-05-22 (501 sessioni)
+const DATA = {"c":[[1716471000000,56.88,57.26,53.11,54.16],[1716557400000,53.96,56.0,53.21,54.72],[1716903000000,55.12,59.28,53.86,58.49],[1716989400000,57.45,58.63,56.8,57.64],[1717075800000,57.0,59.49,55.76,56.3],[1717162200000,56.21,57.52,53.45,54.24],[1717421400000,57.55,58.64,54.82,55.8],[1717507800000,55.2,55.4,53.96,54.5],[1717594200000,54.79,60.24,54.57,60.07],[1717680600000,58.99,63.57,58.38,63.46],[1717767000000,61.63,63.8,59.21,59.8],[1718026200000,60.01,61.38,58.26,59.63],[1718112600000,60.12,62.05,58.49,61.55],[1718199000000,62.88,69.59,61.85,65.93],[1718285400000,66.83,69.04,63.64,63.96],[1718371800000,63.54,64.94,60.11,60.94],[1718631000000,61.0,61.13,58.1,60.35],[1718717400000,61.11,61.64,57.5,60.21],[1718890200000,60.0,60.1,55.47,57.42],[1718976600000,56.4,57.65,54.45,57.3],[1719235800000,57.32,58.89,55.95,56.48],[1719322200000,56.56,61.57,56.42,61.38],[1719408600000,60.5,63.88,60.33,63.61],[1719495000000,62.83,64.7,62.03,63.58],[1719581400000,64.07,65.82,62.67,63.89],[1719840600000,64.2,66.69,62.2,66.59],[1719927000000,65.99,73.52,65.65,73.51],[1720013400000,71.93,73.97,70.18,73.62],[1720186200000,73.78,76.2,71.58,72.97],[1720445400000,72.76,74.12,70.9,72.81],[1720531800000,73.48,76.74,69.2,70.59],[1720618200000,71.23,72.28,67.62,69.4],[1720704600000,70.5,71.89,68.33,70.29],[1720791000000,70.75,76.73,69.4,73.85],[1721050200000,74.69,78.08,72.53,72.98],[1721136600000,70.67,70.69,66.77,70.44],[1721223000000,68.48,69.79,63.79,65.21],[1721309400000,66.74,66.74,63.94,65.92],[1721395800000,65.75,68.27,64.5,64.7],[1721655000000,66.93,70.46,65.54,68.13],[1721741400000,67.8,71.41,67.01,67.84],[1721827800000,65.67,66.3,62.18,62.95],[1721914200000,62.9,64.36,59.73,62.06],[1722000600000,62.9,64.32,61.23,62.36],[1722259800000,62.97,62.98,58.72,59.98],[1722346200000,60.06,60.59,57.36,58.44],[1722432600000,59.38,61.27,59.31,60.85],[1722519000000,64.4,64.64,59.2,59.38],[1722605400000,56.24,57.81,54.11,57.58],[1722864600000,53.25,59.13,52.76,56.81],[1722951000000,58.1,58.5,54.34,54.36],[1723037400000,54.8,55.24,49.13,50.69],[1723123800000,51.95,57.74,51.76,54.94],[1723210200000,53.97,54.11,51.5,52.91],[1723469400000,52.5,52.97,50.8,52.51],[1723555800000,53.05,54.69,52.54,54.52],[1723642200000,53.7,55.03,53.2,54.95],[1723728600000,55.25,56.85,54.18,55.55],[1723815000000,54.87,55.14,53.9,54.92],[1724074200000,54.79,54.9,52.49,54.36],[1724160600000,53.5,55.06,52.39,55.02],[1724247000000,54.88,57.11,54.27,56.89],[1724333400000,56.5,57.45,55.3,56.43],[1724419800000,56.51,59.68,56.13,59.21],[1724679000000,59.29,59.98,57.51,58.26],[1724765400000,57.72,60.27,56.54,59.0],[1724851800000,57.88,57.93,55.02,56.14],[1724938200000,57.58,60.29,57.1,58.75],[1725024600000,59.0,60.41,58.47,60.03],[1725370200000,59.24,60.08,57.49,57.53],[1725456600000,56.72,58.81,56.06,57.0],[1725543000000,56.8,59.56,56.38,58.71],[1725629400000,59.24,60.41,55.8,56.85],[1725888600000,57.14,58.5,55.25,57.46],[1725975000000,57.52,57.87,55.48,56.87],[1726061400000,56.5,60.0,55.84,59.87],[1726147800000,60.0,62.66,59.38,59.63],[1726234200000,59.63,60.25,58.04,59.09],[1726493400000,58.6,60.1,57.22,59.15],[1726579800000,61.37,61.98,59.31,61.89],[1726666200000,61.92,64.09,61.54,63.66],[1726752600000,64.99,67.19,63.9,64.56],[1726839000000,64.82,66.94,64.17,66.17],[1727098200000,66.0,66.96,64.78,65.0],[1727184600000,65.28,67.28,63.6,66.96],[1727271000000,66.96,69.11,66.35,67.88],[1727357400000,69.0,69.0,65.71,66.52],[1727443800000,66.59,68.35,66.12,67.08],[1727703000000,66.94,67.81,65.32,65.92],[1727789400000,65.93,66.61,64.51,65.97],[1727875800000,65.49,68.31,64.9,67.78],[1727962200000,68.06,68.97,67.35,67.47],[1728048600000,69.52,72.88,68.8,72.38],[1728307800000,72.99,73.42,70.13,70.44],[1728394200000,70.75,72.98,70.24,70.77],[1728480600000,73.64,75.2,70.44,71.0],[1728567000000,70.69,71.66,69.3,69.9],[1728653400000,69.95,73.25,69.74,73.25],[1728912600000,73.75,75.67,72.82,74.87],[1728999000000,74.8,76.48,74.14,75.17],[1729085400000,75.16,77.87,73.59,77.26],[1729171800000,76.98,78.74,75.94,76.29],[1729258200000,76.61,81.36,76.42,80.9],[1729517400000,80.56,80.56,77.9,78.55],[1729603800000,77.77,78.5,76.54,77.29],[1729690200000,77.69,80.13,76.65,77.68],[1729776600000,77.86,78.71,77.14,78.6],[1729863000000,79.02,81.72,79.02,81.36],[1730122200000,82.21,82.53,79.45,79.68],[1730208600000,79.72,82.97,79.1,81.74],[1730295000000,104.9,118.25,104.11,116.05],[1730381400000,117.4,123.6,114.8,119.3],[1730467800000,114.0,115.5,110.5,112.98],[1730730600000,110.76,112.98,108.68,109.03],[1730817000000,110.5,122.68,110.27,122.57],[1730903400000,124.15,124.93,117.16,121.08],[1730989800000,121.57,133.25,121.57,131.44],[1731076200000,130.03,134.8,128.33,134.8],[1731335400000,139.0,139.04,128.3,129.23],[1731421800000,126.66,130.47,125.69,127.75],[1731508200000,128.8,135.07,128.8,132.06],[1731594600000,132.06,133.99,129.72,131.88],[1731681000000,128.79,131.69,123.14,124.78],[1731940200000,125.56,130.13,124.66,129.42],[1732026600000,129.01,138.54,128.72,137.16],[1732113000000,137.15,138.39,130.01,136.27],[1732199400000,141.27,158.49,139.57,158.02],[1732285800000,145.41,149.0,142.91,146.67],[1732545000000,149.5,152.14,139.22,141.9],[1732631400000,141.65,144.81,132.48,135.61],[1732717800000,137.8,141.19,134.45,140.04],[1732890600000,143.43,143.93,140.26,140.69],[1733149800000,144.0,145.58,138.75,141.64],[1733236200000,141.0,151.56,141.0,149.83],[1733322600000,150.84,157.75,150.63,154.23],[1733409000000,155.58,156.67,151.25,153.09],[1733495400000,152.06,163.72,149.33,162.76],[1733754600000,171.5,180.74,157.05,167.17],[1733841000000,168.31,176.67,151.76,155.93],[1733927400000,164.0,168.66,161.0,165.92],[1734013800000,164.01,172.5,163.24,163.51],[1734100200000,164.35,174.0,163.51,172.65],[1734359400000,169.27,180.36,166.2,178.1],[1734445800000,177.15,177.57,167.32,168.79],[1734532200000,172.45,174.38,157.75,160.65],[1734618600000,163.9,166.6,157.22,163.72],[1734705000000,162.99,174.11,158.77,170.71],[1734964200000,171.25,173.82,166.37,168.61],[1735050600000,169.0,178.1,168.89,177.41],[1735223400000,177.8,182.2,174.77,176.74],[1735309800000,175.53,176.53,167.8,173.54],[1735569000000,167.38,169.79,162.26,165.53],[1735655400000,166.0,167.68,162.64,163.44],[1735828200000,164.43,168.5,156.04,165.91],[1735914600000,167.53,181.22,166.96,177.74],[1736173800000,182.0,187.69,174.5,179.49],[1736260200000,180.25,183.12,171.11,172.32],[1736346600000,167.59,174.34,166.0,172.01],[1736519400000,169.0,169.7,159.8,167.08],[1736778600000,160.44,165.5,156.58,164.65],[1736865000000,169.6,172.19,161.06,164.82],[1736951400000,170.09,178.83,167.5,170.69],[1737037800000,171.76,176.82,169.73,174.87],[1737124200000,178.28,179.87,172.15,175.33],[1737469800000,177.5,191.0,175.6,188.32],[1737556200000,187.47,188.19,181.52,183.74],[1737642600000,182.0,187.7,178.5,181.99],[1737729000000,183.63,190.5,180.0,182.4],[1737988200000,174.22,183.59,170.2,180.83],[1738074600000,184.0,196.83,181.81,194.75],[1738161000000,201.0,205.57,195.67,202.0],[1738247400000,204.99,208.62,195.69,198.93],[1738333800000,201.84,206.6,197.05,199.55],[1738593000000,189.12,205.5,188.95,202.31],[1738679400000,208.87,218.25,207.14,215.31],[1738765800000,213.5,221.18,211.0,221.16],[1738852200000,222.44,222.44,209.0,216.51],[1738938600000,218.59,227.05,218.2,225.23],[1739197800000,228.8,230.41,221.5,224.93],[1739284200000,222.03,222.48,211.33,213.76],[1739370600000,213.6,220.75,211.0,216.47],[1739457000000,203.91,214.3,195.98,204.95],[1739543400000,202.0,203.95,192.57,196.38],[1739889000000,193.4,196.76,183.8,187.13],[1739975400000,185.5,190.92,183.96,189.66],[1740061800000,187.7,187.75,170.6,175.44],[1740148200000,175.5,176.51,161.88,166.4],[1740407400000,164.77,166.38,154.2,165.57],[1740493800000,164.0,166.99,154.74,159.99],[1740580200000,161.96,170.3,161.22,168.1],[1740666600000,170.41,172.14,156.0,159.78],[1740753000000,156.9,163.38,155.45,161.78],[1741012200000,165.46,174.22,160.4,162.45],[1741098600000,157.86,164.65,148.26,159.17],[1741185000000,161.0,169.99,158.32,168.52],[1741271400000,160.5,166.11,150.53,150.72],[1741357800000,147.02,148.3,131.26,133.98],[1741613400000,127.75,127.75,105.51,107.29],[1741699800000,111.0,123.49,110.0,122.73],[1741786200000,134.79,136.47,126.12,130.68],[1741872600000,130.0,131.68,118.57,121.53],[1741959000000,126.51,130.83,123.45,128.21],[1742218200000,123.62,142.0,119.92,125.56],[1742304600000,120.57,121.94,108.13,110.1],[1742391000000,110.1,113.48,105.5,109.91],[1742477400000,109.18,112.99,107.04,108.75],[1742563800000,107.8,116.29,106.0,115.7],[1742823000000,119.81,126.5,119.76,124.94],[1742909400000,124.0,127.27,120.02,125.43],[1742995800000,124.6,125.6,117.17,120.2],[1743082200000,117.5,117.5,110.05,110.23],[1743168600000,110.25,112.78,103.74,107.71],[1743427800000,102.29,106.59,97.61,104.9],[1743514200000,105.79,111.6,104.35,110.05],[1743600600000,104.85,113.75,104.85,109.5],[1743687000000,99.5,100.5,93.63,96.9],[1743773400000,92.18,92.91,82.8,86.91],[1744032600000,81.01,97.0,79.75,93.0],[1744119000000,97.14,97.9,86.88,88.89],[1744205400000,88.74,113.9,87.12,110.86],[1744291800000,103.98,107.46,98.77,102.01],[1744378200000,101.0,101.81,96.43,101.15],[1744637400000,105.75,106.5,97.5,98.26],[1744723800000,98.66,99.79,94.56,96.46],[1744810200000,93.07,95.49,91.61,95.38],[1744896600000,94.52,96.87,93.08,96.16],[1745242200000,94.0,95.41,90.78,94.15],[1745328600000,96.24,101.9,95.4,101.66],[1745415000000,109.51,113.55,105.82,107.17],[1745501400000,106.9,112.96,106.16,112.25],[1745587800000,115.03,120.56,114.26,118.1],[1745847000000,118.58,123.0,116.3,121.21],[1745933400000,119.57,123.29,118.2,122.14],[1746019800000,113.88,116.94,108.5,116.57],[1746106200000,125.64,126.1,117.49,118.79],[1746192600000,120.25,125.39,111.62,113.83],[1746451800000,113.09,120.87,111.63,116.33],[1746538200000,113.65,114.78,108.63,109.99],[1746624600000,109.33,111.58,102.8,105.53],[1746711000000,108.25,109.66,105.2,107.83],[1746797400000,109.85,112.35,105.52,108.46],[1747056600000,114.15,114.54,109.6,111.21],[1747143000000,113.04,116.4,111.5,112.84],[1747229400000,114.72,130.11,113.8,125.32],[1747315800000,122.08,122.08,112.85,113.59],[1747402200000,117.5,117.59,110.82,113.23],[1747661400000,104.89,110.09,104.8,107.99],[1747747800000,107.35,107.99,104.47,105.64],[1747834200000,103.09,103.5,94.89,95.85],[1747920600000,97.29,100.45,95.7,98.32],[1748007000000,95.83,102.26,95.23,100.76],[1748352600000,103.0,104.91,99.14,104.62],[1748439000000,104.94,106.71,103.09,105.43],[1748525400000,108.19,113.8,107.59,109.03],[1748611800000,107.31,112.62,106.34,112.35],[1748871000000,109.16,113.66,109.16,112.11],[1748957400000,112.46,115.39,109.92,110.86],[1749043800000,110.87,119.69,110.87,118.21],[1749130200000,118.76,119.23,111.85,112.24],[1749216600000,113.63,121.29,112.77,121.29],[1749475800000,119.65,121.98,116.38,117.53],[1749562200000,116.2,119.15,115.26,117.09],[1749648600000,117.4,120.62,114.45,115.03],[1749735000000,113.02,118.12,110.85,116.2],[1749821400000,112.3,120.3,112.3,118.18],[1750080600000,121.43,126.59,121.43,126.2],[1750167000000,133.65,146.16,132.41,133.84],[1750253400000,132.32,143.89,132.25,141.16],[1750426200000,141.51,148.0,138.1,139.15],[1750685400000,135.77,141.67,133.28,134.14],[1750771800000,136.35,143.77,136.03,140.79],[1750858200000,150.91,153.94,141.44,141.68],[1750944600000,145.1,147.0,140.75,143.95],[1751031000000,143.51,145.5,139.26,143.01],[1751290200000,148.08,155.0,146.78,150.57],[1751376600000,151.82,156.37,146.55,152.23],[1751463000000,152.0,164.55,151.8,159.34],[1751549400000,159.0,160.99,155.4,157.03],[1751895000000,154.95,155.39,149.56,153.37],[1751981400000,155.2,155.85,145.2,145.96],[1752067800000,147.31,147.95,141.3,145.65],[1752154200000,148.73,148.8,141.28,143.0],[1752240600000,141.64,147.4,141.3,145.59],[1752499800000,146.0,150.39,145.3,146.38],[1752586200000,147.29,148.05,142.9,144.8],[1752672600000,144.95,146.19,138.3,144.31],[1752759000000,144.3,147.05,140.89,142.52],[1752845400000,142.51,149.09,138.11,148.24],[1753104600000,145.02,149.73,144.41,146.29],[1753191000000,145.4,147.8,138.6,145.8],[1753277400000,147.97,152.25,144.32,146.1],[1753363800000,147.85,150.75,142.9,148.13],[1753450200000,149.94,152.78,147.9,149.66],[1753709400000,150.84,153.2,147.55,151.6],[1753795800000,151.55,152.0,141.6,144.85],[1753882200000,145.72,150.38,144.09,149.33],[1753968600000,160.88,162.88,154.83,160.59],[1754055000000,182.0,196.68,177.77,188.64],[1754314200000,191.7,203.73,188.98,201.76],[1754400600000,198.67,208.68,197.51,199.09],[1754487000000,199.01,212.98,198.75,212.81],[1754573400000,215.74,217.3,205.72,211.82],[1754659800000,211.85,219.0,208.85,215.44],[1754919000000,215.23,225.35,211.8,220.75],[1755005400000,221.18,229.45,220.69,224.02],[1755091800000,225.92,237.35,224.3,234.77],[1755178200000,229.96,244.85,229.96,243.47],[1755264600000,242.57,248.01,235.79,246.5],[1755523800000,245.63,253.14,237.54,241.76],[1755610200000,238.22,238.84,225.5,228.18],[1755696600000,221.5,225.03,205.37,218.37],[1755783000000,217.44,221.73,215.1,218.65],[1755869400000,215.0,230.25,214.1,217.31],[1756128600000,214.27,222.47,212.57,219.73],[1756215000000,218.84,220.5,214.99,219.43],[1756301400000,220.97,226.67,208.24,211.1],[1756387800000,212.8,227.0,212.4,225.54],[1756474200000,225.54,227.9,219.62,225.08],[1756819800000,219.98,223.44,213.15,220.06],[1756906200000,226.28,239.37,218.7,223.14],[1756992600000,225.0,234.38,223.5,232.11],[1757079000000,234.0,241.18,230.24,240.0],[1757338200000,245.09,246.99,229.86,229.98],[1757424600000,235.35,240.3,232.05,240.2],[1757511000000,245.14,261.13,244.85,259.03],[1757597400000,260.57,266.64,257.45,260.54],[1757683800000,262.22,266.15,251.19,254.29],[1757943000000,256.66,265.54,255.42,263.64],[1758029400000,265.08,268.15,260.5,266.66],[1758115800000,263.1,270.36,249.22,266.47],[1758202200000,271.99,282.95,269.92,270.71],[1758288600000,270.5,271.99,251.5,264.48],[1758547800000,257.45,262.99,253.34,257.56],[1758634200000,255.57,255.78,235.85,237.45],[1758720600000,241.51,244.0,234.89,235.69],[1758807000000,228.15,236.52,223.5,232.75],[1758893400000,234.08,240.61,231.24,240.11],[1759152600000,244.8,246.43,239.3,241.98],[1759239000000,240.34,240.99,225.09,229.99],[1759325400000,213.0,218.32,202.26,202.6],[1759411800000,206.85,209.0,198.8,200.92],[1759498200000,212.02,213.38,205.41,207.2],[1759757400000,207.3,211.15,198.87,203.63],[1759843800000,206.24,209.74,202.51,205.92],[1759930200000,206.23,206.23,195.01,202.29],[1760016600000,203.25,212.34,199.38,211.7],[1760103000000,214.4,214.4,198.0,198.55],[1760362200000,201.89,204.71,197.85,203.68],[1760448600000,199.93,205.52,194.77,196.35],[1760535000000,201.36,203.86,196.8,200.76],[1760621400000,202.54,203.88,196.0,198.97],[1760707800000,195.16,200.6,189.02,194.95],[1760967000000,201.0,211.11,200.65,202.48],[1761053400000,207.52,208.0,203.01,205.71],[1761139800000,204.03,205.0,191.28,197.05],[1761226200000,201.0,205.32,200.37,200.82],[1761312600000,206.02,215.94,205.12,214.2],[1761571800000,219.7,224.75,216.54,219.24],[1761658200000,222.22,222.22,212.75,212.97],[1761744600000,211.27,214.13,204.75,210.77],[1761831000000,209.41,209.47,193.81,194.42],[1761917400000,219.2,230.97,208.41,208.95],[1762180200000,211.06,214.25,199.11,204.98],[1762266600000,199.19,199.69,187.4,187.77],[1762353000000,187.78,199.3,186.36,196.27],[1762439400000,195.99,196.7,182.74,183.64],[1762525800000,178.0,195.16,173.56,194.58],[1762785000000,200.03,208.28,198.34,204.19],[1762871400000,201.94,211.08,201.34,208.21],[1762957800000,208.85,213.0,200.08,202.82],[1763044200000,201.77,201.96,185.44,189.42],[1763130600000,186.4,198.59,183.8,193.31],[1763389800000,191.34,194.34,185.25,187.55],[1763476200000,184.18,189.5,180.89,185.69],[1763562600000,185.69,192.45,185.21,187.78],[1763649000000,192.96,195.48,178.24,181.88],[1763735400000,185.04,190.15,180.01,183.48],[1763994600000,186.6,195.69,184.78,195.0],[1764081000000,198.0,219.8,196.57,218.48],[1764167400000,216.0,220.76,207.29,207.56],[1764340200000,209.15,218.0,207.34,216.47],[1764599400000,211.72,226.25,211.5,223.4],[1764685800000,224.69,231.51,221.72,222.76],[1764772200000,222.66,225.82,220.0,220.84],[1764858600000,222.19,225.87,215.0,222.75],[1764945000000,225.15,237.59,224.18,234.11],[1765204200000,230.0,238.2,225.26,236.95],[1765290600000,230.85,237.5,229.55,236.11],[1765377000000,235.3,240.18,231.47,238.11],[1765463400000,235.54,238.0,227.3,233.54],[1765549800000,233.06,237.4,222.85,224.78],[1765809000000,222.04,225.77,213.35,218.5],[1765895400000,215.26,224.63,215.26,224.0],[1765981800000,226.83,235.42,226.83,227.34],[1766068200000,232.82,246.15,229.45,231.34],[1766154600000,235.85,239.44,230.99,233.19],[1766413800000,235.95,240.49,230.3,233.15],[1766500200000,231.53,237.5,225.45,225.82],[1766586600000,225.77,228.4,222.79,225.85],[1766759400000,225.79,226.22,220.26,225.77],[1767018600000,225.15,236.0,223.91,234.65],[1767105000000,235.92,236.93,229.08,233.36],[1767191400000,232.24,233.71,227.5,229.87],[1767364200000,232.18,242.87,228.15,241.89],[1767623400000,248.84,250.0,241.0,244.05],[1767709800000,248.21,254.78,242.15,253.81],[1767796200000,252.0,260.5,251.05,255.5],[1767882600000,255.34,259.55,248.1,253.95],[1767969000000,257.67,263.5,235.01,244.56],[1768228200000,244.72,251.87,240.61,244.02],[1768314600000,246.22,263.33,246.1,258.93],[1768401000000,258.8,258.8,246.85,252.38],[1768487400000,250.09,251.0,225.25,228.75],[1768573800000,228.5,236.5,222.85,231.01],[1768919400000,220.12,228.98,217.34,225.36],[1769005800000,224.49,224.93,208.5,210.13],[1769092200000,214.0,216.0,209.78,214.54],[1769178600000,212.6,220.82,209.0,218.88],[1769437800000,216.64,222.65,212.63,213.63],[1769524200000,203.14,204.56,193.11,196.3],[1769610600000,195.0,199.05,189.53,193.14],[1769697000000,200.0,201.12,188.65,190.05],[1769783400000,188.24,190.47,180.0,180.27],[1770042600000,180.0,184.35,176.14,177.15],[1770129000000,178.4,179.01,161.71,165.41],[1770215400000,162.51,163.26,146.35,152.69],[1770301800000,151.01,155.34,148.5,151.05],[1770388200000,161.53,164.4,137.02,139.83],[1770647400000,139.39,145.94,136.61,141.74],[1770733800000,145.06,152.44,143.51,149.98],[1770820200000,148.86,152.44,137.25,139.29],[1770906600000,138.45,138.45,127.71,131.07],[1770993000000,141.85,141.85,135.37,139.65],[1771338600000,138.2,143.92,135.85,139.23],[1771425000000,140.9,148.18,139.26,147.46],[1771511400000,146.08,147.4,141.8,146.13],[1771597800000,144.4,151.25,143.39,150.17],[1771857000000,148.42,150.94,140.34,142.46],[1771943400000,142.93,147.5,141.09,142.08],[1772029800000,143.4,150.51,141.05,149.67],[1772116200000,148.38,156.39,146.48,151.25],[1772202600000,149.51,150.45,143.05,145.81],[1772461800000,142.25,147.5,141.53,147.11],[1772548200000,141.88,146.51,137.5,145.69],[1772634600000,146.59,149.85,144.35,147.29],[1772721000000,146.97,153.78,142.3,144.34],[1772807400000,142.0,142.33,137.9,139.39],[1773063000000,136.75,139.39,132.41,138.86],[1773149400000,141.88,142.46,133.8,134.13],[1773235800000,135.05,137.97,133.28,137.12],[1773322200000,135.59,139.79,131.5,132.25],[1773408600000,133.67,136.98,131.31,132.36],[1773667800000,133.97,140.08,133.18,140.0],[1773754200000,140.02,147.45,140.0,144.33],[1773840600000,144.01,146.75,142.04,142.79],[1773927000000,138.75,142.27,135.33,138.12],[1774013400000,139.0,143.85,135.68,139.85],[1774272600000,140.0,144.19,138.7,140.96],[1774359000000,139.7,141.24,134.59,136.12],[1774445400000,139.0,143.22,138.43,139.63],[1774531800000,135.49,137.52,124.0,127.26],[1774618200000,125.04,125.51,120.5,121.84],[1774877400000,122.5,126.38,119.27,124.13],[1774963800000,126.06,135.9,125.12,134.65],[1775050200000,136.38,139.34,133.25,136.18],[1775136600000,129.67,137.12,128.63,136.0],[1775482200000,138.46,140.55,136.22,138.34],[1775568600000,137.5,141.27,136.35,141.14],[1775655000000,151.59,154.77,143.86,145.0],[1775741400000,144.54,145.17,135.0,138.38],[1775827800000,141.05,142.3,135.99,139.73],[1776087000000,138.97,149.45,138.81,149.35],[1776173400000,152.61,156.5,151.78,154.54],[1776259800000,156.78,160.38,155.33,158.48],[1776346200000,163.11,164.0,157.01,162.45],[1776432600000,165.51,168.7,161.36,163.8],[1776691800000,162.15,166.79,161.01,166.28],[1776778200000,166.5,167.92,156.09,156.82],[1776864600000,161.38,164.41,158.95,164.31],[1776951000000,162.3,162.3,151.22,152.96],[1777037400000,154.3,154.93,150.55,154.89],[1777296600000,154.38,163.15,154.05,160.21],[1777383000000,153.02,153.73,146.55,147.93],[1777469400000,146.0,148.78,143.09,147.75],[1777555800000,146.85,150.2,143.39,147.23],[1777642200000,165.51,173.0,156.49,166.48],[1777901400000,170.08,175.29,164.65,169.07],[1777987800000,171.0,177.13,167.62,171.63],[1778074200000,172.02,172.65,162.55,166.56],[1778160600000,168.5,169.1,159.6,163.95],[1778247000000,162.62,162.9,155.21,155.8],[1778506200000,153.5,162.45,153.5,159.51],[1778592600000,159.3,161.04,150.32,152.35],[1778679000000,152.0,154.7,148.5,154.12],[1778765400000,155.77,157.23,149.03,156.31],[1778851800000,153.55,159.16,153.14,158.17],[1779111000000,157.0,160.98,153.57,159.11],[1779197400000,158.23,161.49,154.15,154.88],[1779283800000,154.02,154.76,143.91,146.72],[1779370200000,144.31,153.45,144.1,150.04],[1779456600000,145.23,145.79,140.67,141.67]],"v":[[1716471000000,3289600],[1716557400000,2019800],[1716903000000,3536900],[1716989400000,1320000],[1717075800000,1857800],[1717162200000,2036800],[1717421400000,2573100],[1717507800000,1291000],[1717594200000,3030000],[1717680600000,3375200],[1717767000000,3414000],[1718026200000,1456800],[1718112600000,2024100],[1718199000000,6825700],[1718285400000,2874500],[1718371800000,2454900],[1718631000000,2097100],[1718717400000,2213100],[1718890200000,3372100],[1718976600000,4440000],[1719235800000,1789200],[1719322200000,2819000],[1719408600000,3828400],[1719495000000,1704800],[1719581400000,1921900],[1719840600000,3609100],[1719927000000,6089600],[1720013400000,2718100],[1720186200000,2587200],[1720445400000,2191100],[1720531800000,2879900],[1720618200000,2156100],[1720704600000,2170300],[1720791000000,3512600],[1721050200000,2782800],[1721136600000,4589300],[1721223000000,3319000],[1721309400000,2064100],[1721395800000,1997300],[1721655000000,3644800],[1721741400000,2486500],[1721827800000,2869100],[1721914200000,2644500],[1722000600000,2044300],[1722259800000,2202900],[1722346200000,2211200],[1722432600000,1652100],[1722519000000,2520400],[1722605400000,3254200],[1722864600000,3078900],[1722951000000,6498300],[1723037400000,7772200],[1723123800000,5653300],[1723210200000,14509800],[1723469400000,3398000],[1723555800000,3967800],[1723642200000,3874000],[1723728600000,4841800],[1723815000000,3005700],[1724074200000,4487400],[1724160600000,4206300],[1724247000000,4179400],[1724333400000,3939000],[1724419800000,5286700],[1724679000000,2555700],[1724765400000,3716300],[1724851800000,4033100],[1724938200000,5040100],[1725024600000,4152500],[1725370200000,3016000],[1725456600000,2772100],[1725543000000,2699600],[1725629400000,3074500],[1725888600000,4540600],[1725975000000,2615600],[1726061400000,3466500],[1726147800000,4783600],[1726234200000,3726000],[1726493400000,2683800],[1726579800000,3824400],[1726666200000,4688400],[1726752600000,5105700],[1726839000000,8518300],[1727098200000,3645600],[1727184600000,4444900],[1727271000000,4321100],[1727357400000,4310300],[1727443800000,3922300],[1727703000000,3558300],[1727789400000,3150500],[1727875800000,3992000],[1727962200000,4120300],[1728048600000,7415600],[1728307800000,2811200],[1728394200000,2494700],[1728480600000,5019000],[1728567000000,3974100],[1728653400000,5076300],[1728912600000,5488800],[1728999000000,5701300],[1729085400000,4455200],[1729171800000,3074900],[1729258200000,5428500],[1729517400000,3750600],[1729603800000,3285000],[1729690200000,4083700],[1729776600000,2174100],[1729863000000,3889100],[1730122200000,6567500],[1730208600000,12718700],[1730295000000,37764600],[1730381400000,17033500],[1730467800000,12024700],[1730730600000,7719300],[1730817000000,10831200],[1730903400000,6506100],[1730989800000,7756000],[1731076200000,4402000],[1731335400000,5711400],[1731421800000,5247900],[1731508200000,4567400],[1731594600000,2667700],[1731681000000,4605100],[1731940200000,4314500],[1732026600000,6889200],[1732113000000,5497900],[1732199400000,12275500],[1732285800000,18665500],[1732545000000,8403900],[1732631400000,7697100],[1732717800000,5531000],[1732890600000,2105900],[1733149800000,3263200],[1733236200000,5966700],[1733322600000,6568500],[1733409000000,4500200],[1733495400000,7910700],[1733754600000,16640800],[1733841000000,10972800],[1733927400000,5981900],[1734013800000,4024700],[1734100200000,4893300],[1734359400000,8934900],[1734445800000,6894500],[1734532200000,7792800],[1734618600000,4761600],[1734705000000,7705600],[1734964200000,3728900],[1735050600000,2098700],[1735223400000,2442200],[1735309800000,2606100],[1735569000000,7541100],[1735655400000,3438500],[1735828200000,4076500],[1735914600000,9436000],[1736173800000,5416400],[1736260200000,4201100],[1736346600000,4202600],[1736519400000,4003800],[1736778600000,4368200],[1736865000000,4914000],[1736951400000,5164800],[1737037800000,3341600],[1737124200000,3375500],[1737469800000,7475500],[1737556200000,4999400],[1737642600000,3568400],[1737729000000,3923200],[1737988200000,4068600],[1738074600000,5422800],[1738161000000,5863400],[1738247400000,4168900],[1738333800000,3241400],[1738593000000,3611100],[1738679400000,5509400],[1738765800000,3563600],[1738852200000,6409300],[1738938600000,5448000],[1739197800000,4314800],[1739284200000,6210500],[1739370600000,11245500],[1739457000000,21066700],[1739543400000,8424900],[1739889000000,9020200],[1739975400000,4444100],[1740061800000,10625800],[1740148200000,9939000],[1740407400000,7908200],[1740493800000,6115800],[1740580200000,6341100],[1740666600000,5342600],[1740753000000,9356900],[1741012200000,7176800],[1741098600000,7780700],[1741185000000,4355900],[1741271400000,5336000],[1741357800000,13834900],[1741613400000,20956700],[1741699800000,14629600],[1741786200000,11368700],[1741872600000,7288600],[1741959000000,6818900],[1742218200000,19261700],[1742304600000,13232200],[1742391000000,9529600],[1742477400000,7803400],[1742563800000,7987100],[1742823000000,9012100],[1742909400000,5815600],[1742995800000,4849600],[1743082200000,6775400],[1743168600000,8001900],[1743427800000,9511600],[1743514200000,6568200],[1743600600000,10073500],[1743687000000,11840700],[1743773400000,13290300],[1744032600000,11772300],[1744119000000,9633600],[1744205400000,13906500],[1744291800000,7351300],[1744378200000,4217600],[1744637400000,3943400],[1744723800000,4061700],[1744810200000,3685300],[1744896600000,2858300],[1745242200000,3090800],[1745328600000,5108800],[1745415000000,5873700],[1745501400000,4141100],[1745587800000,8702700],[1745847000000,8891400],[1745933400000,3767000],[1746019800000,8008400],[1746106200000,14328200],[1746192600000,29599200],[1746451800000,11529500],[1746538200000,8954700],[1746624600000,9200200],[1746711000000,5759000],[1746797400000,4836100],[1747056600000,7070500],[1747143000000,6684800],[1747229400000,20753500],[1747315800000,13711000],[1747402200000,8627000],[1747661400000,10494200],[1747747800000,7178300],[1747834200000,17448200],[1747920600000,8522900],[1748007000000,6753500],[1748352600000,6944400],[1748439000000,5399900],[1748525400000,10689400],[1748611800000,7555500],[1748871000000,4539400],[1748957400000,5462500],[1749043800000,8683400],[1749130200000,6172500],[1749216600000,6773400],[1749475800000,5636100],[1749562200000,5631200],[1749648600000,5988200],[1749735000000,4824400],[1749821400000,6509200],[1750080600000,8405100],[1750167000000,23521800],[1750253400000,12180700],[1750426200000,8787300],[1750685400000,7057600],[1750771800000,6547800],[1750858200000,9090200],[1750944600000,6587100],[1751031000000,17684800],[1751290200000,9904700],[1751376600000,8713500],[1751463000000,11005400],[1751549400000,4041200],[1751895000000,6308100],[1751981400000,7055500],[1752067800000,4609600],[1752154200000,3933500],[1752240600000,3686200],[1752499800000,4438700],[1752586200000,4426500],[1752672600000,5849800],[1752759000000,4454700],[1752845400000,6405900],[1753104600000,5134900],[1753191000000,5183100],[1753277400000,5664400],[1753363800000,5460500],[1753450200000,4505600],[1753709400000,4008700],[1753795800000,6464100],[1753882200000,5280700],[1753968600000,19988900],[1754055000000,27258300],[1754314200000,15113300],[1754400600000,10585100],[1754487000000,8279400],[1754573400000,6074500],[1754659800000,4727000],[1754919000000,5563400],[1755005400000,4742400],[1755091800000,7467000],[1755178200000,7579700],[1755264600000,6434000],[1755523800000,6933800],[1755610200000,8655700],[1755696600000,13073400],[1755783000000,4002400],[1755869400000,7640600],[1756128600000,4580600],[1756215000000,5316200],[1756301400000,4906100],[1756387800000,5147000],[1756474200000,3922300],[1756819800000,4640000],[1756906200000,8426800],[1756992600000,4270000],[1757079000000,5567600],[1757338200000,5949200],[1757424600000,3655900],[1757511000000,7445800],[1757597400000,3726900],[1757683800000,3683700],[1757943000000,4584300],[1758029400000,3671300],[1758115800000,10028700],[1758202200000,6843900],[1758288600000,11586100],[1758547800000,5281200],[1758634200000,8042200],[1758720600000,4821600],[1758807000000,4646100],[1758893400000,3280300],[1759152600000,3784600],[1759239000000,4885400],[1759325400000,15774000],[1759411800000,7759200],[1759498200000,8463200],[1759757400000,4985100],[1759843800000,3706700],[1759930200000,6644100],[1760016600000,5196400],[1760103000000,5569000],[1760362200000,2942300],[1760448600000,3826500],[1760535000000,2697400],[1760621400000,3036100],[1760707800000,4531500],[1760967000000,6315000],[1761053400000,4186000],[1761139800000,5863500],[1761226200000,2798200],[1761312600000,6280400],[1761571800000,4888200],[1761658200000,4565000],[1761744600000,4374600],[1761831000000,12953300],[1761917400000,17708300],[1762180200000,8198700],[1762266600000,8202400],[1762353000000,5074600],[1762439400000,4918900],[1762525800000,6446700],[1762785000000,4657100],[1762871400000,3861800],[1762957800000,3168000],[1763044200000,5213300],[1763130600000,4284900],[1763389800000,2598400],[1763476200000,3722300],[1763562600000,2728500],[1763649000000,5161300],[1763735400000,4009200],[1763994600000,5268000],[1764081000000,7751500],[1764167400000,4680900],[1764340200000,2388700],[1764599400000,4819800],[1764685800000,3445300],[1764772200000,2706100],[1764858600000,3493500],[1764945000000,6141300],[1765204200000,3685800],[1765290600000,2791600],[1765377000000,3816600],[1765463400000,4386000],[1765549800000,4932200],[1765809000000,5415800],[1765895400000,4332200],[1765981800000,5721800],[1766068200000,6060400],[1766154600000,5942900],[1766413800000,4042000],[1766500200000,3487700],[1766586600000,982600],[1766759400000,1904000],[1767018600000,3901200],[1767105000000,2489800],[1767191400000,2149100],[1767364200000,3547100],[1767623400000,3365200],[1767709800000,4159900],[1767796200000,3002300],[1767882600000,3015200],[1767969000000,5542500],[1768228200000,2595300],[1768314600000,4516300],[1768401000000,4829900],[1768487400000,10876300],[1768573800000,5450400],[1768919400000,3748000],[1769005800000,5204300],[1769092200000,2708200],[1769178600000,2612800],[1769437800000,2621500],[1769524200000,7123100],[1769610600000,4372400],[1769697000000,3936200],[1769783400000,4248200],[1770042600000,5887600],[1770129000000,6876700],[1770215400000,9451400],[1770301800000,11083900],[1770388200000,22081600],[1770647400000,8487300],[1770733800000,9003200],[1770820200000,8409700],[1770906600000,8703500],[1770993000000,7462400],[1771338600000,5470600],[1771425000000,5965900],[1771511400000,4097100],[1771597800000,7636900],[1771857000000,4529900],[1771943400000,4012700],[1772029800000,4499400],[1772116200000,4908800],[1772202600000,4747700],[1772461800000,3473100],[1772548200000,4480500],[1772634600000,5053300],[1772721000000,6249900],[1772807400000,5084000],[1773063000000,7991100],[1773149400000,6156800],[1773235800000,5087300],[1773322200000,3330300],[1773408600000,3049100],[1773667800000,4488700],[1773754200000,6424800],[1773840600000,4155900],[1773927000000,4878300],[1774013400000,6532900],[1774272600000,3514700],[1774359000000,3471900],[1774445400000,3192800],[1774531800000,8196900],[1774618200000,5776500],[1774877400000,4487500],[1774963800000,5443800],[1775050200000,3932000],[1775136600000,3077700],[1775482200000,3208700],[1775568600000,2340500],[1775655000000,3995800],[1775741400000,5076500],[1775827800000,3259500],[1776087000000,3638900],[1776173400000,4453100],[1776259800000,4173900],[1776346200000,4032300],[1776432600000,4068600],[1776691800000,3055100],[1776778200000,4777200],[1776864600000,2890100],[1776951000000,3707900],[1777037400000,3242200],[1777296600000,3311700],[1777383000000,5156300],[1777469400000,3373200],[1777555800000,9383400],[1777642200000,14252200],[1777901400000,6092000],[1777987800000,7080600],[1778074200000,7179800],[1778160600000,5444700],[1778247000000,5779000],[1778506200000,5077700],[1778592600000,4698100],[1778679000000,4151100],[1778765400000,3266000],[1778851800000,3340000],[1779111000000,3457200],[1779197400000,4080700],[1779283800000,10395700],[1779370200000,3494500],[1779456600000,7830800]],"s50":[[1722864600000,62.89],[1722951000000,62.9],[1723037400000,62.82],[1723123800000,62.75],[1723210200000,62.65],[1723469400000,62.58],[1723555800000,62.58],[1723642200000,62.56],[1723728600000,62.59],[1723815000000,62.48],[1724074200000,62.3],[1724160600000,62.2],[1724247000000,62.15],[1724333400000,62.05],[1724419800000,61.91],[1724679000000,61.8],[1724765400000,61.76],[1724851800000,61.68],[1724938200000,61.65],[1725024600000,61.7],[1725370200000,61.7],[1725456600000,61.71],[1725543000000,61.66],[1725629400000,61.53],[1725888600000,61.4],[1725975000000,61.26],[1726061400000,61.13],[1726147800000,60.85],[1726234200000,60.56],[1726493400000,60.28],[1726579800000,60.06],[1726666200000,59.93],[1726752600000,59.83],[1726839000000,59.75],[1727098200000,59.57],[1727184600000,59.45],[1727271000000,59.4],[1727357400000,59.42],[1727443800000,59.45],[1727703000000,59.47],[1727789400000,59.43],[1727875800000,59.43],[1727962200000,59.52],[1728048600000,59.72],[1728307800000,59.89],[1728394200000,60.1],[1728480600000,60.35],[1728567000000,60.53],[1728653400000,60.81],[1728912600000,61.16],[1728999000000,61.52],[1729085400000,61.98],[1729171800000,62.49],[1729258200000,63.01],[1729517400000,63.53],[1729603800000,64.02],[1729690200000,64.49],[1729776600000,64.96],[1729863000000,65.47],[1730122200000,65.97],[1730208600000,66.52],[1730295000000,67.74],[1730381400000,68.99],[1730467800000,70.12],[1730730600000,71.11],[1730817000000,72.4],[1730903400000,73.64],[1730989800000,75.15],[1731076200000,76.67],[1731335400000,78.05],[1731421800000,79.46],[1731508200000,80.96],[1731594600000,82.42],[1731681000000,83.78],[1731940200000,85.22],[1732026600000,86.83],[1732113000000,88.35],[1732199400000,90.32],[1732285800000,92.07],[1732545000000,93.73],[1732631400000,95.2],[1732717800000,96.73],[1732890600000,98.25],[1733149800000,99.76],[1733236200000,101.46],[1733322600000,103.2],[1733409000000,104.91],[1733495400000,106.83],[1733754600000,108.83],[1733841000000,110.63],[1733927400000,112.63],[1734013800000,114.55],[1734100200000,116.65],[1734359400000,118.77],[1734445800000,120.73],[1734532200000,122.53],[1734618600000,124.39],[1734705000000,126.4],[1734964200000,128.31],[1735050600000,130.36],[1735223400000,132.39],[1735309800000,134.32],[1735569000000,136.1],[1735655400000,137.75],[1735828200000,139.5],[1735914600000,141.51],[1736173800000,143.54],[1736260200000,145.42],[1736346600000,147.23],[1736519400000,148.98],[1736778600000,150.64],[1736865000000,151.61],[1736951400000,152.64],[1737037800000,153.88],[1737124200000,155.21],[1737469800000,156.52],[1737556200000,157.77],[1737642600000,158.78],[1737729000000,159.74],[1737988200000,160.77],[1738074600000,162.11],[1738161000000,163.51],[1738247400000,164.85],[1738333800000,166.34],[1738593000000,167.8],[1738679400000,169.36],[1738765800000,171.06],[1738852200000,172.23],[1738938600000,173.8],[1739197800000,175.46],[1739284200000,177.03],[1739370600000,178.56],[1739457000000,179.84],[1739543400000,180.94],[1739889000000,181.68],[1739975400000,182.39],[1740061800000,182.84],[1740148200000,182.91],[1740407400000,182.88],[1740493800000,182.96],[1740580200000,183.0],[1740666600000,182.93],[1740753000000,182.71],[1741012200000,182.4],[1741098600000,182.21],[1741185000000,182.36],[1741271400000,182.1],[1741357800000,181.37],[1741613400000,180.14],[1741699800000,179.05],[1741786200000,178.13],[1741872600000,177.09],[1741959000000,176.34],[1742218200000,175.58],[1742304600000,174.47],[1742391000000,173.11],[1742477400000,171.69],[1742563800000,170.56],[1742823000000,169.62],[1742909400000,168.79],[1742995800000,167.9],[1743082200000,166.81],[1743168600000,165.55],[1743427800000,164.15],[1743514200000,162.84],[1743600600000,161.27],[1743687000000,159.53],[1743773400000,157.63],[1744032600000,155.84],[1744119000000,154.0],[1744205400000,152.32],[1744291800000,150.32],[1744378200000,148.37],[1744637400000,146.34],[1744723800000,144.22],[1744810200000,141.83],[1744896600000,139.33],[1745242200000,136.88],[1745328600000,134.41],[1745415000000,132.05],[1745501400000,130.02],[1745587800000,128.06],[1745847000000,126.38],[1745933400000,124.9],[1746019800000,123.48],[1746106200000,122.07],[1746192600000,120.83],[1746451800000,119.83],[1746538200000,118.72],[1746624600000,117.63],[1746711000000,116.43],[1746797400000,115.4],[1747056600000,114.39],[1747143000000,113.4],[1747229400000,112.72],[1747315800000,111.62],[1747402200000,110.87],[1747661400000,110.35],[1747747800000,110.32],[1747834200000,109.78],[1747920600000,109.13],[1748007000000,108.72],[1748352600000,108.25],[1748439000000,107.84],[1748525400000,107.82],[1748611800000,107.87],[1748871000000,107.94],[1748957400000,107.84],[1749043800000,107.71],[1749130200000,107.44],[1749216600000,107.47],[1749475800000,107.61],[1749562200000,107.8],[1749648600000,108.0],[1749735000000,108.12],[1749821400000,108.3],[1750080600000,108.88],[1750167000000,109.82],[1750253400000,110.79],[1750426200000,111.79],[1750685400000,112.26],[1750771800000,113.03],[1750858200000,113.84],[1750944600000,114.76],[1751031000000,115.69],[1751290200000,116.79],[1751376600000,117.91],[1751463000000,119.22],[1751549400000,120.32],[1751895000000,121.25],[1751981400000,121.92],[1752067800000,122.47],[1752154200000,122.91],[1752240600000,123.38],[1752499800000,123.97],[1752586200000,124.49],[1752672600000,125.1],[1752759000000,125.63],[1752845400000,126.39],[1753104600000,127.21],[1753191000000,127.97],[1753277400000,128.72],[1753363800000,129.46],[1753450200000,130.2],[1753709400000,130.72],[1753795800000,131.35],[1753882200000,132.07],[1753968600000,133.12],[1754055000000,134.78],[1754314200000,136.9],[1754400600000,138.91],[1754487000000,141.15],[1754573400000,143.3],[1754659800000,145.5],[1754919000000,147.73],[1755005400000,149.97],[1755091800000,152.42],[1755178200000,155.07],[1755264600000,157.64],[1755523800000,160.23],[1755610200000,162.37],[1755696600000,164.38],[1755783000000,166.41],[1755869400000,168.46],[1756128600000,170.53],[1756215000000,172.56],[1756301400000,174.25],[1756387800000,176.09],[1756474200000,177.77],[1756819800000,179.38],[1756906200000,181.16],[1756992600000,182.99],[1757079000000,184.96],[1757338200000,186.68],[1757424600000,188.62],[1757511000000,190.79],[1757597400000,192.96],[1757683800000,194.86],[1757943000000,196.99],[1758029400000,199.25],[1758115800000,201.66],[1758202200000,204.16],[1758288600000,206.59],[1758547800000,208.83],[1758634200000,210.66],[1758720600000,212.47],[1758807000000,214.24],[1758893400000,216.19],[1759152600000,218.07],[1759239000000,219.74],[1759325400000,220.88],[1759411800000,221.97],[1759498200000,223.16],[1759757400000,224.24],[1759843800000,225.32],[1759930200000,226.47],[1760016600000,227.72],[1760103000000,228.48],[1760362200000,228.78],[1760448600000,228.67],[1760535000000,228.7],[1760621400000,228.43],[1760707800000,228.09],[1760967000000,227.83],[1761053400000,227.53],[1761139800000,226.99],[1761226200000,226.31],[1761312600000,225.73],[1761571800000,225.18],[1761658200000,224.6],[1761744600000,224.26],[1761831000000,223.78],[1761917400000,223.58],[1762180200000,223.34],[1762266600000,222.7],[1762353000000,222.23],[1762439400000,221.69],[1762525800000,221.07],[1762785000000,220.65],[1762871400000,220.41],[1762957800000,220.0],[1763044200000,219.15],[1763130600000,218.22],[1763389800000,217.37],[1763476200000,216.28],[1763562600000,214.85],[1763649000000,213.28],[1763735400000,211.86],[1763994600000,210.49],[1764081000000,209.53],[1764167400000,208.35],[1764340200000,207.26],[1764599400000,206.44],[1764685800000,205.75],[1764772200000,205.41],[1764858600000,205.16],[1764945000000,205.18],[1765204200000,205.12],[1765290600000,205.0],[1765377000000,205.16],[1765463400000,205.78],[1765549800000,206.26],[1765809000000,206.49],[1765895400000,206.89],[1765981800000,207.32],[1766068200000,207.9],[1766154600000,208.33],[1766413800000,209.03],[1766500200000,209.47],[1766586600000,210.06],[1766759400000,210.56],[1767018600000,211.27],[1767105000000,212.04],[1767191400000,212.59],[1767364200000,213.31],[1767623400000,214.25],[1767709800000,215.31],[1767796200000,216.14],[1767882600000,216.83],[1767969000000,217.46],[1768228200000,218.13],[1768314600000,219.42],[1768401000000,220.29],[1768487400000,220.76],[1768573800000,221.63],[1768919400000,222.21],[1769005800000,222.74],[1769092200000,223.14],[1769178600000,223.43],[1769437800000,223.54],[1769524200000,223.41],[1769610600000,223.48],[1769697000000,223.42],[1769783400000,223.27],[1770042600000,223.1],[1770129000000,222.66],[1770215400000,222.07],[1770301800000,221.42],[1770388200000,220.32],[1770647400000,218.78],[1770733800000,217.63],[1770820200000,216.09],[1770906600000,214.24],[1770993000000,212.58],[1771338600000,210.95],[1771425000000,209.44],[1771511400000,207.68],[1771597800000,205.95],[1771857000000,204.07],[1771943400000,202.15],[1772029800000,200.48],[1772116200000,199.01],[1772202600000,197.55],[1772461800000,196.01],[1772548200000,194.38],[1772634600000,192.7],[1772721000000,190.92],[1772807400000,189.05],[1773063000000,187.31],[1773149400000,185.47],[1773235800000,183.7],[1773322200000,181.65],[1773408600000,179.63],[1773667800000,177.84],[1773754200000,175.88],[1773840600000,173.86],[1773927000000,171.55],[1774013400000,169.23],[1774272600000,166.97],[1774359000000,164.8],[1774445400000,162.72],[1774531800000,160.08],[1774618200000,157.47],[1774877400000,155.38],[1774963800000,153.45],[1775050200000,151.67],[1775136600000,150.19],[1775482200000,148.66],[1775568600000,147.11],[1775655000000,145.74],[1775741400000,144.58],[1775827800000,143.51],[1776087000000,142.69],[1776173400000,142.18],[1776259800000,141.81],[1776346200000,141.75],[1776432600000,141.97],[1776691800000,142.27],[1776778200000,142.61],[1776864600000,143.07],[1776951000000,143.12],[1777037400000,143.44],[1777296600000,144.02],[1777383000000,144.19],[1777469400000,144.36],[1777555800000,144.35],[1777642200000,144.76],[1777901400000,145.14],[1777987800000,145.72],[1778074200000,146.21],[1778160600000,146.49],[1778247000000,146.59],[1778506200000,146.86],[1778592600000,146.96],[1778679000000,147.13],[1778765400000,147.31],[1778851800000,147.59],[1779111000000,147.98],[1779197400000,148.31],[1779283800000,148.56],[1779370200000,148.82],[1779456600000,149.0]],"s200":[[1741786200000,108.73],[1741872600000,109.07],[1741959000000,109.44],[1742218200000,109.77],[1742304600000,110.04],[1742391000000,110.3],[1742477400000,110.58],[1742563800000,110.88],[1742823000000,111.23],[1742909400000,111.55],[1742995800000,111.84],[1743082200000,112.09],[1743168600000,112.33],[1743427800000,112.55],[1743514200000,112.77],[1743600600000,113.0],[1743687000000,113.18],[1743773400000,113.31],[1744032600000,113.47],[1744119000000,113.63],[1744205400000,113.9],[1744291800000,114.13],[1744378200000,114.32],[1744637400000,114.5],[1744723800000,114.66],[1744810200000,114.82],[1744896600000,114.97],[1745242200000,115.07],[1745328600000,115.21],[1745415000000,115.38],[1745501400000,115.58],[1745587800000,115.82],[1745847000000,116.08],[1745933400000,116.33],[1746019800000,116.55],[1746106200000,116.78],[1746192600000,116.99],[1746451800000,117.25],[1746538200000,117.47],[1746624600000,117.67],[1746711000000,117.87],[1746797400000,118.08],[1747056600000,118.32],[1747143000000,118.57],[1747229400000,118.89],[1747315800000,119.15],[1747402200000,119.43],[1747661400000,119.66],[1747747800000,119.9],[1747834200000,120.09],[1747920600000,120.29],[1748007000000,120.53],[1748352600000,120.8],[1748439000000,121.05],[1748525400000,121.33],[1748611800000,121.63],[1748871000000,121.92],[1748957400000,122.2],[1749043800000,122.51],[1749130200000,122.8],[1749216600000,123.13],[1749475800000,123.44],[1749562200000,123.74],[1749648600000,124.04],[1749735000000,124.32],[1749821400000,124.62],[1750080600000,124.96],[1750167000000,125.35],[1750253400000,125.76],[1750426200000,126.15],[1750685400000,126.54],[1750771800000,126.96],[1750858200000,127.37],[1750944600000,127.81],[1751031000000,128.23],[1751290200000,128.7],[1751376600000,129.16],[1751463000000,129.66],[1751549400000,130.15],[1751895000000,130.62],[1751981400000,131.04],[1752067800000,131.45],[1752154200000,131.85],[1752240600000,132.24],[1752499800000,132.65],[1752586200000,133.04],[1752672600000,133.42],[1752759000000,133.8],[1752845400000,134.21],[1753104600000,134.61],[1753191000000,135.01],[1753277400000,135.4],[1753363800000,135.8],[1753450200000,136.19],[1753709400000,136.59],[1753795800000,136.97],[1753882200000,137.36],[1753968600000,137.81],[1754055000000,138.39],[1754314200000,139.02],[1754400600000,139.64],[1754487000000,140.32],[1754573400000,141.0],[1754659800000,141.67],[1754919000000,142.38],[1755005400000,143.11],[1755091800000,143.9],[1755178200000,144.72],[1755264600000,145.55],[1755523800000,146.36],[1755610200000,147.09],[1755696600000,147.6],[1755783000000,148.1],[1755869400000,148.62],[1756128600000,149.18],[1756215000000,149.66],[1756301400000,150.11],[1756387800000,150.58],[1756474200000,151.03],[1756819800000,151.49],[1756906200000,151.96],[1756992600000,152.46],[1757079000000,153.0],[1757338200000,153.53],[1757424600000,154.08],[1757511000000,154.69],[1757597400000,155.31],[1757683800000,155.8],[1757943000000,156.38],[1758029400000,157.0],[1758115800000,157.66],[1758202200000,158.31],[1758288600000,158.93],[1758547800000,159.51],[1758634200000,159.95],[1758720600000,160.36],[1758807000000,160.75],[1758893400000,161.14],[1759152600000,161.52],[1759239000000,161.89],[1759325400000,162.07],[1759411800000,162.26],[1759498200000,162.43],[1759757400000,162.56],[1759843800000,162.74],[1759930200000,162.95],[1760016600000,163.19],[1760103000000,163.33],[1760362200000,163.5],[1760448600000,163.6],[1760535000000,163.72],[1760621400000,163.85],[1760707800000,163.99],[1760967000000,164.19],[1761053400000,164.39],[1761139800000,164.48],[1761226200000,164.59],[1761312600000,164.8],[1761571800000,165.04],[1761658200000,165.27],[1761744600000,165.5],[1761831000000,165.64],[1761917400000,165.84],[1762180200000,165.99],[1762266600000,166.05],[1762353000000,166.09],[1762439400000,166.09],[1762525800000,166.15],[1762785000000,166.26],[1762871400000,166.4],[1762957800000,166.44],[1763044200000,166.37],[1763130600000,166.35],[1763389800000,166.29],[1763476200000,166.2],[1763562600000,166.07],[1763649000000,165.87],[1763735400000,165.7],[1763994600000,165.55],[1764081000000,165.52],[1764167400000,165.49],[1764340200000,165.49],[1764599400000,165.58],[1764685800000,165.71],[1764772200000,165.88],[1764858600000,166.05],[1764945000000,166.34],[1765204200000,166.69],[1765290600000,167.05],[1765377000000,167.44],[1765463400000,167.76],[1765549800000,168.09],[1765809000000,168.37],[1765895400000,168.68],[1765981800000,169.02],[1766068200000,169.34],[1766154600000,169.75],[1766413800000,170.24],[1766500200000,170.84],[1766586600000,171.35],[1766759400000,171.83],[1767018600000,172.39],[1767105000000,172.92],[1767191400000,173.44],[1767364200000,174.1],[1767623400000,174.77],[1767709800000,175.5],[1767796200000,176.19],[1767882600000,176.84],[1767969000000,177.43],[1768228200000,178.05],[1768314600000,178.8],[1768401000000,179.52],[1768487400000,180.14],[1768573800000,180.74],[1768919400000,181.32],[1769005800000,181.89],[1769092200000,182.53],[1769178600000,183.16],[1769437800000,183.78],[1769524200000,184.21],[1769610600000,184.66],[1769697000000,185.11],[1769783400000,185.52],[1770042600000,185.92],[1770129000000,186.27],[1770215400000,186.56],[1770301800000,186.84],[1770388200000,187.03],[1770647400000,187.2],[1770733800000,187.39],[1770820200000,187.5],[1770906600000,187.55],[1770993000000,187.63],[1771338600000,187.75],[1771425000000,187.89],[1771511400000,188.05],[1771597800000,188.22],[1771857000000,188.38],[1771943400000,188.57],[1772029800000,188.78],[1772116200000,188.99],[1772202600000,189.16],[1772461800000,189.33],[1772548200000,189.44],[1772634600000,189.61],[1772721000000,189.76],[1772807400000,189.92],[1773063000000,190.08],[1773149400000,190.28],[1773235800000,190.47],[1773322200000,190.63],[1773408600000,190.77],[1773667800000,190.94],[1773754200000,191.11],[1773840600000,191.27],[1773927000000,191.4],[1774013400000,191.54],[1774272600000,191.66],[1774359000000,191.78],[1774445400000,191.87],[1774531800000,191.92],[1774618200000,191.94],[1774877400000,191.98],[1774963800000,192.08],[1775050200000,192.17],[1775136600000,192.22],[1775482200000,192.24],[1775568600000,192.24],[1775655000000,192.27],[1775741400000,192.29],[1775827800000,192.28],[1776087000000,192.32],[1776173400000,192.37],[1776259800000,192.45],[1776346200000,192.51],[1776432600000,192.57],[1776691800000,192.6],[1776778200000,192.6],[1776864600000,192.66],[1776951000000,192.69],[1777037400000,192.74],[1777296600000,192.82],[1777383000000,192.84],[1777469400000,192.84],[1777555800000,192.86],[1777642200000,192.97],[1777901400000,193.1],[1777987800000,193.22],[1778074200000,193.32],[1778160600000,193.41],[1778247000000,193.46],[1778506200000,193.51],[1778592600000,193.53],[1778679000000,193.54],[1778765400000,193.6],[1778851800000,193.64],[1779111000000,193.63],[1779197400000,193.47],[1779283800000,193.19],[1779370200000,192.94],[1779456600000,192.59]]};
+const candleData = DATA.c.map(r => ({ x: r[0], o: r[1], h: r[2], l: r[3], c: r[4] }));
+const volumeData = DATA.v.map(r => ({ x: r[0], y: r[1] }));
+const sma50Data = DATA.s50.map(r => ({ x: r[0], y: r[1] }));
+const sma200Data = DATA.s200.map(r => ({ x: r[0], y: r[1] }));
+
+const cutoff6M = new Date('2025-11-23').getTime();
+const candleData6M = candleData.filter(d => d.x >= cutoff6M);
+const volumeData6M = volumeData.filter(d => d.x >= cutoff6M);
+const sma50Data6M = sma50Data.filter(d => d.x >= cutoff6M);
+const sma200Data6M = sma200Data.filter(d => d.x >= cutoff6M);
+
+const events = [
+  { ts: 1722902400000, label: 'Q2 24 earnings', color: '#F59E0B' },
+  { ts: 1739318400000, label: 'Q4 24 earnings', color: '#F59E0B' },
+  { ts: 1754006400000, label: 'Q2 25 earnings', color: '#F59E0B' },
+  { ts: 1765756800000, label: 'ATH ~$282', color: '#3B82F6' },
+  { ts: 1770249600000, label: 'Q4 25 + $1B buyback', color: '#10B981' },
+  { ts: 1770681600000, label: 'Farrell insider buy', color: '#10B981' },
+  { ts: 1777507200000, label: 'Q1 26 earnings', color: '#10B981' },
+  { ts: 1779235200000, label: 'Google I/O sell-off', color: '#EF4444' },
+];
+
+// Plugin candele 24M
+const candlePlugin = {
+  id: 'candleRenderer',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart') return;
+    const { ctx, scales: { x, y }, chartArea } = chart;
+    let candleWidth = 3;
+    if (candleData.length >= 2) {
+      const x0 = x.getPixelForValue(candleData[0].x);
+      const x1 = x.getPixelForValue(candleData[1].x);
+      candleWidth = Math.max(1.5, Math.abs(x1 - x0) * 0.7);
+    }
+    ctx.save();
+    candleData.forEach(d => {
+      const cx = x.getPixelForValue(d.x);
+      if (cx < chartArea.left - 5 || cx > chartArea.right + 5) return;
+      const yO = y.getPixelForValue(d.o);
+      const yH = y.getPixelForValue(d.h);
+      const yL = y.getPixelForValue(d.l);
+      const yC = y.getPixelForValue(d.c);
+      const bullish = d.c >= d.o;
+      const color = bullish ? '#10B981' : '#EF4444';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, yH);
+      ctx.lineTo(cx, yL);
+      ctx.stroke();
+      ctx.fillStyle = color;
+      const bodyTop = Math.min(yO, yC);
+      const bodyHeight = Math.max(1, Math.abs(yC - yO));
+      ctx.fillRect(cx - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+    });
+    ctx.restore();
+  }
+};
+
+const eventLinePlugin = {
+  id: 'eventLines',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart') return;
+    const { ctx, scales: { x }, chartArea } = chart;
+    ctx.save();
+    ctx.font = 'bold 10px -apple-system, sans-serif';
+    const sorted = events.slice().sort((a, b) => a.ts - b.ts);
+    const labelHeightPx = 16;
+    const topPadding = 8;
+    sorted.forEach((ev, idx) => {
+      const cx = x.getPixelForValue(ev.ts);
+      if (cx < chartArea.left || cx > chartArea.right) return;
+      const labelY = chartArea.top + topPadding + idx * labelHeightPx;
+      ctx.strokeStyle = ev.color;
+      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, chartArea.top);
+      ctx.lineTo(cx, chartArea.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      const textWidth = ctx.measureText(ev.label).width;
+      const wouldOverflowRight = (cx + 14 + textWidth) > chartArea.right;
+      const labelX = wouldOverflowRight ? cx - textWidth - 10 : cx + 8;
+      const bgX = wouldOverflowRight ? cx - textWidth - 13 : cx + 5;
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      if (wouldOverflowRight) {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx - 4, labelY - 3);
+      } else {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx + 4, labelY - 3);
+      }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.fillRect(bgX, labelY - 10, textWidth + 8, 14);
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(bgX, labelY - 10, textWidth + 8, 14);
+      ctx.fillStyle = ev.color;
+      ctx.fillText(ev.label, labelX, labelY);
+    });
+    ctx.restore();
+  }
+};
+
+// Plugin candele 6M (ID separato)
+const candlePlugin6M = {
+  id: 'candleRenderer6M',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart6M') return;
+    const { ctx, scales: { x, y }, chartArea } = chart;
+    let candleWidth = 4;
+    if (candleData6M.length >= 2) {
+      const x0 = x.getPixelForValue(candleData6M[0].x);
+      const x1 = x.getPixelForValue(candleData6M[1].x);
+      candleWidth = Math.max(2, Math.abs(x1 - x0) * 0.7);
+    }
+    ctx.save();
+    candleData6M.forEach(d => {
+      const cx = x.getPixelForValue(d.x);
+      if (cx < chartArea.left - 5 || cx > chartArea.right + 5) return;
+      const yO = y.getPixelForValue(d.o);
+      const yH = y.getPixelForValue(d.h);
+      const yL = y.getPixelForValue(d.l);
+      const yC = y.getPixelForValue(d.c);
+      const bullish = d.c >= d.o;
+      const color = bullish ? '#10B981' : '#EF4444';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, yH);
+      ctx.lineTo(cx, yL);
+      ctx.stroke();
+      ctx.fillStyle = color;
+      const bodyTop = Math.min(yO, yC);
+      const bodyHeight = Math.max(1, Math.abs(yC - yO));
+      ctx.fillRect(cx - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+    });
+    ctx.restore();
+  }
+};
+
+const eventLinePlugin6M = {
+  id: 'eventLines6M',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart6M') return;
+    const { ctx, scales: { x }, chartArea } = chart;
+    ctx.save();
+    ctx.font = 'bold 10px -apple-system, sans-serif';
+    const sorted = events.filter(e => e.ts >= cutoff6M).sort((a, b) => a.ts - b.ts);
+    const labelHeightPx = 16;
+    const topPadding = 8;
+    sorted.forEach((ev, idx) => {
+      const cx = x.getPixelForValue(ev.ts);
+      if (cx < chartArea.left || cx > chartArea.right) return;
+      const labelY = chartArea.top + topPadding + idx * labelHeightPx;
+      ctx.strokeStyle = ev.color;
+      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, chartArea.top);
+      ctx.lineTo(cx, chartArea.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      const textWidth = ctx.measureText(ev.label).width;
+      const wouldOverflowRight = (cx + 14 + textWidth) > chartArea.right;
+      const labelX = wouldOverflowRight ? cx - textWidth - 10 : cx + 8;
+      const bgX = wouldOverflowRight ? cx - textWidth - 13 : cx + 5;
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      if (wouldOverflowRight) {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx - 4, labelY - 3);
+      } else {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx + 4, labelY - 3);
+      }
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.fillRect(bgX, labelY - 10, textWidth + 8, 14);
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(bgX, labelY - 10, textWidth + 8, 14);
+      ctx.fillStyle = ev.color;
+      ctx.fillText(ev.label, labelX, labelY);
+    });
+    ctx.restore();
+  }
+};
+
+Chart.register(candlePlugin, eventLinePlugin, candlePlugin6M, eventLinePlugin6M);
+
+const commonScales = {
+  x: { type: 'time', time: { unit: 'month', tooltipFormat: 'MMM d, yyyy' }, ticks: { color: '#94A3B8', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: 'rgba(51,65,85,0.3)' } },
+  y: { position: 'right', ticks: { color: '#94A3B8', callback: v => '$' + v.toFixed(0), font: { size: 10 } }, grid: { color: 'rgba(51,65,85,0.3)' } }
+};
+
+// CHART 24M
+new Chart(document.getElementById('priceChart').getContext('2d'), {
+  type: 'line',
+  data: {
+    datasets: [
+      { label: 'OHLC carrier', data: candleData.map(d => ({x: d.x, y: d.c})), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, showLine: false, parsing: false },
+      { label: 'SMA 50', data: sma50Data, borderColor: '#F59E0B', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, parsing: false, tension: 0 },
+      { label: 'SMA 200', data: sma200Data, borderColor: '#3B82F6', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, parsing: false, tension: 0 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, scales: commonScales, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15,23,42,0.95)', borderColor: '#334155', borderWidth: 1 } } }
+});
+
+new Chart(document.getElementById('volumeChart').getContext('2d'), {
+  type: 'bar',
+  data: {
+    datasets: [{ data: volumeData, backgroundColor: volumeData.map((v, i) => {
+      const prev = candleData[i-1], curr = candleData[i];
+      if (!prev || !curr) return '#64748B';
+      return curr.c >= prev.c ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)';
+    }), parsing: false, borderWidth: 0 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month' }, ticks: { display: false }, grid: { display: false } }, y: { position: 'right', ticks: { color: '#94A3B8', callback: v => (v/1e6).toFixed(0) + 'M', font: { size: 10 } }, grid: { color: 'rgba(51,65,85,0.2)' } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+});
+
+// CHART 6M
+const commonScales6M = {
+  x: { type: 'time', time: { unit: 'month', tooltipFormat: 'MMM d, yyyy' }, ticks: { color: '#94A3B8', maxTicksLimit: 8, font: { size: 10 } }, grid: { color: 'rgba(51,65,85,0.3)' } },
+  y: { position: 'right', ticks: { color: '#94A3B8', callback: v => '$' + v.toFixed(0), font: { size: 10 } }, grid: { color: 'rgba(51,65,85,0.3)' } }
+};
+
+new Chart(document.getElementById('priceChart6M').getContext('2d'), {
+  type: 'line',
+  data: {
+    datasets: [
+      { label: 'OHLC carrier', data: candleData6M.map(d => ({x: d.x, y: d.c})), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, showLine: false, parsing: false },
+      { label: 'SMA 50', data: sma50Data6M, borderColor: '#F59E0B', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, parsing: false, tension: 0 },
+      { label: 'SMA 200', data: sma200Data6M, borderColor: '#3B82F6', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, parsing: false, tension: 0 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, scales: commonScales6M, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(15,23,42,0.95)', borderColor: '#334155', borderWidth: 1 } } }
+});
+
+new Chart(document.getElementById('volumeChart6M').getContext('2d'), {
+  type: 'bar',
+  data: {
+    datasets: [{ data: volumeData6M, backgroundColor: volumeData6M.map((v, i) => {
+      const prev = candleData6M[i-1], curr = candleData6M[i];
+      if (!prev || !curr) return '#64748B';
+      return curr.c >= prev.c ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)';
+    }), parsing: false, borderWidth: 0 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'month' }, ticks: { display: false }, grid: { display: false } }, y: { position: 'right', ticks: { color: '#94A3B8', callback: v => (v/1e6).toFixed(0) + 'M', font: { size: 10 } }, grid: { color: 'rgba(51,65,85,0.2)' } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+});
+</script>
 </body>
 </html>
