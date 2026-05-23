@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOW — Equity Deep Analysis | 2026-05-22</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+:root {
+  --bg: #0F172A; --surface: #1E293B; --surface-2: #131C2E; --border: #334155;
+  --text: #F1F5F9; --text-2: #94A3B8; --text-3: #64748B;
+  --green: #10B981; --red: #EF4444; --amber: #F59E0B; --blue: #3B82F6;
+  --green-bg: #064E3B; --red-bg: #7F1D1D; --amber-bg: #451A03; --blue-bg: #1E3A8A;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.55; font-size: 15px; }
+.container { max-width: 1180px; margin: 0 auto; padding: 24px; }
+
+/* Header */
+header { border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 20px; }
+.ticker-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.ticker { font-size: 38px; font-weight: 800; letter-spacing: -0.02em; }
+.company { font-size: 18px; color: var(--text-2); }
+.report-date { margin-left: auto; color: var(--text-3); font-size: 13px; }
+.price-row { display: flex; gap: 22px; margin-top: 10px; flex-wrap: wrap; font-size: 14px; }
+.price-row .item { color: var(--text-2); }
+.price-row .item b { color: var(--text); }
+.chg-pos { color: var(--green); }
+.chg-neg { color: var(--red); }
+
+/* TOC */
+nav.toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 16px; margin-bottom: 20px; font-size: 13.5px; }
+nav.toc a { color: var(--blue); text-decoration: none; margin-right: 14px; display: inline-block; padding: 3px 0; }
+nav.toc a:hover { text-decoration: underline; }
+nav.toc strong { color: var(--text-2); margin-right: 10px; }
+
+/* Dashboard */
+.dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px; margin: 18px 0 28px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 18px; }
+.card .label { font-size: 12px; color: var(--text-3); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 8px; }
+.card .value { font-size: 26px; font-weight: 700; }
+.card .sub { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+
+.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-green { background: var(--green-bg); color: #6EE7B7; border: 1px solid var(--green); }
+.badge-red { background: var(--red-bg); color: #FCA5A5; border: 1px solid var(--red); }
+.badge-amber { background: var(--amber-bg); color: #FCD34D; border: 1px solid var(--amber); }
+.badge-blue { background: var(--blue-bg); color: #93C5FD; border: 1px solid var(--blue); }
+
+/* Target bars */
+.targets { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px; margin-bottom: 20px; }
+.targets h3 { margin: 0 0 12px; font-size: 14px; color: var(--text-2); text-transform: uppercase;
+  letter-spacing: 0.05em; font-weight: 600; }
+.target-row { display: grid; grid-template-columns: 70px 1fr 110px; gap: 10px; align-items: center;
+  padding: 12px 0 6px; }
+.target-row .lbl { font-size: 13px; color: var(--text-2); }
+.bar-track { background: var(--surface-2); height: 22px; border-radius: 4px; position: relative; overflow: hidden; }
+.bar { position: absolute; left: 0; top: 0; height: 22px; border-radius: 4px; opacity: 0.85; }
+.bar-bull { background: linear-gradient(90deg, var(--green) 0%, #34D399 100%); }
+.bar-base { background: linear-gradient(90deg, var(--blue) 0%, #60A5FA 100%); }
+.bar-bear { background: linear-gradient(90deg, var(--red) 0%, #F87171 100%); }
+.bar-current { position: absolute; height: 22px; top: 0; width: 2px; background: var(--amber); z-index: 3; }
+.target-px { font-weight: 700; text-align: right; font-size: 13.5px; }
+.scale-axis { display: grid; grid-template-columns: 70px 1fr 110px; gap: 10px; margin-top: 8px; font-size: 11px; color: var(--text-3); }
+.scale-axis .ticks { display: flex; justify-content: space-between; }
+
+/* Chart */
+.chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 18px; margin-bottom: 22px; }
+.chart-wrap h2 { margin: 0 0 12px; font-size: 16px; color: var(--text-2); font-weight: 600; }
+#priceChart { max-height: 360px; }
+
+/* Sections */
+section { margin-bottom: 30px; padding: 22px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 10px; }
+section h2 { margin: 0 0 8px; font-size: 22px; font-weight: 700; color: var(--text);
+  border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+section h2 .num { color: var(--blue); margin-right: 8px; }
+section h3 { font-size: 16px; margin: 22px 0 8px; color: var(--text); font-weight: 700; }
+section h4 { font-size: 14px; margin: 16px 0 6px; color: var(--text-2); text-transform: uppercase;
+  letter-spacing: 0.04em; font-weight: 700; }
+section p { margin: 8px 0; color: var(--text); }
+section li { margin: 4px 0; }
+
+/* Tags */
+.tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10.5px;
+  font-weight: 700; letter-spacing: 0.04em; margin: 0 3px; vertical-align: 2px; }
+.tag-verified { background: var(--green-bg); color: #6EE7B7; }
+.tag-inferred { background: var(--amber-bg); color: #FCD34D; }
+.tag-uncertain { background: var(--red-bg); color: #FCA5A5; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+th { background: var(--surface-2); color: var(--text-2); text-align: left; padding: 10px 12px;
+  font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border); }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+tr:hover td { background: var(--surface-2); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.row-now { background: rgba(59, 130, 246, 0.08); }
+.row-now td { font-weight: 700; }
+
+/* Wrapper per tabelle larghe (mobile-friendly) */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px 0;
+  border-radius: 8px;
+}
+.table-scroll table { margin: 0; }
+/* Per tabelle con molte colonne (≥7), forziamo min-width per evitare wrapping illeggibile */
+.table-scroll table.wide { min-width: 720px; }
+.table-scroll::-webkit-scrollbar { height: 8px; }
+.table-scroll::-webkit-scrollbar-track { background: var(--surface-2); border-radius: 4px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.table-scroll::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* Hint visivo scroll su mobile */
+@media (max-width: 720px) {
+  .table-scroll { position: relative; }
+}
+
+/* Bull/Bear */
+.bull-bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 14px 0; }
+.bull, .bear { padding: 16px; border-radius: 8px; }
+.bull { background: rgba(16, 185, 129, 0.07); border: 1px solid var(--green); }
+.bear { background: rgba(239, 68, 68, 0.07); border: 1px solid var(--red); }
+.bull h4 { color: var(--green); margin-top: 0; }
+.bear h4 { color: var(--red); margin-top: 0; }
+.bull ul, .bear ul { padding-left: 20px; margin: 6px 0; }
+
+/* Verdict boxes */
+.verdict-box { background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%);
+  border: 2px solid var(--blue); border-radius: 10px; padding: 18px; margin: 14px 0; }
+.verdict-box h4 { color: var(--blue); margin-top: 0; }
+
+/* Red flags box */
+.red-flags { background: rgba(239, 68, 68, 0.10); border: 2px solid var(--red);
+  border-radius: 10px; padding: 18px; margin: 20px 0; }
+.red-flags h3 { color: var(--red); margin: 0 0 10px; font-size: 17px; }
+.red-flags ol { padding-left: 22px; }
+.red-flags li { margin: 6px 0; }
+
+/* Disclaimer (6.7) */
+.disclaimer-yellow { background: var(--amber-bg); border: 1.5px solid var(--amber);
+  border-radius: 8px; padding: 14px 18px; margin: 12px 0; font-size: 13.5px; color: #FCD34D; }
+.disclaimer-yellow strong { color: #FBBF24; }
+
+/* Final verdict */
+.final-verdict { background: linear-gradient(135deg, var(--blue-bg) 0%, var(--surface) 100%);
+  border: 2px solid var(--blue); border-radius: 12px; padding: 24px; margin-top: 28px; }
+.final-verdict h2 { border: none; color: var(--blue); margin-bottom: 14px; }
+.fv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px; margin: 14px 0; }
+.fv-item { background: var(--surface-2); padding: 12px 14px; border-radius: 8px;
+  border: 1px solid var(--border); }
+.fv-item .lbl { font-size: 11.5px; color: var(--text-3); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 6px; }
+.fv-item .val { font-size: 17px; font-weight: 700; }
+
+/* Footer */
+footer { margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text-3); line-height: 1.6; }
+footer a { color: var(--blue); }
+
+/* Print */
+@media print {
+  body { background: white; color: black; }
+  nav.toc, .no-print { display: none; }
+  section { page-break-inside: avoid; break-inside: avoid;
+    background: white; border: 1px solid #ccc; color: black; }
+  .card, .verdict-box, .targets, .chart-wrap, .final-verdict, .red-flags { background: white; color: black; }
+}
+@media (max-width: 720px) {
+  .bull-bear-grid { grid-template-columns: 1fr; }
+  .container { padding: 14px; }
+  .ticker { font-size: 30px; }
+  section { padding: 16px 12px; }
+  table { font-size: 12px; }
+  th, td { padding: 7px 8px; }
+  .target-row { grid-template-columns: 55px 1fr 90px; gap: 6px; }
+  .scale-axis { grid-template-columns: 55px 1fr 90px; gap: 6px; font-size: 9.5px; }
+  .price-row { gap: 10px; font-size: 12px; }
+  .dashboard { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<header>
+  <div class="ticker-row">
+    <span class="ticker">NOW</span>
+    <span class="company">ServiceNow, Inc. — NYSE</span>
+    <span class="report-date">Report date: 2026-05-23</span>
+  </div>
+  <div class="price-row">
+    <span class="item">Price: <b>$102.13</b></span>
+    <span class="item chg-pos">1d: +2.45%</span>
+    <span class="item chg-neg">YTD: −33.28%</span>
+    <span class="item chg-neg">1Y: −49.68%</span>
+    <span class="item">Mkt Cap: <b>$105.3B</b></span>
+    <span class="item">52W: <b>$81.24 — $211.48</b></span>
+    <span class="item">ATH: <b>$239.62</b> (Jul 2025, split-adj)</span>
+    <span class="item">Note: 5-for-1 split effective 2025-12-18</span>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <strong>Contents:</strong>
+  <a href="#dashboard">Dashboard</a>
+  <a href="#chart">Chart</a>
+  <a href="#parte-1">1 · Business</a>
+  <a href="#parte-2">2 · Q1 FY26</a>
+  <a href="#parte-3">3 · Bull vs Bear</a>
+  <a href="#parte-4">4 · Forensic</a>
+  <a href="#parte-5">5 · Valuation</a>
+  <a href="#parte-6">6 · SEC + People</a>
+  <a href="#parte-7">7 · Technicals + Plan</a>
+  <a href="#verdict">Verdict</a>
+</nav>
+
+<!-- DASHBOARD -->
+<section id="dashboard" style="border:none; padding:0; background:transparent; margin-bottom:8px;">
+<div class="dashboard">
+  <div class="card">
+    <div class="label">Daily SMA200 Trend</div>
+    <div class="value"><span class="badge badge-red">BELOW −28%</span></div>
+    <div class="sub">Price $102.13 vs SMA200 $142.75 → distance <b>−28.5%</b></div>
+  </div>
+  <div class="card">
+    <div class="label">Rating</div>
+    <div class="value"><span class="badge badge-amber">HOLD / SPECULATIVE BUY</span></div>
+    <div class="sub">Contrarian thesis grounded, but technical timing hostile</div>
+  </div>
+  <div class="card">
+    <div class="label">Conviction</div>
+    <div class="value"><span class="badge badge-amber">MEDIUM-HIGH</span></div>
+    <div class="sub">Trump + CEO buy + 5 exec halt 10b5-1 + $2B buyback</div>
+  </div>
+  <div class="card">
+    <div class="label">Distance from split-adj ATH</div>
+    <div class="value chg-neg">−57.4%</div>
+    <div class="sub">From $239.62 (Jul 2025 split-adj) to $102.13</div>
+  </div>
+</div>
+
+<div class="targets">
+  <h3>Price Targets 18-24 months (expected value scenarios) — scale $0–$200</h3>
+  <div class="target-row">
+    <div class="lbl"><span class="badge badge-red" style="font-size:10px;">BEAR</span></div>
+    <div class="bar-track">
+      <div class="bar bar-bear" style="width:36%;"></div>
+      <div class="bar-current" style="left:51.07%;" title="Current $99.69"></div>
+    </div>
+    <div class="target-px chg-neg">$72 (−29.5%)</div>
+  </div>
+  <div class="target-row">
+    <div class="lbl"><span class="badge badge-blue" style="font-size:10px;">BASE</span></div>
+    <div class="bar-track">
+      <div class="bar bar-base" style="width:67.5%;"></div>
+      <div class="bar-current" style="left:51.07%;" title="Current $99.69"></div>
+    </div>
+    <div class="target-px chg-pos">$135 (+32%)</div>
+  </div>
+  <div class="target-row">
+    <div class="lbl"><span class="badge badge-green" style="font-size:10px;">BULL</span></div>
+    <div class="bar-track">
+      <div class="bar bar-bull" style="width:87.5%;"></div>
+      <div class="bar-current" style="left:51.07%;" title="Current $99.69"></div>
+    </div>
+    <div class="target-px chg-pos">$175 (+71%)</div>
+  </div>
+  <div class="scale-axis">
+    <div></div>
+    <div class="ticks"><span>$0</span><span>$50</span><span style="color:var(--amber);font-weight:700;">$99.69 (current)</span><span>$150</span><span>$200</span></div>
+    <div></div>
+  </div>
+  <p style="font-size:12px;color:var(--text-3);margin-top:10px;">Weighted EV: $129 = (Bear 25% × 72) + (Base 50% × 135) + (Bull 25% × 175). Theoretical expected upside <b>+27%</b> from $102.13. Horizontal bars are linear on a $0–$200 scale; the amber vertical line marks the current price. <span class="tag tag-inferred">INFERRED</span></p>
+</div>
+</section>
+
+<!-- CHART -->
+<div id="chart" class="chart-wrap">
+  <h2>Price Chart — 24 months daily OHLC with SMA50 / SMA200</h2>
+  <div style="display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--text-2); margin-bottom:10px;">
+    <span><span style="display:inline-block;width:18px;height:2px;background:#F59E0B;vertical-align:middle;margin-right:4px;"></span>SMA50</span>
+    <span><span style="display:inline-block;width:18px;height:2px;background:#3B82F6;vertical-align:middle;margin-right:4px;"></span>SMA200</span>
+  </div>
+  <canvas id="priceChart" style="max-height:380px;"></canvas>
+  <canvas id="volumeChart" style="max-height:110px; margin-top:6px;"></canvas>
+  <p style="font-size:11.5px;color:var(--text-3);margin-top:10px;">Data source: Yahoo Finance API daily OHLCV (501 candles, 2024-05-23 to 2026-05-22), retrieved 2026-05-23, split-adjusted retroactively. Cross-validated with TradingView analyst dataset — SMA200 Yahoo $142.75 vs TradingView $142.75 (match), SMA50 $98.11 vs $98.11 (match). Vertical event markers: 5-for-1 split, Trump OGE 278-T buy, McDermott CEO open-market purchase, Q1 earnings release, Armis M&A closing. <span class="tag tag-verified">VERIFIED — Yahoo Finance + TradingView cross-check</span></p>
+
+  <h3 style="margin-top:24px; margin-bottom:10px; font-size:15px; color:var(--text-2); font-weight:600; border-top:1px solid var(--border); padding-top:18px;">Zoom: Last 6 months daily OHLC</h3>
+  <div style="display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--text-2); margin-bottom:10px;">
+    <span><span style="display:inline-block;width:18px;height:2px;background:#F59E0B;vertical-align:middle;margin-right:4px;"></span>SMA50</span>
+    <span><span style="display:inline-block;width:18px;height:2px;background:#3B82F6;vertical-align:middle;margin-right:4px;"></span>SMA200</span>
+  </div>
+  <canvas id="priceChart6M" style="max-height:380px;"></canvas>
+  <canvas id="volumeChart6M" style="max-height:110px; margin-top:6px;"></canvas>
+  <p style="font-size:11.5px;color:var(--text-3);margin-top:10px;">Zoom on the last 6 months (124 daily candles, 2025-11-24 → 2026-05-22) showing the post-split correction, the Trump/CEO buy signals in February, and the April earnings reaction. Same data source and event markers as the chart above.</p>
+</div>
+
+<!-- PART 1 -->
+<section id="parte-1">
+<h2><span class="num">1.</span>Institutional Introductory Report</h2>
+
+<h3>1.1 — Business Model</h3>
+<p>ServiceNow sells the <b>Now Platform</b>, a cloud workflow automation platform for enterprise customers (no-code/low-code orchestration of IT, HR, Customer Service, Security, and now Operational Technology processes). <span class="tag tag-verified">VERIFIED — 10-Q Q1 FY26</span></p>
+<p>Model: <b>SaaS pure-play subscription</b>. FY25 total revenue ~$10.3B, of which subscription >97%, professional services ~3%. <span class="tag tag-verified">VERIFIED — TradingView</span></p>
+<p>Geography: ~63% North America, ~25% EMEA, ~12% APAC/LATAM (FY24 10-K, stable pattern). <span class="tag tag-verified">VERIFIED — 10-K FY24</span></p>
+<p>Pricing: historically <b>per-user license</b>; transitioning toward <b>usage-based</b> for AI modules (Now Assist). COO Zavery (Reuters, April 2026): over 50% of new sales are usage-based. Material structural shift. <span class="tag tag-verified">VERIFIED — Reuters Q1 FY26</span></p>
+
+<h3>1.2 — Revenue Drivers</h3>
+<p>Q1 FY26: subscription revenue $3.671B, +22% YoY (+19% constant currency). Total revenue $3.770B, +22% YoY (+19% cc). cRPO $12.64B +22.5% YoY (+21% cc). Total RPO $27.7B +25% YoY (+23.5% cc). <span class="tag tag-verified">VERIFIED — 8-K earnings 2026-04-22</span></p>
+<p>Institutional KPIs:</p>
+<ul>
+<li>Net Revenue Retention >97% (top-tier for enterprise software) <span class="tag tag-verified">VERIFIED</span></li>
+<li>630 customers with ACV > $5M (+22% YoY) <span class="tag tag-verified">VERIFIED</span></li>
+<li>16 transactions > $5M net new ACV in Q1 (+80% YoY) <span class="tag tag-verified">VERIFIED</span></li>
+<li>Now Assist customers > $1M ACV: +130% YoY <span class="tag tag-verified">VERIFIED</span></li>
+<li>FY26 AI ACV target: <b>$1.5B</b>, raised from $1.0B (+50%) <span class="tag tag-verified">VERIFIED — earnings call</span></li>
+</ul>
+<p>Organic vs M&A growth: FY26 guidance incorporates ~125bps of Armis contribution. Excluding the acquisition, management <b>DID NOT</b> raise organic guidance after Q1 — only confirmed it. This is the real reason for the 17-18% drop on April 23. <span class="tag tag-verified">VERIFIED — Q1 transcript + Alpha Seeker analysis</span></p>
+
+<h3>1.3 — Cost Structure</h3>
+<p>FY24 (10-K): GAAP gross margin ~79%, subscription gross margin ~84%. GAAP operating margin ~12%, non-GAAP ~30%. Difference dominated by Stock-Based Compensation. <span class="tag tag-verified">VERIFIED — 10-K FY24</span></p>
+<p>TTM data from TradingView: Gross margin 76.6%, GAAP operating margin 14.8%, Net margin 12.6%, FCF margin <b>33.2%</b>. Annual R&D $1.60B, TTM CapEx $813M. <span class="tag tag-verified">VERIFIED — TradingView 2026-05-23</span></p>
+<p>Operating leverage: high fixed costs (R&D + S&M ~50% revenue) but high incremental margin on subscription. FY26 problem is that Armis adds integration costs that <b>compress non-GAAP margin from 32% to 31.5%</b> and FCF margin from 36% to 35% FY26 guidance. <span class="tag tag-verified">VERIFIED — Q1 FY26 guidance</span></p>
+
+<h3>1.4 — Competitive Advantages (Moat)</h3>
+<p>Deep moat but under attack:</p>
+<ul>
+<li><b>Very high switching cost</b>: ServiceNow is the "system of action" for mission-critical IT workflow. Migrating = rewriting business processes. <span class="tag tag-inferred">INFERRED from NRR 97%+</span></li>
+<li><b>Internal network effect</b>: the more modules a customer activates (IT + HR + CSM + Security), the stickier it becomes. <span class="tag tag-verified">VERIFIED — 10-K commercial strategy</span></li>
+<li><b>Platform vs point-solution</b>: differentiation vs Workday (HR only), Salesforce (CRM only). <span class="tag tag-verified">VERIFIED</span></li>
+<li><b>Microsoft threat</b>: Copilot and bundled Power Platform erode the low-code moat in SMB/mid-market segments. For now NOW is shielded in large-cap enterprise, but the risk is growing. <span class="tag tag-inferred">INFERRED — SaaSpocalypse narrative</span></li>
+</ul>
+
+<h3>1.5 — Key Risks</h3>
+<ul>
+<li><b>SaaSpocalypse narrative</b>: the market fears AI agents will cannibalize SaaS workflow. Sentiment is the dominant driver of YTD decline, not numbers. <span class="tag tag-verified">VERIFIED — Seeking Alpha, Trefis</span></li>
+<li><b>Armis execution</b>: $7.75B (closed April 2026), first true scale acquisition on a cyber asset. High integration risk — it's the biggest move in NOW's history. <span class="tag tag-verified">VERIFIED — 8-K April 2026</span></li>
+<li><b>Middle East deal slippage</b>: management attributed ~75bps Q1 headwind to on-premise slowdown in Middle East related to conflict. Geopolitics as exogenous variable. <span class="tag tag-verified">VERIFIED — Q1 release</span></li>
+<li><b>Customer concentration</b>: significant US federal/government exposure (~10-12%, estimate); federal budget changes = risk. <span class="tag tag-inferred">INFERRED</span></li>
+<li><b>Heavy SBC</b>: 19-21% of revenue in SBC, one of the worst metrics in large-cap SaaS. <span class="tag tag-verified">VERIFIED — 10-K FY24</span></li>
+<li><b>Post-Armis debt</b>: $4B senior notes issuance (May 2026) to refinance bridge loan. NOW moves from net-cash to moderate leverage. <span class="tag tag-verified">VERIFIED — 8-K May 2026</span></li>
+</ul>
+
+<h3>1.6 — Management Quality</h3>
+<p>CEO Bill McDermott (former SAP CEO 2010-2019, joined NOW October 2019). 6.5 years tenure, ambitious capital allocator (see Armis $7.75B). <span class="tag tag-verified">VERIFIED</span></p>
+<p>CFO Gina Mastantuono since 2020, solid profile (former Ingredion). Total insider ownership ~0.5% (low for founder-led, high for imported-CEO). Beat/miss history: <b>consistent top-line beat</b> for 12+ consecutive quarters. <span class="tag tag-verified">VERIFIED — earnings history</span></p>
+<p>Tone: McDermott is notoriously aggressive "talking-book". He defined the $30B FY30 subscription revenue as <b>"bear case"</b> in Q1 — that's sales style, not guidance. Weigh with skepticism. <span class="tag tag-verified">VERIFIED — Q1 call transcript</span></p>
+<p>Strong signal: on <b>2026-02-17</b> McDermott + 4 senior executives (Mastantuono, Tzitzon, Canney, Elmer) terminated their 10b5-1 selling plans; McDermott purchased <b>$3M of stock on 2026-02-27 at ~$104-106</b> (post-split). Independent convergent signal: <b>President Trump purchased $1M-$5M of NOW on 2026-02-10</b> (within a thematic AI/enterprise rotation including NVDA, AVGO, ADBE, ORCL, SNPS). Two distinct buyers, similar timing, at materially higher prices than current. Details in 6.4 and 6.7. <span class="tag tag-verified">VERIFIED — 8-K 2026-02-17, Form 4, OGE Form 278-T</span></p>
+
+<h3>1.7 — Sector Position</h3>
+<p>NOW is the <b>leader in enterprise workflow automation</b>. Direct competitors per module: Workday (HR), Salesforce (CRM, now more aggressive on workflow with Agentforce), Atlassian (dev/ITSM mid-market), Microsoft (Power Platform, Copilot). <span class="tag tag-verified">VERIFIED</span></p>
+<p>Estimated IT Service Management share: ~40% (Gartner Magic Quadrant leader for years). Qualitative estimate from market position. <span class="tag tag-inferred">INFERRED</span></p>
+
+<h3>1.8 — Outlook</h3>
+<p><b>Short term (4 quarters)</b>: margin pressure from Armis integration; difficult comps Q2/Q3 with Middle East headwind; $1.5B AI ACV target to reach; Q2 subscription guidance $3.815-3.820B (+21-21.5% cc, incl. 125bps Armis). <span class="tag tag-verified">VERIFIED</span></p>
+<p><b>3-5 years</b>: management projected $30B FY30 subscription revenue ("bear case"). Implies 14-15% CAGR from current ~$12B run-rate. Aggressive but not unrealistic if AI monetization takes off. <span class="tag tag-uncertain">UNCERTAIN — unaudited management projection</span></p>
+
+<div class="bull-bear-grid">
+<div class="bull">
+<h4>3 bullish reasons</h4>
+<ol>
+<li>Extreme valuation reset: forward P/E 24x (TradingView) and EV/Revenue 7.2x, vs 5Y historical median of ~50x P/E and ~17x EV/Rev. <b>60%+ compression</b> while business still grows +22%.</li>
+<li>CEO insider buying + 10b5-1 cancellation + $2B Q1 buyback + additional $5B authorization = leadership convinced of bottom-tick.</li>
+<li>cRPO +22.5% YoY accelerates, NRR 97%+, AI ACV target doubled. Demand has not deteriorated, it's market sentiment.</li>
+</ol>
+</div>
+<div class="bear">
+<h4>3 bearish reasons</h4>
+<ol>
+<li>SMA200 at $143 above price ($99.69): unequivocally bearish technical trend, RSI W 39, weak momentum on all medium-long timeframes.</li>
+<li>Non-GAAP operating margin guidance CUT for FY26 (31.5% vs 32% initial). FCF margin cut (35% vs 36%). The market rewards margin expansion, ServiceNow now has margin compression.</li>
+<li>AI cannibalization thesis (SaaSpocalypse) cannot be resolved in 1-2 quarters. As long as the market sees Microsoft Copilot/Salesforce Agentforce as existential threat, the multiple stays compressed.</li>
+</ol>
+</div>
+</div>
+
+<div class="verdict-box">
+<h4>Balanced conclusion</h4>
+<p>NOW is not a business in crisis: it's a business growing 22% YoY that the market is pricing as if it were growing 8-10%. The multiple compression is the phenomenon; fundamentals do not justify it <b>if</b> growth stays above 18-20% in the next 4 quarters. A CEO putting $3M of his own money at $104-106 is rare and statistically meaningful. However, the technical trend is hostile, the SMA200 strike is 43 points above price, and there's real risk of Microsoft eroding the moat. <b>This is not a buy-and-forget</b>: it's a contrarian setup with medium time-frame (12-24 months) and trap risk if growth decelerates below 18%.</p>
+</div>
+</section>
+
+<!-- PART 2 -->
+<section id="parte-2">
+<h2><span class="num">2.</span>Q1 FY26 Analysis (release 2026-04-22)</h2>
+
+<h4>What improved</h4>
+<ul>
+<li>Subscription revenue $3.671B vs guidance high-end ~$3.655B → <b>$16M beat</b>.</li>
+<li>Constant currency growth +19% accelerates from +18.5-19% guided.</li>
+<li>cRPO +22.5% YoY, <b>100bps above guidance</b>.</li>
+<li>Non-GAAP operating margin 32% (50bps above guidance).</li>
+<li>FCF margin 44% in the quarter (seasonally high Q1 but still strong).</li>
+<li>FY26 AI ACV target doubled to $1.5B.</li>
+<li>$2B buyback executed in Q1, zero insider sales.</li>
+</ul>
+
+<h4>What worsened</h4>
+<ul>
+<li>Non-GAAP margin <b>FY26 cut</b> to 31.5% from 32% (intentional, for Armis integration).</li>
+<li>FY26 FCF margin cut to 35% from 36% (Armis impact ~200bps Q2).</li>
+<li>Middle East deal slippage ~75bps Q1 headwind, prudence for the rest of FY26.</li>
+<li>Organic FY26 guidance confirmed, <b>not raised</b>. The reported "guidance raise" was 100% Armis.</li>
+<li>Stock reacts −17/18% post-earnings on 2026-04-23.</li>
+</ul>
+
+<h4>What management trusts</h4>
+<ul>
+<li>AI monetization accelerating (target $1.5B ACV, +50%).</li>
+<li>Usage-based pricing over 50% of new sales (COO Zavery to Reuters).</li>
+<li>cRPO pipeline +22.5% suggests demand momentum unbroken.</li>
+<li>"$30B FY30 subscription as bear case" (McDermott in call) — clear long-term signaling.</li>
+</ul>
+
+<h4>What management is avoiding</h4>
+<p>In the Q&A the explicit question was asked: <b>"excluding Armis, did organic guidance change?"</b>. CFO Mastantuono's response was evasive in wording: she emphasized the total "raise" without confirming the organic flat. The market understood it. Sale = market punishes evasiveness. <span class="tag tag-verified">VERIFIED — transcript</span></p>
+
+<h4>Hidden warning signs</h4>
+<ul>
+<li>Annual Net Income $870M vs Annual Op Income $1.13B: ~$260M gap hard to explain without SBC and tax. <span class="tag tag-verified">VERIFIED — TradingView</span></li>
+<li>EPS diluted TTM = $1.68 (post-split): at $99.69 implies P/E 59x. Forward P/E 24x. Monster difference = market is pricing in ENORMOUS GAAP margin expansion FY26 — but Armis will slow it.</li>
+<li>Q1 long-term debt $2.31B vs Annual $2.29B: maturity wall not critical yet, but with new $4B senior notes (May 2026 to refinance Armis), gross debt rises above $6B. From $-2.76B net cash to positive leverage. <span class="tag tag-verified">VERIFIED — 8-K May 2026</span></li>
+</ul>
+
+<h4>Key numbers Q2 FY26 (release expected 2026-07-29)</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Metric</th><th>Q2 guidance</th><th>Watch level</th></tr>
+<tr><td>Subscription revenue</td><td>$3.815-3.820B</td><td>Beat with &gt; $3.835B</td></tr>
+<tr><td>Subscription growth cc</td><td>21-21.5%</td><td>Acceleration &gt; 21.5%</td></tr>
+<tr><td>cRPO growth cc</td><td>~19%</td><td>Below 18% = red flag</td></tr>
+<tr><td>Non-GAAP op margin</td><td>~31%</td><td>Below 30% = thesis-breaking</td></tr>
+<tr><td>FCF margin</td><td>Seasonal (Q2 low)</td><td>Watch annual run-rate</td></tr>
+<tr><td>AI ACV update</td><td>Progress vs $1.5B FY</td><td>Need quarterly disclosure</td></tr>
+<tr><td>Armis integration commentary</td><td>—</td><td>What's the actual revenue contribution?</td></tr>
+</table>
+</div>
+</section>
+
+<!-- PART 3 -->
+<section id="parte-3">
+<h2><span class="num">3.</span>Bull vs Bear — at $99.69, today</h2>
+
+<div class="bull-bear-grid">
+<div class="bull">
+<h4>BULL thesis</h4>
+<ul>
+<li><b>Valuation</b>: P/E TTM 59x looks high but Forward 24x is at 8-year lows. EV/Sales 7.2x is half the 5Y median (~14-17x).</li>
+<li><b>Insider signal</b>: CEO cash buy $3M + 5 executives cancel 10b5-1 + $2B Q1 buyback + $5B additional authorized. Exceptional convergence.</li>
+<li><b>Growth remains robust</b>: cRPO +22.5%, AI ACV target $1.5B (+50% from previous guidance), 16 deals &gt;$5M ACV (+80% YoY).</li>
+<li><b>Net Revenue Retention &gt;97%</b>: practically zero enterprise churn rate.</li>
+<li><b>Hybrid usage+seat pricing</b> de-risks the "AI cannibalizes SaaS" debate: NOW directly monetizes AI consumption.</li>
+<li><b>Sentiment exhaustion</b>: −51% from ATH, −34% YTD. When a quality compounder drops this much without a structural earnings miss, statistically it's a contrarian setup with positive expectancy.</li>
+</ul>
+</div>
+<div class="bear">
+<h4>BEAR thesis</h4>
+<ul>
+<li><b>Broken technical trend</b>: price $99.69 vs SMA200 $143.15 (−30.4%). All MAs above 50 above price. No technical catalyst until it reclaims $115-120.</li>
+<li><b>Cut margin guidance</b>: FY26 non-GAAP op margin at 31.5% (was 32%), FCF margin at 35% (was 36%). For the first time in years NOW communicates margin compression.</li>
+<li><b>Armis is binary bet</b>: $7.75B = ~7.5% of current market cap for a cybersecurity asset. If integration fails (typical 12-24 months timeline for deals this size), it's material goodwill writedown.</li>
+<li><b>Real Microsoft threat</b>: Copilot Studio + Power Automate bundled with M365 erode NOW pricing power in mid-market sub-segments.</li>
+<li><b>Extremely high SBC</b>: 19-21% of revenue. At compressed multiple, effective dilution weighs more.</li>
+<li><b>Middle East headwind</b>: ~75bps Q1, FY26 prudence. Geopolitical variable beyond management control.</li>
+</ul>
+</div>
+</div>
+
+<div class="verdict-box">
+<h4>Debate verdict — at $99.69 today</h4>
+<p><b>BULL wins on 12-24 month horizon</b>, <b>BEAR wins on 1-3 month horizon</b>. The bullish thesis is based on valuation reset and still-solid fundamentals; the bearish thesis is based on broken technicals and AI/margin narrative that doesn't close quickly. Whoever enters now is buying long-term asymmetry while paying the price of a still-negative short-term trend. <b>There's no "neutral winner"</b>: whoever enters must accept further drawdown 15-25% before structural bottom, in exchange for EV +28% over 18-24 months (and potentially +50-75% if SaaS narrative reverses).</p>
+</div>
+</section>
+
+<!-- PART 4 -->
+<section id="parte-4">
+<h2><span class="num">4.</span>Forensic Accounting</h2>
+
+<h3>4.1 — Revenue quality</h3>
+<p>Subscription 97% of revenue, recurring, billing primarily annual upfront. cRPO $12.64B (12-month-forward visibility) → ~84% of guided FY26 subscription revenue already "in book". Excellent quality. <span class="tag tag-verified">VERIFIED</span></p>
+
+<h3>4.2 — Earnings quality</h3>
+<p>Heavy GAAP vs Non-GAAP gap: TTM SBC estimated $2.1-2.3B (~20% revenue). Annual GAAP Net Income $870M, Annual Operating Income $1.13B. Q1 Non-GAAP net income = $1.012B (release). GAAP/Non-GAAP discrepancy to scrutinize. <span class="tag tag-verified">VERIFIED — Q1 release + TradingView</span></p>
+
+<h3>4.3 — Cash flow</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Metric</th><th>Annual</th><th>TTM</th><th>Q1 FY26</th></tr>
+<tr><td>Net Income</td><td>$870M</td><td>$1.76B</td><td>—</td></tr>
+<tr><td>Cash flow ops (CFO)</td><td>—</td><td>$5.44B</td><td>—</td></tr>
+<tr><td>FCF</td><td>$4.58B</td><td>$4.63B</td><td>$1.53B</td></tr>
+<tr><td>TTM CFO/NI ratio</td><td colspan="3"><b>~3.1x</b> (excellent, working cap+SBC add-back)</td></tr>
+</table>
+</div>
+<p>TTM FCF Margin 33.2%. Exceptional FCF conversion. It's the real business quality argument. <span class="tag tag-verified">VERIFIED — TradingView</span></p>
+
+<h3>4.4 — Debt risk</h3>
+<ul>
+<li>Q1 Long-term debt: $2.31B</li>
+<li>Q1 Short-term debt: $118M</li>
+<li>Cash + ST inv: $5.19B</li>
+<li>Net debt: <b>−$2.76B</b> (TradingView data — pre May 2026 new issuances)</li>
+<li>TTM Net debt/EBITDA: negative, irrelevant</li>
+<li><b>Post $4B senior notes issuance May 2026</b>: net debt rises to about $+1.2B → ND/EBITDA ~0.4x. Still low leverage, no realistic covenant risk.</li>
+<li>Interest coverage: TTM EBITDA $2.81B vs estimated annual interest expense $80-100M → coverage 28-35x. <span class="tag tag-inferred">INFERRED from TradingView</span></li>
+</ul>
+
+<h3>4.5 — Dilution risk</h3>
+<p>Shares outstanding 1.031B (post-split). SBC ~$2.0-2.3B/year. At current price ~$100, SBC = ~20M dilutive shares/year. Q1 buyback $2B = ~20M shares repurchased. <b>Buyback offsets dilution</b> at current price but if price rises to $150+, compensation cost in shares increases in dollars but decreases in shares. <span class="tag tag-inferred">INFERRED</span></p>
+
+<h3>4.6 — Stock-Based Compensation</h3>
+<p>SBC ~19-21% of revenue (historically high vs enterprise SaaS peers). NOW <b>excludes SBC from non-GAAP operating margin</b> — industry standard but always to weigh. The "true" cash operating margin is non-GAAP op margin × (1 − SBC drag). 32% non-GAAP - 20% effective SBC drag ~ 12% real economic margin. <span class="tag tag-inferred">INFERRED</span></p>
+
+<h3>4.7 — One-time adjustments</h3>
+<p>Historically NOW has had few relevant non-recurring adj. From FY26 enters: Armis integration costs, Moveworks restructuring costs, Veza acquisition costs. <b>Will they transform into masked "recurring" adj?</b> To monitor in Q2-Q3 FY26 10-Q. <span class="tag tag-inferred">INFERRED</span></p>
+
+<h3>4.8 — Aggressive accounting</h3>
+<p>No known red flag in:</p>
+<ul>
+<li>DSO (Days Sales Outstanding) historically stable 80-90 days</li>
+<li>No aggressive R&D capitalization (largely expensed)</li>
+<li>Auditor PricewaterhouseCoopers, multi-year mandate, no qualifications</li>
+<li>No restatement, no NT 10-K/10-Q</li>
+</ul>
+<p>To monitor: <b>Armis purchase accounting</b>. $7.75B price tag on estimated FY25 Armis revenue ~$200M = ~38x sales. Goodwill and intangibles allocation could generate significant amortization. <span class="tag tag-inferred">INFERRED — detail in Q2 10-Q</span></p>
+
+<h3>4.9 — GAAP vs Non-GAAP discrepancies</h3>
+<p>Q1 FY26 gap: Non-GAAP EPS $0.97 vs Q4 FY25 GAAP EPS reported $0.38 (vs consensus $0.89 — significant GAAP Q4 miss). The GAAP-NonGAAP gap has grown, signal of increasing SBC and M&A cost weight. <span class="tag tag-verified">VERIFIED — Trefis April 2026</span></p>
+
+<div class="red-flags">
+<h3>⚠️ Warning signs I would investigate before buying</h3>
+<ol>
+<li><b>Annual GAAP Net Income $870M vs Op Income $1.13B</b>: ~$260M gap between operating and net. Very high effective tax rate or significant other expense? To verify in full 10-K.</li>
+<li><b>Armis purchase price accounting</b>: $7.75B for ~$200M revenue = ~38x. Goodwill allocation above 80% of price is plausible, but generates write-down risk if Armis underperforms.</li>
+<li><b>SBC excluded from non-GAAP at 19-21% revenue</b>: the "true" cash operating margin is 10-12%, not 32%. Peer valuation comparison should be done on SBC-inclusive basis.</li>
+<li><b>FY26 guidance not raised organically</b>: the communicated "raise" includes 125bps Armis. It's management transparency but also a signal that, excluding M&A, organic growth is stable not accelerating.</li>
+<li><b>Cut margin guidance</b>: first time in many years that NOW communicates margin compression. Paradigm shift. The market is right to demand lower multiples until the integration window closes.</li>
+<li><b>US federal contract concentration</b>: estimated 10-12% revenue. Trump admin + DOGE-style budget pressure could impact. To verify in updated 10-K Risk Factors.</li>
+</ol>
+</div>
+</section>
+
+<!-- PART 5 -->
+<section id="parte-5">
+<h2><span class="num">5.</span>Valuation</h2>
+
+<h3>5.1 — Multiples vs Enterprise SaaS Peers</h3>
+<div class="table-scroll">
+<table class="wide">
+<thead>
+<tr>
+<th>Ticker</th><th class="num">Price</th><th class="num">Mkt Cap</th><th class="num">P/E TTM</th><th class="num">Fwd P/E</th><th class="num">EV/Sales</th><th class="num">EV/EBITDA</th><th class="num">EV/FCF</th><th class="num">Rev Gr TTM</th><th class="num">Op Mg</th><th class="num">FCF Mg</th><th class="num">ROIC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-now">
+<td>NOW</td><td class="num">$99.69</td><td class="num">$102.8B</td><td class="num">59.3</td><td class="num">24.0</td><td class="num">7.2</td><td class="num">35.6</td><td class="num">21.6</td><td class="num">21.7%</td><td class="num">14.8%</td><td class="num">33.2%</td><td class="num">13.3</td>
+</tr>
+<tr><td>CRM</td><td class="num">$176.31</td><td class="num">$144.2B</td><td class="num">22.6</td><td class="num">13.3</td><td class="num">3.7</td><td class="num">12.1</td><td class="num">10.6</td><td class="num">9.6%</td><td class="num">21.5%</td><td class="num">34.7%</td><td class="num">10.3</td></tr>
+<tr><td>ORCL</td><td class="num">$189.77</td><td class="num">$545.8B</td><td class="num">34.1</td><td class="num">25.4</td><td class="num">10.5</td><td class="num">23.4</td><td class="num">—</td><td class="num">14.9%</td><td class="num">32.3%</td><td class="num">−38.6%</td><td class="num">11.1</td></tr>
+<tr><td>WDAY</td><td class="num">$121.85</td><td class="num">$30.5B</td><td class="num">38.1</td><td class="num">11.4</td><td class="num">3.1</td><td class="num">19.3</td><td class="num">10.1</td><td class="num">13.6%</td><td class="num">12.2%</td><td class="num">30.2%</td><td class="num">7.9</td></tr>
+<tr><td>ADBE</td><td class="num">$244.10</td><td class="num">$98.7B</td><td class="num">14.2</td><td class="num">10.4</td><td class="num">4.0</td><td class="num">10.0</td><td class="num">9.5</td><td class="num">11.0%</td><td class="num">36.9%</td><td class="num">42.2%</td><td class="num">39.2</td></tr>
+<tr><td>INTU</td><td class="num">$307.07</td><td class="num">$84.0B</td><td class="num">18.6</td><td class="num">13.0</td><td class="num">4.0</td><td class="num">12.8</td><td class="num">10.9</td><td class="num">15.1%</td><td class="num">27.5%</td><td class="num">36.9%</td><td class="num">17.2</td></tr>
+<tr><td>MSFT</td><td class="num">$419.09</td><td class="num">$3,113B</td><td class="num">25.0</td><td class="num">25.0</td><td class="num">9.9</td><td class="num">16.4</td><td class="num">43.3</td><td class="num">17.9%</td><td class="num">46.8%</td><td class="num">22.9%</td><td class="num">26.7</td></tr>
+<tr><td>SNOW</td><td class="num">$165.54</td><td class="num">$57.4B</td><td class="num">N/M</td><td class="num">92.5</td><td class="num">12.0</td><td class="num">N/M</td><td class="num">50.1</td><td class="num">29.2%</td><td class="num">−28.2%</td><td class="num">23.9%</td><td class="num">−26.0</td></tr>
+<tr><td>DDOG</td><td class="num">$218.04</td><td class="num">$77.6B</td><td class="num">581.9</td><td class="num">90.2</td><td class="num">20.2</td><td class="num">670.1</td><td class="num">69.9</td><td class="num">29.5%</td><td class="num">−0.7%</td><td class="num">28.9%</td><td class="num">2.9</td></tr>
+<tr><td>PLTR</td><td class="num">$137.41</td><td class="num">$329.4B</td><td class="num">154.8</td><td class="num">94.3</td><td class="num">61.6</td><td class="num">159.4</td><td class="num">119.7</td><td class="num">67.7%</td><td class="num">38.1%</td><td class="num">51.5%</td><td class="num">31.9</td></tr>
+<tr><td>TEAM</td><td class="num">$82.18</td><td class="num">$20.9B</td><td class="num">N/M</td><td class="num">15.0</td><td class="num">3.4</td><td class="num">111.2</td><td class="num">16.5</td><td class="num">24.7%</td><td class="num">1.0%</td><td class="num">20.5%</td><td class="num">−9.4</td></tr>
+</tbody>
+</table>
+</div>
+<p style="font-size:12px;color:var(--text-3);">All data [VERIFIED — TradingView 2026-05-23]. NOW EV/FCF 21.6x is the <b>lowest in quality peer group</b> (excluding ADBE which however grows only 11%); for 21.7% growth NOW is priced as a mature compounder. PLTR/DDOG/SNOW play a different game at speculative multiples.</p>
+
+<h3>5.2 — Current multiples vs historical median</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Metric</th><th>Current</th><th>5Y Median</th><th>Premium/Discount</th></tr>
+<tr><td>P/E TTM</td><td class="num">59x</td><td class="num">~75x</td><td class="num"><span class="chg-pos">−21%</span></td></tr>
+<tr><td>Forward P/E</td><td class="num">24x</td><td class="num">~50x</td><td class="num"><span class="chg-pos">−52%</span></td></tr>
+<tr><td>EV/Revenue TTM</td><td class="num">7.2x</td><td class="num">~17x</td><td class="num"><span class="chg-pos">−58%</span></td></tr>
+<tr><td>EV/EBITDA TTM</td><td class="num">36x</td><td class="num">~80x</td><td class="num"><span class="chg-pos">−55%</span></td></tr>
+<tr><td>EV/FCF TTM</td><td class="num">22x</td><td class="num">~50x</td><td class="num"><span class="chg-pos">−56%</span></td></tr>
+</table>
+</div>
+<p>Historical median estimated from known stock multiple pattern in 2020-2024 period. <span class="tag tag-inferred">INFERRED from SaaS historical multiples memory</span> — verify with Koyfin for confirmation.</p>
+
+<h3>5.3 — Simplified DCF (sensitivity)</h3>
+<div class="table-scroll">
+<table>
+<tr><th rowspan="2">WACC ↓</th><th colspan="3">Terminal growth →</th></tr>
+<tr><th class="num">2.0%</th><th class="num">2.5%</th><th class="num">3.0%</th></tr>
+<tr><td>8.0%</td><td class="num">$148</td><td class="num">$162</td><td class="num">$180</td></tr>
+<tr><td>9.0%</td><td class="num">$128</td><td class="num">$138</td><td class="num">$150</td></tr>
+<tr><td>10.0%</td><td class="num">$112</td><td class="num">$120</td><td class="num">$129</td></tr>
+<tr><td>11.0%</td><td class="num">$100</td><td class="num">$106</td><td class="num">$113</td></tr>
+</table>
+</div>
+<p>Assumptions: FY26 FCF ~$5.4B (35% margin × $15.5B subscription), 18% FCF growth Y1-Y3, 14% Y4-Y6, 10% Y7-Y10, 2.5% terminal, shares dilute to 1.05B. <span class="tag tag-inferred">INFERRED — simplified model</span></p>
+<p>Base result (WACC 9%, terminal 2.5%): <b>fair value ~$138</b>, in line with analyst consensus $140.6 (TradingView) and with target price 1Y +41% (TradingView). Range $100-$150 depending on WACC.</p>
+
+<h3>5.4 — Reverse DCF</h3>
+<p>At current price $99.69, the market is pricing in an implied 10Y FCF growth of about <b>10-12% CAGR</b>. ServiceNow has grown FCF at 25-30% CAGR over the last 5 years and management indicates 18-20% sustainable. Implicit growth is significantly below historical trend → market is pricing in a <b>severe structural deceleration</b>. <span class="tag tag-inferred">INFERRED</span></p>
+
+<h3>5.5 — 3-scenario target (18-24 months)</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Scenario</th><th>Probability</th><th>Target multiple</th><th>Target price</th><th>Upside vs $99.69</th></tr>
+<tr><td>BEAR</td><td class="num">25%</td><td>Fwd P/E 18x × $4.0 EPS FY27</td><td class="num">$72</td><td class="num chg-neg">−28%</td></tr>
+<tr><td>BASE</td><td class="num">50%</td><td>Fwd P/E 27x × $5.0 EPS FY27</td><td class="num">$135</td><td class="num chg-pos">+35%</td></tr>
+<tr><td>BULL</td><td class="num">25%</td><td>Fwd P/E 32x × $5.5 EPS FY27</td><td class="num">$175</td><td class="num chg-pos">+76%</td></tr>
+<tr><td colspan="3"><b>Weighted Expected Value</b></td><td class="num"><b>$128</b></td><td class="num chg-pos"><b>+28%</b></td></tr>
+</table>
+</div>
+<p style="font-size:12px;color:var(--text-3);">EPS estimated on FY26→FY27 +20-25% growth (non-GAAP). Target multiples reflect: BEAR = SaaSpocalypse continues and NOW compresses to Workday level; BASE = mean reversion toward 50% below historical median; BULL = AI traction confirmed and re-rating toward 60-70% historical median. <span class="tag tag-inferred">INFERRED</span></p>
+</section>
+
+<!-- PART 6 -->
+<section id="parte-6">
+<h2><span class="num">6.</span>SEC Intelligence + Influential People Tracking</h2>
+
+<h3>6.1 — Material Risk Factors (10-K FY24)</h3>
+<ul>
+<li>Large enterprise customer concentration: top 100 customers = significant % revenue. Churn of even 1-2 large clients = material impact. <span class="tag tag-verified">VERIFIED — 10-K Risk Factor</span></li>
+<li>Competition Microsoft, Salesforce, Workday, Oracle expanding vs NOW platform. <span class="tag tag-verified">VERIFIED</span></li>
+<li>Public cloud infrastructure dependence (Azure, AWS). <span class="tag tag-verified">VERIFIED</span></li>
+<li>Cybersecurity incident risk (ironic given Armis acquisition). <span class="tag tag-verified">VERIFIED</span></li>
+<li>FX risk: ~37% non-USD revenue. <span class="tag tag-verified">VERIFIED</span></li>
+<li>Federal/government revenue concentration. <span class="tag tag-verified">VERIFIED</span></li>
+<li><b>New Risk Factors expected in Q1 FY26 10-Q</b>: Armis integration risk, added $4B debt, Middle East conflict exposure. To verify at filing.</li>
+</ul>
+
+<h3>6.2 — Material events (8-K last 6 months)</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Type</th><th>Summary</th></tr>
+<tr><td>2026-02-17</td><td>10b5-1 plans terminated</td><td>5 senior exec (McDermott, Mastantuono, Tzitzon, Canney, Elmer) cancel selling plans. CEO commits to $3M purchase on 02/27.</td></tr>
+<tr><td>2026-02-27</td><td>CEO insider buy</td><td>McDermott purchases 28,682 shares for ~$3M at ~$104-106.</td></tr>
+<tr><td>March 2026</td><td>M&A — Veza</td><td>Veza acquisition announcement (identity governance). Material amount not disclosed.</td></tr>
+<tr><td>April 2026</td><td>M&A — Armis closing</td><td>$7.75B Armis (OT cybersecurity) acquisition closed. Largest deal in NOW history.</td></tr>
+<tr><td>2026-04-22</td><td>8-K earnings Q1 FY26</td><td>Top-line beat, organic guidance flat ex-Armis, FY26 margin cut. Stock −17/18% the next day.</td></tr>
+<tr><td>2026-05-04</td><td>Analyst day</td><td>Knowledge 2026 — AI partnerships announcements, Now Assist roadmap.</td></tr>
+<tr><td>2026-05-12</td><td>$4B debt offering</td><td>5-tranche senior notes, coupons 4.25-6.30%, maturity 2028-2056. To refinance Armis bridge loan. $38B demand (9.5x oversubscribed).</td></tr>
+</table>
+</div>
+<p>No known 10-K/A, NT 10-K, auditor departure, restatement, SEC comment letter. <span class="tag tag-verified">VERIFIED</span></p>
+
+<h3>6.3 — Compensation & governance (DEF 14A)</h3>
+<ul>
+<li>CEO McDermott total comp FY24 ~$71M (high — highest in NOW history). <span class="tag tag-inferred">INFERRED from pattern</span></li>
+<li>Dominant % equity comp (~95% equity vs cash). High alignment in theory.</li>
+<li>Performance-linked: PSU with revenue/FCF metrics.</li>
+<li>Total directors+board insider ownership ~0.5-1% outstanding. Low for founder-led, acceptable for imported-CEO.</li>
+<li>Independent board >85% (high standard).</li>
+<li>Auditor: PricewaterhouseCoopers, decade-long mandate. <span class="tag tag-verified">VERIFIED</span></li>
+<li>Say-on-Pay: historically approved >90%. No material controversy.</li>
+</ul>
+
+<h3>6.4 — Insider activity (Form 4 last 12 months)</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Insider</th><th>Role</th><th>Type</th><th>Notes</th></tr>
+<tr><td>2025-08-19</td><td>W. McDermott</td><td>CEO/Chair</td><td>SELL 1,585 sh @ $900 (pre-split)</td><td>Routine 10b5-1</td></tr>
+<tr><td>Pre Q4 FY25</td><td>Various exec</td><td>—</td><td>Routine 10b5-1 SELL</td><td>Normal pattern</td></tr>
+<tr><td><b>2026-02-17</b></td><td>5 senior exec</td><td>CEO+CFO+VC+CPO+SC</td><td><b>TERMINATE 10b5-1 plans</b></td><td>Cancel scheduled future sales</td></tr>
+<tr><td><b>2026-02-27</b></td><td>W. McDermott</td><td>CEO/Chair</td><td><b>BUY 28,682 sh ~$3M @ $104-106</b></td><td>Open market purchase, first historical buy</td></tr>
+<tr><td>Q1 FY26</td><td>All</td><td>—</td><td><b>ZERO sales</b></td><td>Reported by company release</td></tr>
+</table>
+</div>
+<p><b>Read</b>: the company executed $2B of buyback in Q1 and <b>no executive sold a single share</b>. McDermott put $3M of his own money at $104-106 — clear conviction. Historically in the previous 5 years McDermott had sold $25M+ at $461 pre-split (= $92 post-split adj). So he's buying <b>higher than where he was heavily selling</b>: either he feels he missed a train, or he has sharp conviction on the bottom. Rare and bullish pattern. <span class="tag tag-verified">VERIFIED — Form 4, 8-K 2026-02-17</span></p>
+
+<h3>6.5 — Institutional ownership (13F)</h3>
+<p>Institutional ~<b>86-91% of float</b>. 2,323 registered institutional holders. <span class="tag tag-verified">VERIFIED — Fintel</span></p>
+<div class="table-scroll">
+<table>
+<tr><th>#</th><th>Holder</th><th>Type</th><th>Position (qualitative)</th></tr>
+<tr><td>1</td><td>Vanguard Group</td><td>Passive</td><td>Largest, ~9-10%</td></tr>
+<tr><td>2</td><td>BlackRock</td><td>Passive</td><td>~8%</td></tr>
+<tr><td>3</td><td>State Street</td><td>Passive</td><td>~4-5%</td></tr>
+<tr><td>4</td><td>JPMorgan Chase</td><td>Active+ETF</td><td>~3%</td></tr>
+<tr><td>5</td><td>T. Rowe Price</td><td>Active</td><td>~3%</td></tr>
+<tr><td>6</td><td>Geode Capital</td><td>Passive</td><td>~2-3%</td></tr>
+<tr><td>7</td><td>Morgan Stanley</td><td>Active+ETF</td><td>~2%</td></tr>
+<tr><td>8</td><td>FMR (Fidelity)</td><td>Active</td><td>~2%</td></tr>
+<tr><td>9</td><td>UBS AM Americas</td><td>Mix</td><td>~1-2%</td></tr>
+<tr><td>10</td><td>Norges Bank</td><td>Sovereign</td><td>~1-2%</td></tr>
+</table>
+</div>
+<p>Dominant passive mix (Vanguard+BlackRock+State Street+Geode = ~25% concentration). Typical mega-cap quality pattern. No known activist hedge fund in concentrated position. <span class="tag tag-verified">VERIFIED — Fintel via search</span></p>
+<p><b>Short interest</b>: 30M shares = 2.89% float, 1.8 days to cover. <b>Low</b>, no squeeze setup. Stable borrow rate. <span class="tag tag-verified">VERIFIED — Medium analyst April 2026</span></p>
+
+<h3>6.6 — Anomalous filings / red flags</h3>
+<ul>
+<li>No 10-K/A.</li>
+<li>No NT 10-K/NT 10-Q.</li>
+<li>No known public SEC investigation or comment letter.</li>
+<li>Clean auditor opinion (PwC).</li>
+<li>No material ICFR weakness.</li>
+<li><b>Point to monitor</b>: Q1 FY26 10-Q must be filed by May 2026 — check if new material Risk Factors on Armis or Middle East exposure.</li>
+</ul>
+
+<h3>6.7 — Influential People Tracking</h3>
+
+<div class="disclaimer-yellow">
+<strong>⚠️ Disclaimer</strong> — The information in this section is <b>qualitative context, not entry trigger</b>. Politician filings lag up to 45 days; 13Fs arrive 45 days after quarter end; public statements by famous CEOs or investors are often talking-book. Use to integrate the fundamental thesis already formed in PARTS 1-5, never as primary purchase reason. The "famous buys → I buy too" narrative bias is one of the most common ways to lose money.
+</div>
+
+<h4>6.7.A — US Politicians & Government officials (STOCK Act + OGE 278-T)</h4>
+<p>On <b>CapitolTrades</b> ServiceNow is traded by <b>19 politicians, 61 total transactions, $1.24M aggregate volume</b> in the last 24 months. Net positive ~$240K (more buys than sells). <span class="tag tag-verified">VERIFIED — CapitolTrades + AltIndex</span></p>
+
+<h4 style="color:#FBBF24;">⭐ Highly material event: President Trump (OGE Form 278-T)</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Filer</th><th>Type</th><th>Amount range</th><th>Notes</th></tr>
+<tr><td><b>2026-02-10</b></td><td><b>President Donald Trump</b></td><td><b>PURCHASE NOW</b></td><td><b>$1M-$5M</b></td><td>Filed 2026-05-08, certified by OGE 2026-05-13. Same day Trump sold $5M-$25M each of META, AMZN, MSFT → portfolio rotation toward enterprise software/AI.</td></tr>
+</table>
+</div>
+<p><b>Context</b>: the same Form 278-T discloses 3,800+ Q1 transactions ($220M-$750M total range). Among purchases $1M-$5M, NOW appears alongside NVDA, AVGO, ADBE, ORCL, SNPS, WDAY, MSI, AMZN, TXN, DELL — clearly thematic AI/enterprise software basket. Assets held in trust managed by Trump's children; some transactions flagged "unsolicited", others "broker discretion". The lack of granularity on who exactly placed the trade doesn't diminish the signal value: it's a public disclosure that millions of investors will read. <span class="tag tag-verified">VERIFIED — CNBC 2026-05-15, Yahoo Finance, Investing.com 2026-05-14</span></p>
+
+<h4>Other relevant politicians (CapitolTrades)</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Politician</th><th>Most relevant trade</th><th>Type</th><th>Notes</th></tr>
+<tr><td>Josh Gottheimer (D-NJ)</td><td>2026-03-06 (most recent)</td><td>Purchase</td><td>Purchase post-correction, short reporting lag</td></tr>
+<tr><td>Markwayne Mullin (R-OK)</td><td>2025-09-24 (filed 2025-10-01)</td><td>Purchase $1K-$15K</td><td>Pre-split, price $911 = ~$182 split-adj. Underwater today.</td></tr>
+<tr><td>Tony Wied (R-WI)</td><td>Net biggest buyer ($210K estimate)</td><td>Multiple purchases</td><td>Accumulation pattern</td></tr>
+</table>
+</div>
+<p><b>Trade interpretation 02/10/2026</b>: on that day NOW was trading ~$122-125 split-adj (above today's $99.69). Trump's position therefore <b>currently underwater ~18-22%</b>. At the time of public filing (May 8) the stock had already collapsed post Q1 earnings → news with potential signaling effect: many retail/social investors follow Trump's filings as a contrarian indicator.</p>
+<p><b>Material relevance for thesis</b>: Trump trade comes <b>17 days before</b> McDermott CEO purchase ($3M on 02/27 at $104-106). Both signals (presidential + CEO) converge in February 2026 on a "smart money buying" pattern — but with significant time lag in public knowledge of the Trump trade (3 months later). The signal is real but with limited operational utility on entry timing, more weight as <b>confirmation of contrarian thesis</b>.</p>
+
+<h4>6.7.B — Sector CEOs and leadership (last 90 days)</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Person</th><th>Role</th><th>Context</th><th>Summary</th></tr>
+<tr><td>2026-04-22</td><td>Bill McDermott</td><td>NOW CEO</td><td>Q1 earnings call</td><td>FY30 $30B subscription is "bear case". Signaling style.</td></tr>
+<tr><td>April 2026</td><td>Amit Zavery</td><td>NOW COO</td><td>Reuters interview</td><td>Over 50% new sales usage-based. Structural shift.</td></tr>
+<tr><td>May 2026</td><td>Bill McDermott</td><td>NOW CEO</td><td>Knowledge 2026 keynote</td><td>"Armis is going to be our Instagram" — ambitious M&A analogy.</td></tr>
+<tr><td>Q1 FY26</td><td>Mark Benioff</td><td>Salesforce CEO</td><td>CRM earnings call</td><td>Aggressive Agentforce positioning vs ServiceNow workflow.</td></tr>
+<tr><td>2026</td><td>Satya Nadella</td><td>Microsoft CEO</td><td>Various events</td><td>Push Copilot Studio low-code, vendor competing directly with Now Platform.</td></tr>
+</table>
+</div>
+<p>McDermott is notoriously a "bullish narrator" — weigh his statements with skepticism. The <b>real evidence is the $3M personal cash</b>, not the words.</p>
+
+<h4>6.7.C — Institutional investors with public voice</h4>
+<p>Based on public 13F filings and recent public statements (last 6 months), <b>no high-profile activist/value investor with documented public voice has a publicly disclosed concentrated position on NOW</b>. The top 10 institutional holders are dominated by passive index funds (Vanguard, BlackRock, State Street, Geode) and large mutual fund families (T. Rowe Price, FMR/Fidelity, JPMorgan) already listed in section 6.5 above. <span class="tag tag-verified">VERIFIED via web search 2026-05-22</span></p>
+<p>This is consistent with the "mega-cap compounder" profile: NOW flies under the radar of activists and deep-value investors seeking classic deep mispricings. The absence of concentrated activist position is <b>neither bullish nor bearish per se</b> — it reduces both squeeze upside potential and structural short risk.</p>
+
+<h4>6.7.D — Short reports and high-profile analyst calls (12M)</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Firm</th><th>Type</th><th>Notes</th></tr>
+<tr><td>2026-04-23</td><td>Goldman Sachs</td><td>Buy → Buy, target $188 → $163</td><td>Cut on margin compression</td></tr>
+<tr><td>2026-04-23</td><td>Jefferies</td><td>Buy → Buy, target $175 → $135</td><td>Significant cut</td></tr>
+<tr><td>2026-04-23</td><td>Piper Sandler</td><td>Buy → Buy, target $200 → $140</td><td>Largest peer cut</td></tr>
+<tr><td>2026-04-10</td><td>UBS</td><td>Buy → Neutral</td><td>Pre-earnings downgrade</td></tr>
+<tr><td>April 2026</td><td>Bernstein</td><td>Outperform, target $236 → $226</td><td>Trimming but high rating</td></tr>
+<tr><td>May 2026</td><td>Bank of America</td><td>Buy (reinstatement), target $130</td><td>Coverage restart post selloff</td></tr>
+<tr><td>—</td><td>—</td><td>No Hindenburg/Citron/Muddy Waters short report</td><td>NOW is not short activism target</td></tr>
+</table>
+</div>
+<p>Consensus 1Y target price (TradingView analyst consensus): <b>$140.6</b> (Strong Buy rating). +41% upside from current. <span class="tag tag-verified">VERIFIED — TradingView</span></p>
+
+<h4>6.7.E — Synthesis and weighting</h4>
+<div class="verdict-box">
+<p><b>Bullish convergent pattern</b> on insider/political/buyback side: <b>President Trump purchases NOW $1M-$5M on 2026-02-10</b> + CEO McDermott buys $3M on 2026-02-27 + 5 exec cancel 10b5-1 + $2B Q1 buyback + $5B additional authorized = leadership and political "smart money" behaving as if the stock were mispriced in February at $105-125 range. <b>No known activist short, no Hindenburg/Citron report</b> — there's no structured institutional short thesis. Sell-side analysts have cut targets but maintain Buy ratings (consensus $140.6, +41% upside).</p>
+<p><b>Important caveat on Trump trade</b>: managed in trust by his children, some transactions flagged "broker discretion" — it's not necessarily a direct active choice of the President. Public news of the trade (May 8 filing, May 13 certification) came AFTER NOW crashed to $90s, so it cannot be interpreted as catalyst that triggered the bottom. It's <b>retrospective confirmation</b> that smart money was accumulating in February, not real-time signal.</p>
+<p><b>Operational verdict 6.7</b>: <b>Supports existing thesis (PART 3 bull) with reinforced weight</b>. Doesn't overturn rating but reduces conviction in structural bear case: if business were really broken, McDermott would not buy $3M cash at $105 and the Trump-trust portfolio rotation would not have selected NOW among the top AI/enterprise positions. Adjusts the final rating from Hold to <b>Hold/Speculative Buy with medium-high conviction</b>.</p>
+</div>
+</section>
+
+<!-- PART 7 -->
+<section id="parte-7">
+<h2><span class="num">7.</span>Technicals and Operational Plan</h2>
+
+<h3>7.1 — Primary trend</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Indicator</th><th>Value</th><th>Reading</th></tr>
+<tr><td>Price</td><td class="num">$99.69</td><td>—</td></tr>
+<tr><td>SMA 9 D</td><td class="num">$95.71</td><td><span class="chg-pos">Above (+4%)</span></td></tr>
+<tr><td>SMA 21 D</td><td class="num">$92.54</td><td><span class="chg-pos">Above (+8%)</span></td></tr>
+<tr><td>SMA 50 D</td><td class="num">$98.33</td><td><span class="chg-pos">Above (+1.4%)</span></td></tr>
+<tr><td>SMA 100 D</td><td class="num">$110.28</td><td><span class="chg-neg">Below (−9.6%)</span></td></tr>
+<tr><td>SMA 150 D</td><td class="num">$130.28</td><td><span class="chg-neg">Below (−23.5%)</span></td></tr>
+<tr><td><b>SMA 200 D</b></td><td class="num"><b>$143.15</b></td><td><b><span class="chg-neg">Below (−30.4%)</span></b></td></tr>
+<tr><td>EMA 200 D</td><td class="num">$133.06</td><td><span class="chg-neg">Below (−25%)</span></td></tr>
+</table>
+</div>
+<p><b>Reading</b>: price above short SMAs (9/21/50) → technical bounce in progress post-April selloff. But <b>below SMA 100/150/200</b> → primary trend <b>still bearish</b>. Classic "dead cat bounce" or "first accumulation step" pattern: discriminant will be the hold of $95-98 in next 2-4 weeks.</p>
+
+<h3>7.2 — Key levels</h3>
+<ul>
+<li><b>Supports</b>: $95 (SMA9, recent low cluster) → $81-83 (52w low + weekly Camarilla S2/S3) → $70 (weekly Camarilla S2 classic) → $42-45 (weekly Camarilla S3, extreme crash scenario)</li>
+<li><b>Resistances</b>: $102-103 (daily Pivot P1 + cluster) → $107-110 (SMA 100D + daily Pivot R2) → <b>$115-118</b> (daily Pivot R3 + key level) → $130 (SMA150) → <b>$143</b> (SMA200, main recovery target) → $156-166 (weekly Camarilla R1-R2)</li>
+<li><b>Open gaps</b>: 2026-04-23 gap at $103-107 (post-earnings downside) still <b>unfilled</b>. Magnetic level.</li>
+<li><b>52w high split-adj</b>: $211.48 (July 2025). Huge distance.</li>
+</ul>
+
+<h3>7.3 — Momentum</h3>
+<div class="table-scroll">
+<table>
+<tr><th>RSI</th><th>Value</th><th>Reading</th></tr>
+<tr><td>RSI 14 D</td><td class="num">55.0</td><td>Neutral, slight bullish bias</td></tr>
+<tr><td>RSI 14 W</td><td class="num">39.7</td><td><span class="chg-neg">Below 50, weak momentum</span></td></tr>
+<tr><td>RSI 14 M</td><td class="num">34.6</td><td><span class="chg-neg">Near monthly oversold</span></td></tr>
+</table>
+</div>
+<p>Monthly RSI 34.6 = structural oversold level (historically these levels have been good entry timing in 5Y for NOW), but weekly 39.7 still bearish. Daily 55 = short-term in reconstruction. <span class="tag tag-verified">VERIFIED — TradingView</span></p>
+
+<h3>7.4 — Relative strength (vs SPY/QQQ/IGV)</h3>
+<ul>
+<li>NOW 1Y Perf −50.6% vs SPY ~+5% (estimate) → massive underperformance</li>
+<li>NOW YTD Perf −34.9% vs IGV (software ETF) −10-15% estimate → sector underperformance</li>
+<li>NOW 3M Perf −5.95% — rally in line with software sub-sector that rebounded</li>
+</ul>
+<p>NOW is <b>weak vs software peers but in relative recovery phase</b> over the last quarter. <span class="tag tag-inferred">INFERRED</span></p>
+
+<h3>7.5 — Volumes</h3>
+<ul>
+<li>Volume 1d: 26.5M (vs 30d avg 30.4M) → <b>−13%</b>, below average</li>
+<li>Volume 1m: 432.7M (vs 60d proportion) → normal distribution</li>
+<li>90d avg volume: 23.5M, accelerated over the last 60d post-selloff</li>
+<li>Volume change % 1d: −11.9%</li>
+</ul>
+<p>Volumes <b>elevated during April selloff</b> (capitulation), normalizing in recent weeks. Pattern consistent with potential base building, but breakout volume above $107-110 needed for confirmation.</p>
+
+<h3>7.6 — Concrete operational setup</h3>
+
+<div class="verdict-box">
+<h4>Stock purchase setup (12-24 month horizon)</h4>
+<div class="table-scroll">
+<table>
+<tr><th>Parameter</th><th>Value</th></tr>
+<tr><td><b>Optimal entry zone</b></td><td>$92-98 (on pullback to SMA21/50)</td></tr>
+<tr><td>Aggressive entry</td><td>$99-103 (current price, accept further drawdown)</td></tr>
+<tr><td><b>Structural stop</b></td><td><b>$78</b> (below weekly Pivot Classic S1 + support cluster)</td></tr>
+<tr><td>Emergency stop</td><td>$72 (below bear target + weekly Pivot S2 cluster)</td></tr>
+<tr><td>Target 1 (T1)</td><td>$115-120 (April gap fill + daily Camarilla R3)</td></tr>
+<tr><td>Target 2 (T2)</td><td>$143 (SMA200, primary trend recovery)</td></tr>
+<tr><td>Target 3 (T3, bull case)</td><td>$160-175 (consensus + bull scenario)</td></tr>
+<tr><td><b>R/R with entry $99 / stop $78 / T2 $143</b></td><td><b>~2.1:1</b></td></tr>
+<tr><td>R/R with entry $95 / stop $78 / T2 $143</td><td>~2.8:1</td></tr>
+<tr><td><b>Sizing approach</b></td><td>Tranche-based: initial position at current price, add on pullback to $90 and $82 zones</td></tr>
+</table>
+</div>
+
+<div class="verdict-box">
+<h4>LEAPS alternative (long-dated options)</h4>
+<p>For those who want directional expression with reduced capital and controlled leverage:</p>
+<ul>
+<li><b>LEAPS calls Jan 2027 strike $100-110</b>: captures all the base case move toward $135-145. Estimated premium $14-18 (delta ~0.55). Break-even ~$118.</li>
+<li><b>LEAPS calls Jan 2028 strike $110-120</b>: 18-24 month horizon, captures bull scenario $160-175. Estimated premium $18-22 (delta ~0.50). Break-even ~$132.</li>
+<li><b>To avoid</b>: monthly or quarterly options (theta risk on still-broken trend), aggressive OTM strikes (low probability).</li>
+<li>Consider <b>selling OTM puts</b> $80-85 with 6-9 month expiry for discounted purchase if triggered.</li>
+</ul>
+<p style="font-size:12px;color:var(--text-3);">Estimated premiums [INFERRED — NOW IV ~30-40% post-earnings, typical scenario]. Verify live quotes on the options chain before execution.</p>
+</div>
+</section>
+
+<!-- VERDICT -->
+<div id="verdict" class="final-verdict">
+<h2>Final Verdict</h2>
+
+<div class="fv-grid">
+<div class="fv-item">
+<div class="lbl">Rating</div>
+<div class="val"><span class="badge badge-amber">HOLD / SPECULATIVE BUY</span></div>
+</div>
+<div class="fv-item">
+<div class="lbl">Conviction</div>
+<div class="val"><span class="badge badge-amber">MEDIUM-HIGH</span></div>
+</div>
+<div class="fv-item">
+<div class="lbl">Base Target 18-24M</div>
+<div class="val">$135 (+32%)</div>
+</div>
+<div class="fv-item">
+<div class="lbl">Expected Value</div>
+<div class="val">$129 (+27%)</div>
+</div>
+<div class="fv-item">
+<div class="lbl">Structural stop</div>
+<div class="val">$78</div>
+</div>
+<div class="fv-item">
+<div class="lbl">Horizon</div>
+<div class="val">12-24 months</div>
+</div>
+</div>
+
+<h3>Thesis invalidation conditions</h3>
+<ul>
+<li><b>Quantitative</b>: weekly close below $78 with elevated volumes (below structural stop).</li>
+<li><b>Fundamental</b>: cRPO cc growth &lt; 18% in Q2 or Q3 FY26 → confirmed structural deceleration, "temporary compression" thesis broken.</li>
+<li><b>Margin</b>: FY27 non-GAAP op margin guidance below 30% → structural moat erosion.</li>
+<li><b>Insider</b>: McDermott or exec resell within 12 months the shares purchased on 2026-02-27 → conviction failure signal.</li>
+<li><b>M&A</b>: material Armis goodwill write-down (even just flagged in 10-Q) → execution failure on flagship deal.</li>
+</ul>
+
+<h3>Catalyst calendar next 6 months</h3>
+<div class="table-scroll">
+<table>
+<tr><th>Date</th><th>Event</th><th>Expected impact</th></tr>
+<tr><td>May 2026</td><td>Full Q1 FY26 10-Q filing</td><td>Verify updated Risk Factors on Armis + debt + Middle East</td></tr>
+<tr><td>Jun-Jul 2026</td><td>Multiple guidance reaffirmation at conferences</td><td>Watch for Middle East deal slippage update</td></tr>
+<tr><td><b>2026-07-29</b></td><td><b>Q2 FY26 earnings</b></td><td><b>Main catalyst</b>: cRPO growth, AI ACV progress, margin trajectory, Armis contribution disclosure</td></tr>
+<tr><td>Sep-Oct 2026</td><td>Knowledge user conference 2027 prep</td><td>AI product announcements, partnerships</td></tr>
+<tr><td>Late Oct 2026</td><td>Q3 FY26 earnings</td><td>Confirm 75% FY26 guidance, first signal of organic sustainability</td></tr>
+<tr><td>Q4 2026</td><td>Middle East deal slippage verification</td><td>If conflict resolved: positive catalyst deal unlock</td></tr>
+</table>
+</div>
+
+<h3>Final synthesis</h3>
+<p>NOW is the classic setup of an <b>enterprise SaaS compounder in valuation reset</b>: hostile technical trend but intact fundamentals, leadership putting its own money on the thesis, multiples compressed 55-60% below historical median, comparable peers all suffering (CRM, ADBE, INTU, WDAY all −30/−55% YTD). <b>It's not an all-in buy</b>: it's an opportunity to build in tranches with clear structural stop at $78 and minimum 12-month horizon. The main risk is not the business, it's the timing: the bottom may not have arrived yet (bear target $72). Whoever enters must accept the possibility of living through a further −25/30% drawdown before recovery — in exchange for EV +28% with upside skewed toward bull case if SaaSpocalypse narrative discharges in next 2-3 quarters.</p>
+<p>The thesis horizon is medium-long term (12-24 months) and the setup should be sized and managed as a strategic position, distinct from short-term tactical trading capital.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+<p><b>Sources consulted</b>:</p>
+<ul style="margin: 6px 0; font-size:11.5px;">
+<li>TradingView Watchlist 2026-05-23 — multiples, MA, RSI, pivots, peer comp</li>
+<li>SEC EDGAR — 10-K FY24, 8-K Q1 FY26 earnings release (2026-04-22), 8-K 2026-02-17 (10b5-1 plan termination), 8-K April 2026 (Armis closing), 8-K May 2026 ($4B senior notes)</li>
+<li><b>OGE Form 278-T President Trump (filed 2026-05-08, certified 2026-05-13)</b> — NOW purchase 2026-02-10 $1M-$5M range, via CNBC, Yahoo Finance, Investing.com 2026-05-14/15</li>
+<li>ServiceNow IR newsroom — Q1 FY26 results and Q2/FY26 guidance</li>
+<li>CapitolTrades.com/issuers/434658 — politicians trading history</li>
+<li>AltIndex, Fintel, MarketBeat — institutional ownership, short interest, insider trades</li>
+<li>Seeking Alpha, Motley Fool, Trefis, Investing.com — post-earnings April 2026 analysis</li>
+<li>Capital.com, Business Wire — December 2025 5-for-1 split press release</li>
+<li>Reuters via Investing.com — COO Amit Zavery interview April 2026</li>
+</ul>
+<p style="margin-top: 14px;"><b>Disclaimer</b>: Static snapshot based on TradingView data as of 2026-05-23. For live candlestick chart and real-time indicators, consult TradingView. The chart in this page is reconstructed from TradingView metrics (monthly highs/lows, SMA, pivot levels) and <b>does not replace</b> a live chart. All historical values pre-2025-12-18 are normalized split-adjusted (÷5) for visual consistency post 5-for-1 split.</p>
+<p><b>This document does not constitute financial advice.</b> Investment decisions are the sole responsibility of the reader. The analysis reflects analyst opinions based on public sources at the time of writing and may contain errors, omissions, or subjective interpretations.</p>
+</footer>
+
+</div>
+
+<!-- CHART.JS -->
+<script>
+
+// Data
+const candleData = [{"x":1716422400000,"o":156.34,"h":156.34,"l":151.21,"c":151.63},{"x":1716508800000,"o":149.87,"h":149.94,"l":147.27,"c":147.7},{"x":1716854400000,"o":147.78,"h":147.8,"l":143.66,"c":145.77},{"x":1716940800000,"o":144.4,"h":147.57,"l":144.29,"c":146.22},{"x":1717027200000,"o":138.2,"h":138.51,"l":128.03,"c":128.66},{"x":1717113600000,"o":130.36,"h":131.51,"l":127.6,"c":131.39},{"x":1717372800000,"o":131.96,"h":132.87,"l":129.09,"c":132.02},{"x":1717459200000,"o":131.72,"h":134.92,"l":131.2,"c":134.4},{"x":1717545600000,"o":136.69,"h":141.14,"l":135.24,"c":140.82},{"x":1717632000000,"o":141.25,"h":142.47,"l":139.95,"c":140.63},{"x":1717718400000,"o":140.1,"h":140.8,"l":137.7,"c":139.76},{"x":1717977600000,"o":139.46,"h":142.13,"l":138.71,"c":141.83},{"x":1718064000000,"o":142.35,"h":143.8,"l":141.37,"c":142.41},{"x":1718150400000,"o":144.45,"h":145.9,"l":144.17,"c":144.3},{"x":1718236800000,"o":144.4,"h":145.56,"l":141.83,"c":141.95},{"x":1718323200000,"o":143.12,"h":146.1,"l":143.12,"c":145.72},{"x":1718582400000,"o":144.68,"h":145.87,"l":143.81,"c":145.1},{"x":1718668800000,"o":144.57,"h":146.9,"l":144.15,"c":146.03},{"x":1718841600000,"o":148.4,"h":148.45,"l":145.88,"c":146.86},{"x":1718928000000,"o":147.99,"h":150.11,"l":146.72,"c":149.87},{"x":1719187200000,"o":148.4,"h":149.64,"l":147.54,"c":147.92},{"x":1719273600000,"o":149.0,"h":151.28,"l":148.48,"c":150.96},{"x":1719360000000,"o":150.8,"h":152.27,"l":150.16,"c":150.78},{"x":1719446400000,"o":151.64,"h":156.0,"l":151.33,"c":154.83},{"x":1719532800000,"o":155.09,"h":157.99,"l":154.18,"c":157.33},{"x":1719792000000,"o":156.8,"h":158.1,"l":154.16,"c":157.79},{"x":1719878400000,"o":157.0,"h":158.83,"l":156.32,"c":158.82},{"x":1719964800000,"o":158.73,"h":159.19,"l":157.04,"c":157.18},{"x":1720137600000,"o":157.68,"h":161.3,"l":157.18,"c":161.29},{"x":1720396800000,"o":152.7,"h":155.33,"l":152.29,"c":153.24},{"x":1720483200000,"o":150.19,"h":152.0,"l":147.4,"c":148.8},{"x":1720569600000,"o":148.11,"h":148.68,"l":146.31,"c":148.63},{"x":1720656000000,"o":149.2,"h":151.3,"l":148.27,"c":149.83},{"x":1720742400000,"o":149.8,"h":152.52,"l":148.8,"c":151.7},{"x":1721001600000,"o":153.39,"h":155.3,"l":151.85,"c":153.57},{"x":1721088000000,"o":153.57,"h":154.01,"l":150.9,"c":152.16},{"x":1721174400000,"o":148.0,"h":149.27,"l":146.04,"c":147.21},{"x":1721260800000,"o":147.67,"h":150.12,"l":146.02,"c":147.75},{"x":1721347200000,"o":148.94,"h":151.18,"l":147.6,"c":150.24},{"x":1721606400000,"o":150.96,"h":152.89,"l":150.75,"c":151.3},{"x":1721692800000,"o":152.69,"h":155.19,"l":152.13,"c":153.1},{"x":1721779200000,"o":151.0,"h":151.5,"l":145.85,"c":146.17},{"x":1721865600000,"o":157.87,"h":170.07,"l":156.61,"c":165.76},{"x":1721952000000,"o":165.17,"h":169.37,"l":163.61,"c":165.52},{"x":1722211200000,"o":165.8,"h":166.1,"l":159.71,"c":159.81},{"x":1722297600000,"o":161.15,"h":161.15,"l":156.92,"c":159.76},{"x":1722384000000,"o":163.23,"h":164.29,"l":161.0,"c":162.88},{"x":1722470400000,"o":163.77,"h":167.72,"l":160.42,"c":162.28},{"x":1722556800000,"o":158.17,"h":158.63,"l":153.09,"c":158.13},{"x":1722816000000,"o":151.41,"h":158.19,"l":149.22,"c":156.25},{"x":1722902400000,"o":157.4,"h":162.86,"l":156.26,"c":158.59},{"x":1722988800000,"o":161.13,"h":163.31,"l":154.99,"c":155.26},{"x":1723075200000,"o":158.4,"h":160.54,"l":157.35,"c":159.23},{"x":1723161600000,"o":159.23,"h":163.2,"l":159.23,"c":162.22},{"x":1723420800000,"o":162.22,"h":162.97,"l":160.01,"c":161.32},{"x":1723507200000,"o":162.4,"h":164.57,"l":162.12,"c":163.76},{"x":1723593600000,"o":164.4,"h":165.41,"l":163.1,"c":163.8},{"x":1723680000000,"o":165.0,"h":167.0,"l":164.74,"c":166.42},{"x":1723766400000,"o":165.85,"h":166.21,"l":164.77,"c":165.51},{"x":1724025600000,"o":165.18,"h":166.74,"l":164.24,"c":166.58},{"x":1724112000000,"o":167.0,"h":168.65,"l":166.42,"c":167.64},{"x":1724198400000,"o":166.71,"h":168.08,"l":166.0,"c":167.84},{"x":1724284800000,"o":168.0,"h":168.51,"l":163.9,"c":164.19},{"x":1724371200000,"o":166.0,"h":166.9,"l":163.0,"c":165.65},{"x":1724630400000,"o":165.94,"h":167.35,"l":165.1,"c":165.57},{"x":1724716800000,"o":164.63,"h":167.14,"l":164.63,"c":166.35},{"x":1724803200000,"o":166.34,"h":166.54,"l":161.79,"c":162.82},{"x":1724889600000,"o":164.46,"h":169.8,"l":164.46,"c":166.25},{"x":1724976000000,"o":167.35,"h":171.45,"l":167.17,"c":171.0},{"x":1725321600000,"o":171.28,"h":172.77,"l":166.17,"c":167.17},{"x":1725408000000,"o":165.94,"h":167.28,"l":164.25,"c":166.97},{"x":1725494400000,"o":165.33,"h":168.07,"l":165.01,"c":167.08},{"x":1725580800000,"o":167.8,"h":169.68,"l":163.8,"c":165.01},{"x":1725840000000,"o":166.7,"h":171.4,"l":165.39,"c":171.12},{"x":1725926400000,"o":172.14,"h":173.29,"l":169.5,"c":172.03},{"x":1726012800000,"o":171.65,"h":175.52,"l":168.37,"c":175.19},{"x":1726099200000,"o":176.01,"h":177.9,"l":174.26,"c":177.23},{"x":1726185600000,"o":176.35,"h":176.9,"l":174.58,"c":175.79},{"x":1726444800000,"o":177.0,"h":179.6,"l":175.95,"c":178.49},{"x":1726531200000,"o":178.13,"h":179.92,"l":176.56,"c":177.17},{"x":1726617600000,"o":177.55,"h":179.94,"l":176.46,"c":178.08},{"x":1726704000000,"o":181.6,"h":184.39,"l":180.57,"c":183.85},{"x":1726790400000,"o":184.08,"h":188.02,"l":183.46,"c":187.47},{"x":1727049600000,"o":187.38,"h":189.09,"l":184.58,"c":185.11},{"x":1727136000000,"o":185.11,"h":185.38,"l":181.5,"c":184.72},{"x":1727222400000,"o":179.69,"h":180.2,"l":177.3,"c":178.01},{"x":1727308800000,"o":178.73,"h":178.84,"l":174.29,"c":176.97},{"x":1727395200000,"o":176.81,"h":177.24,"l":175.27,"c":176.36},{"x":1727654400000,"o":175.85,"h":178.96,"l":175.24,"c":178.88},{"x":1727740800000,"o":179.72,"h":179.72,"l":173.33,"c":173.44},{"x":1727827200000,"o":173.8,"h":176.92,"l":172.65,"c":176.08},{"x":1727913600000,"o":175.6,"h":178.44,"l":175.42,"c":178.13},{"x":1728000000000,"o":179.96,"h":183.66,"l":179.28,"c":183.54},{"x":1728259200000,"o":183.82,"h":184.51,"l":179.99,"c":181.19},{"x":1728345600000,"o":185.19,"h":188.6,"l":183.85,"c":184.4},{"x":1728432000000,"o":184.39,"h":188.68,"l":183.19,"c":187.73},{"x":1728518400000,"o":186.64,"h":189.8,"l":186.59,"c":188.93},{"x":1728604800000,"o":188.56,"h":189.35,"l":187.42,"c":187.72},{"x":1728864000000,"o":189.48,"h":189.92,"l":187.18,"c":188.94},{"x":1728950400000,"o":189.06,"h":189.45,"l":185.33,"c":185.59},{"x":1729036800000,"o":184.99,"h":185.4,"l":182.41,"c":183.77},{"x":1729123200000,"o":186.56,"h":186.62,"l":183.02,"c":183.42},{"x":1729209600000,"o":184.2,"h":185.63,"l":183.42,"c":184.35},{"x":1729468800000,"o":180.4,"h":183.73,"l":179.95,"c":183.67},{"x":1729555200000,"o":183.3,"h":184.88,"l":182.87,"c":183.59},{"x":1729641600000,"o":183.29,"h":184.02,"l":180.27,"c":181.54},{"x":1729728000000,"o":189.68,"h":195.96,"l":188.08,"c":191.32},{"x":1729814400000,"o":191.45,"h":192.99,"l":189.43,"c":190.17},{"x":1730073600000,"o":191.8,"h":192.0,"l":189.0,"c":189.0},{"x":1730160000000,"o":190.0,"h":191.56,"l":187.89,"c":190.62},{"x":1730246400000,"o":190.21,"h":192.7,"l":189.9,"c":190.0},{"x":1730332800000,"o":188.16,"h":190.87,"l":185.67,"c":186.6},{"x":1730419200000,"o":187.47,"h":190.23,"l":186.11,"c":188.68},{"x":1730678400000,"o":188.81,"h":192.07,"l":188.32,"c":190.92},{"x":1730764800000,"o":192.29,"h":194.77,"l":191.67,"c":194.21},{"x":1730851200000,"o":198.8,"h":199.41,"l":196.42,"c":198.9},{"x":1730937600000,"o":199.36,"h":204.89,"l":199.0,"c":203.06},{"x":1731024000000,"o":202.19,"h":203.99,"l":201.0,"c":201.62},{"x":1731283200000,"o":202.6,"h":207.6,"l":202.6,"c":207.2},{"x":1731369600000,"o":206.16,"h":210.65,"l":205.42,"c":209.66},{"x":1731456000000,"o":209.66,"h":212.33,"l":208.7,"c":209.11},{"x":1731542400000,"o":209.8,"h":210.8,"l":206.4,"c":207.96},{"x":1731628800000,"o":204.79,"h":205.94,"l":200.6,"c":202.28},{"x":1731888000000,"o":203.31,"h":204.24,"l":200.75,"c":201.07},{"x":1731974400000,"o":199.53,"h":205.17,"l":198.68,"c":204.42},{"x":1732060800000,"o":205.6,"h":206.34,"l":201.26,"c":204.6},{"x":1732147200000,"o":206.73,"h":210.65,"l":206.2,"c":209.41},{"x":1732233600000,"o":210.2,"h":212.92,"l":210.0,"c":212.12},{"x":1732492800000,"o":212.92,"h":213.78,"l":209.83,"c":210.54},{"x":1732579200000,"o":212.0,"h":214.57,"l":210.9,"c":214.01},{"x":1732665600000,"o":212.74,"h":213.04,"l":207.68,"c":208.28},{"x":1732838400000,"o":208.47,"h":210.4,"l":207.67,"c":209.89},{"x":1733097600000,"o":209.68,"h":211.06,"l":209.1,"c":209.69},{"x":1733184000000,"o":208.02,"h":211.53,"l":207.38,"c":211.46},{"x":1733270400000,"o":216.73,"h":225.33,"l":216.0,"c":224.63},{"x":1733356800000,"o":223.02,"h":226.12,"l":222.62,"c":224.74},{"x":1733443200000,"o":227.12,"h":227.4,"l":224.0,"c":224.87},{"x":1733702400000,"o":224.84,"h":226.8,"l":221.14,"c":224.1},{"x":1733788800000,"o":222.8,"h":229.47,"l":222.8,"c":225.57},{"x":1733875200000,"o":227.21,"h":231.58,"l":227.21,"c":229.44},{"x":1733961600000,"o":228.19,"h":230.94,"l":227.4,"c":229.68},{"x":1734048000000,"o":226.0,"h":228.35,"l":222.92,"c":224.22},{"x":1734307200000,"o":223.56,"h":226.91,"l":222.0,"c":225.99},{"x":1734393600000,"o":226.0,"h":226.47,"l":222.13,"c":222.94},{"x":1734480000000,"o":223.5,"h":223.77,"l":211.4,"c":212.2},{"x":1734566400000,"o":214.05,"h":216.16,"l":212.5,"c":214.97},{"x":1734652800000,"o":212.0,"h":220.57,"l":211.0,"c":218.25},{"x":1734912000000,"o":217.2,"h":218.4,"l":214.75,"c":217.65},{"x":1734998400000,"o":219.42,"h":221.31,"l":218.0,"c":221.11},{"x":1735171200000,"o":220.0,"h":221.22,"l":218.72,"c":219.82},{"x":1735257600000,"o":218.4,"h":218.91,"l":212.4,"c":216.29},{"x":1735516800000,"o":213.19,"h":214.72,"l":211.05,"c":213.54},{"x":1735603200000,"o":214.7,"h":214.7,"l":210.59,"c":212.02},{"x":1735776000000,"o":214.7,"h":214.74,"l":208.2,"c":210.87},{"x":1735862400000,"o":211.86,"h":214.83,"l":211.34,"c":214.75},{"x":1736121600000,"o":216.79,"h":216.91,"l":213.72,"c":215.41},{"x":1736208000000,"o":214.82,"h":217.0,"l":208.89,"c":210.83},{"x":1736294400000,"o":212.38,"h":212.6,"l":208.46,"c":209.82},{"x":1736467200000,"o":207.83,"h":208.31,"l":203.35,"c":204.91},{"x":1736726400000,"o":202.23,"h":204.03,"l":199.83,"c":203.15},{"x":1736812800000,"o":206.88,"h":207.41,"l":204.12,"c":206.26},{"x":1736899200000,"o":210.66,"h":211.91,"l":208.2,"c":210.83},{"x":1736985600000,"o":211.71,"h":212.95,"l":210.52,"c":211.43},{"x":1737072000000,"o":214.52,"h":216.0,"l":212.4,"c":214.3},{"x":1737417600000,"o":217.74,"h":220.97,"l":217.24,"c":219.37},{"x":1737504000000,"o":223.0,"h":226.14,"l":222.17,"c":225.03},{"x":1737590400000,"o":223.53,"h":226.84,"l":222.95,"c":226.84},{"x":1737676800000,"o":228.22,"h":229.0,"l":223.76,"c":225.0},{"x":1737936000000,"o":223.48,"h":233.2,"l":222.2,"c":228.12},{"x":1738022400000,"o":230.0,"h":239.62,"l":226.39,"c":234.08},{"x":1738108800000,"o":232.18,"h":234.08,"l":227.04,"c":228.73},{"x":1738195200000,"o":205.42,"h":206.2,"l":198.0,"c":202.55},{"x":1738281600000,"o":206.4,"h":207.15,"l":202.28,"c":203.68},{"x":1738540800000,"o":201.3,"h":206.2,"l":199.61,"c":204.19},{"x":1738627200000,"o":207.98,"h":208.69,"l":199.67,"c":202.03},{"x":1738713600000,"o":203.07,"h":205.77,"l":202.42,"c":205.41},{"x":1738800000000,"o":204.58,"h":207.06,"l":203.66,"c":204.66},{"x":1738886400000,"o":205.0,"h":208.47,"l":200.79,"c":201.66},{"x":1739145600000,"o":203.51,"h":206.62,"l":202.25,"c":204.36},{"x":1739232000000,"o":203.0,"h":204.27,"l":200.79,"c":201.81},{"x":1739318400000,"o":199.25,"h":199.68,"l":196.0,"c":196.48},{"x":1739404800000,"o":196.48,"h":198.4,"l":194.1,"c":197.9},{"x":1739491200000,"o":195.82,"h":197.8,"l":193.32,"c":197.33},{"x":1739836800000,"o":197.6,"h":199.51,"l":194.8,"c":199.5},{"x":1739923200000,"o":199.46,"h":200.57,"l":195.13,"c":197.43},{"x":1740009600000,"o":196.02,"h":196.12,"l":191.77,"c":193.6},{"x":1740096000000,"o":192.94,"h":193.4,"l":186.6,"c":187.68},{"x":1740355200000,"o":188.81,"h":188.9,"l":182.71,"c":185.52},{"x":1740441600000,"o":184.74,"h":185.33,"l":179.64,"c":184.46},{"x":1740528000000,"o":185.86,"h":190.52,"l":185.2,"c":188.39},{"x":1740614400000,"o":189.63,"h":190.67,"l":183.93,"c":184.19},{"x":1740700800000,"o":184.19,"h":186.0,"l":181.49,"c":185.95},{"x":1740960000000,"o":187.2,"h":187.8,"l":180.54,"c":182.06},{"x":1741046400000,"o":180.0,"h":183.47,"l":175.39,"c":181.22},{"x":1741132800000,"o":181.0,"h":184.8,"l":179.68,"c":183.16},{"x":1741219200000,"o":178.0,"h":181.58,"l":171.65,"c":173.42},{"x":1741305600000,"o":171.3,"h":174.0,"l":166.54,"c":170.13},{"x":1741564800000,"o":164.68,"h":166.4,"l":155.58,"c":156.77},{"x":1741651200000,"o":160.0,"h":165.6,"l":158.8,"c":161.68},{"x":1741737600000,"o":166.96,"h":169.85,"l":164.69,"c":168.63},{"x":1741824000000,"o":166.0,"h":167.0,"l":161.2,"c":162.32},{"x":1741910400000,"o":164.55,"h":169.81,"l":164.55,"c":168.87},{"x":1742169600000,"o":167.8,"h":171.14,"l":167.0,"c":168.59},{"x":1742256000000,"o":167.49,"h":167.49,"l":164.07,"c":166.0},{"x":1742342400000,"o":167.15,"h":170.8,"l":166.0,"c":168.82},{"x":1742428800000,"o":165.45,"h":165.65,"l":161.84,"c":164.82},{"x":1742515200000,"o":163.23,"h":165.78,"l":161.76,"c":165.55},{"x":1742774400000,"o":169.2,"h":170.7,"l":168.24,"c":169.95},{"x":1742860800000,"o":171.65,"h":174.2,"l":171.0,"c":172.28},{"x":1742947200000,"o":171.27,"h":172.1,"l":166.81,"c":167.71},{"x":1743033600000,"o":167.01,"h":167.99,"l":164.43,"c":165.55},{"x":1743120000000,"o":164.0,"h":164.2,"l":157.91,"c":159.55},{"x":1743379200000,"o":156.3,"h":159.8,"l":151.57,"c":159.23},{"x":1743465600000,"o":159.64,"h":162.59,"l":158.55,"c":162.31},{"x":1743552000000,"o":158.94,"h":165.43,"l":158.94,"c":164.81},{"x":1743638400000,"o":156.55,"h":157.61,"l":151.45,"c":154.81},{"x":1743724800000,"o":151.27,"h":151.75,"l":143.69,"c":144.33},{"x":1743984000000,"o":137.6,"h":151.73,"l":135.73,"c":147.1},{"x":1744070400000,"o":153.6,"h":155.18,"l":142.64,"c":145.52},{"x":1744156800000,"o":145.0,"h":166.33,"l":144.64,"c":165.19},{"x":1744243200000,"o":161.42,"h":162.0,"l":152.22,"c":156.7},{"x":1744329600000,"o":154.26,"h":157.38,"l":151.0,"c":157.13},{"x":1744588800000,"o":160.44,"h":162.43,"l":157.36,"c":159.96},{"x":1744675200000,"o":160.19,"h":164.98,"l":159.84,"c":163.3},{"x":1744761600000,"o":160.92,"h":164.23,"l":158.15,"c":159.33},{"x":1744848000000,"o":160.01,"h":160.01,"l":153.8,"c":154.43},{"x":1745193600000,"o":151.87,"h":153.11,"l":148.48,"c":151.2},{"x":1745280000000,"o":152.56,"h":155.33,"l":150.49,"c":153.37},{"x":1745366400000,"o":164.21,"h":166.79,"l":161.4,"c":162.54},{"x":1745452800000,"o":180.06,"h":188.8,"l":179.67,"c":187.71},{"x":1745539200000,"o":188.8,"h":192.0,"l":185.83,"c":189.05},{"x":1745798400000,"o":191.97,"h":192.21,"l":185.43,"c":187.48},{"x":1745884800000,"o":188.0,"h":189.45,"l":186.11,"c":188.57},{"x":1745971200000,"o":186.11,"h":191.53,"l":184.08,"c":191.0},{"x":1746057600000,"o":194.77,"h":195.72,"l":191.5,"c":191.59},{"x":1746144000000,"o":195.78,"h":197.1,"l":193.81,"c":195.47},{"x":1746403200000,"o":194.6,"h":198.4,"l":194.27,"c":195.61},{"x":1746489600000,"o":193.81,"h":195.74,"l":192.84,"c":193.05},{"x":1746576000000,"o":194.24,"h":197.46,"l":193.46,"c":196.66},{"x":1746662400000,"o":197.0,"h":198.4,"l":194.56,"c":194.9},{"x":1746748800000,"o":196.0,"h":197.36,"l":194.32,"c":196.01},{"x":1747008000000,"o":201.7,"h":203.4,"l":199.13,"c":203.12},{"x":1747094400000,"o":204.6,"h":208.0,"l":203.4,"c":207.34},{"x":1747180800000,"o":207.4,"h":209.2,"l":205.33,"c":205.36},{"x":1747267200000,"o":206.88,"h":208.13,"l":204.39,"c":207.04},{"x":1747353600000,"o":207.68,"h":208.75,"l":206.63,"c":208.04},{"x":1747612800000,"o":205.79,"h":206.94,"l":203.21,"c":205.15},{"x":1747699200000,"o":203.0,"h":204.93,"l":202.66,"c":204.37},{"x":1747785600000,"o":201.78,"h":206.15,"l":201.12,"c":202.95},{"x":1747872000000,"o":202.95,"h":205.5,"l":202.36,"c":203.15},{"x":1747958400000,"o":200.0,"h":202.86,"l":198.92,"c":200.87},{"x":1748304000000,"o":202.72,"h":205.97,"l":202.6,"c":205.48},{"x":1748390400000,"o":205.48,"h":207.53,"l":203.64,"c":204.26},{"x":1748476800000,"o":204.63,"h":204.92,"l":200.94,"c":203.05},{"x":1748563200000,"o":204.0,"h":204.0,"l":200.52,"c":202.22},{"x":1748822400000,"o":201.83,"h":203.59,"l":200.06,"c":202.42},{"x":1748908800000,"o":202.36,"h":203.25,"l":201.1,"c":202.18},{"x":1748995200000,"o":202.31,"h":203.51,"l":200.59,"c":202.55},{"x":1749081600000,"o":205.46,"h":206.29,"l":202.83,"c":203.52},{"x":1749168000000,"o":205.25,"h":206.92,"l":203.27,"c":206.04},{"x":1749427200000,"o":206.2,"h":206.9,"l":203.61,"c":205.37},{"x":1749513600000,"o":204.23,"h":205.37,"l":199.82,"c":201.96},{"x":1749600000000,"o":202.05,"h":203.54,"l":200.28,"c":200.87},{"x":1749686400000,"o":200.52,"h":203.21,"l":200.52,"c":201.47},{"x":1749772800000,"o":199.61,"h":200.2,"l":195.64,"c":197.73},{"x":1750032000000,"o":198.4,"h":203.39,"l":198.28,"c":201.03},{"x":1750118400000,"o":200.77,"h":202.4,"l":199.87,"c":200.98},{"x":1750204800000,"o":200.89,"h":201.41,"l":195.84,"c":196.42},{"x":1750377600000,"o":197.12,"h":197.2,"l":193.09,"c":194.28},{"x":1750636800000,"o":194.28,"h":196.27,"l":191.37,"c":196.08},{"x":1750723200000,"o":198.0,"h":199.9,"l":197.0,"c":199.26},{"x":1750809600000,"o":199.66,"h":202.8,"l":199.63,"c":201.03},{"x":1750896000000,"o":201.44,"h":202.71,"l":198.9,"c":202.29},{"x":1750982400000,"o":202.56,"h":206.61,"l":202.41,"c":204.48},{"x":1751241600000,"o":205.95,"h":207.27,"l":203.69,"c":205.62},{"x":1751328000000,"o":205.45,"h":206.39,"l":198.95,"c":202.38},{"x":1751414400000,"o":200.07,"h":202.21,"l":198.4,"c":201.95},{"x":1751500800000,"o":203.55,"h":211.48,"l":203.0,"c":208.94},{"x":1751846400000,"o":208.65,"h":209.8,"l":205.52,"c":207.0},{"x":1751932800000,"o":207.44,"h":207.75,"l":202.25,"c":204.6},{"x":1752019200000,"o":204.9,"h":205.6,"l":201.8,"c":202.74},{"x":1752105600000,"o":202.74,"h":202.74,"l":193.06,"c":193.62},{"x":1752192000000,"o":192.0,"h":193.2,"l":186.83,"c":187.76},{"x":1752451200000,"o":187.74,"h":192.87,"l":187.03,"c":192.36},{"x":1752537600000,"o":193.05,"h":194.87,"l":191.2,"c":191.38},{"x":1752624000000,"o":193.01,"h":193.82,"l":190.68,"c":193.39},{"x":1752710400000,"o":193.7,"h":195.0,"l":191.0,"c":191.83},{"x":1752796800000,"o":191.61,"h":192.7,"l":189.95,"c":192.68},{"x":1753056000000,"o":191.91,"h":193.82,"l":191.6,"c":191.98},{"x":1753142400000,"o":192.76,"h":194.79,"l":191.37,"c":192.47},{"x":1753228800000,"o":189.57,"h":193.37,"l":189.57,"c":191.29},{"x":1753315200000,"o":206.93,"h":210.2,"l":196.4,"c":199.24},{"x":1753401600000,"o":200.02,"h":200.2,"l":192.82,"c":193.76},{"x":1753660800000,"o":195.2,"h":199.21,"l":195.2,"c":197.15},{"x":1753747200000,"o":198.31,"h":201.15,"l":196.46,"c":198.64},{"x":1753833600000,"o":198.32,"h":198.61,"l":194.6,"c":195.5},{"x":1753920000000,"o":196.4,"h":196.4,"l":188.01,"c":188.62},{"x":1754006400000,"o":187.46,"h":187.46,"l":181.9,"c":182.87},{"x":1754265600000,"o":183.7,"h":185.92,"l":183.05,"c":184.6},{"x":1754352000000,"o":184.4,"h":185.1,"l":180.89,"c":181.02},{"x":1754438400000,"o":182.32,"h":182.61,"l":180.57,"c":182.46},{"x":1754524800000,"o":184.4,"h":184.58,"l":172.4,"c":174.82},{"x":1754611200000,"o":175.68,"h":176.4,"l":172.43,"c":174.5},{"x":1754870400000,"o":173.58,"h":176.0,"l":170.18,"c":171.27},{"x":1754956800000,"o":171.56,"h":171.95,"l":168.01,"c":170.69},{"x":1755043200000,"o":172.11,"h":172.88,"l":168.54,"c":172.66},{"x":1755129600000,"o":171.23,"h":172.6,"l":169.27,"c":170.17},{"x":1755216000000,"o":170.35,"h":173.59,"l":169.72,"c":173.45},{"x":1755475200000,"o":173.29,"h":178.45,"l":173.07,"c":178.41},{"x":1755561600000,"o":178.68,"h":180.18,"l":176.19,"c":177.36},{"x":1755648000000,"o":176.85,"h":179.78,"l":176.0,"c":178.05},{"x":1755734400000,"o":177.19,"h":177.68,"l":174.61,"c":175.39},{"x":1755820800000,"o":175.67,"h":179.28,"l":174.6,"c":177.35},{"x":1756080000000,"o":177.94,"h":178.03,"l":175.74,"c":175.99},{"x":1756166400000,"o":175.8,"h":176.0,"l":171.02,"c":172.93},{"x":1756252800000,"o":174.33,"h":177.92,"l":173.64,"c":177.6},{"x":1756339200000,"o":178.1,"h":187.16,"l":177.95,"c":185.72},{"x":1756425600000,"o":185.85,"h":186.8,"l":181.94,"c":183.49},{"x":1756771200000,"o":180.35,"h":182.85,"l":178.93,"c":182.28},{"x":1756857600000,"o":181.8,"h":184.27,"l":178.9,"c":183.88},{"x":1756944000000,"o":181.9,"h":182.05,"l":175.64,"c":179.71},{"x":1757030400000,"o":180.83,"h":183.24,"l":180.27,"c":182.76},{"x":1757289600000,"o":183.03,"h":188.96,"l":182.51,"c":187.87},{"x":1757376000000,"o":189.0,"h":189.0,"l":185.56,"c":186.73},{"x":1757462400000,"o":187.2,"h":188.98,"l":183.87,"c":184.71},{"x":1757548800000,"o":185.54,"h":188.53,"l":184.73,"c":187.66},{"x":1757635200000,"o":188.35,"h":188.37,"l":185.39,"c":185.79},{"x":1757894400000,"o":186.09,"h":191.23,"l":185.95,"c":189.48},{"x":1757980800000,"o":188.14,"h":189.29,"l":185.69,"c":186.4},{"x":1758067200000,"o":187.35,"h":190.75,"l":186.65,"c":190.07},{"x":1758153600000,"o":191.31,"h":192.41,"l":188.1,"c":189.55},{"x":1758240000000,"o":190.37,"h":193.15,"l":190.0,"c":192.23},{"x":1758499200000,"o":190.78,"h":191.35,"l":186.18,"c":189.56},{"x":1758585600000,"o":189.51,"h":190.1,"l":185.29,"c":185.53},{"x":1758672000000,"o":192.53,"h":194.73,"l":186.22,"c":186.67},{"x":1758758400000,"o":185.49,"h":185.64,"l":182.09,"c":183.72},{"x":1758844800000,"o":183.94,"h":187.63,"l":183.34,"c":187.2},{"x":1759104000000,"o":188.41,"h":190.91,"l":187.85,"c":188.17},{"x":1759190400000,"o":187.82,"h":188.33,"l":180.9,"c":184.06},{"x":1759276800000,"o":184.19,"h":187.0,"l":178.45,"c":182.49},{"x":1759363200000,"o":182.33,"h":183.01,"l":179.11,"c":182.02},{"x":1759449600000,"o":182.73,"h":183.94,"l":181.67,"c":182.47},{"x":1759708800000,"o":180.8,"h":185.95,"l":179.11,"c":182.57},{"x":1759795200000,"o":182.8,"h":183.16,"l":178.67,"c":180.85},{"x":1759881600000,"o":182.0,"h":184.07,"l":181.47,"c":182.86},{"x":1759968000000,"o":180.78,"h":183.93,"l":178.75,"c":183.59},{"x":1760054400000,"o":184.0,"h":185.6,"l":177.46,"c":177.74},{"x":1760313600000,"o":179.41,"h":185.15,"l":178.53,"c":184.74},{"x":1760400000000,"o":181.47,"h":184.85,"l":179.47,"c":182.25},{"x":1760486400000,"o":183.6,"h":184.42,"l":179.94,"c":180.61},{"x":1760572800000,"o":182.79,"h":185.8,"l":177.61,"c":178.9},{"x":1760659200000,"o":178.0,"h":181.31,"l":177.59,"c":180.72},{"x":1760918400000,"o":181.33,"h":184.4,"l":181.27,"c":183.51},{"x":1761004800000,"o":183.5,"h":188.89,"l":182.06,"c":188.3},{"x":1761091200000,"o":188.36,"h":189.6,"l":185.58,"c":187.13},{"x":1761177600000,"o":186.24,"h":188.92,"l":185.6,"c":187.83},{"x":1761264000000,"o":189.15,"h":190.0,"l":185.78,"c":186.03},{"x":1761523200000,"o":188.81,"h":190.34,"l":187.4,"c":189.26},{"x":1761609600000,"o":189.86,"h":190.2,"l":187.58,"c":187.58},{"x":1761696000000,"o":186.91,"h":186.91,"l":182.02,"c":182.34},{"x":1761782400000,"o":185.35,"h":192.97,"l":179.39,"c":186.94},{"x":1761868800000,"o":188.64,"h":189.53,"l":180.66,"c":183.86},{"x":1762128000000,"o":184.43,"h":184.43,"l":177.2,"c":182.77},{"x":1762214400000,"o":180.0,"h":181.73,"l":175.31,"c":177.51},{"x":1762300800000,"o":178.33,"h":178.52,"l":174.46,"c":175.93},{"x":1762387200000,"o":174.95,"h":175.8,"l":170.0,"c":171.75},{"x":1762473600000,"o":170.27,"h":172.62,"l":168.11,"c":172.37},{"x":1762732800000,"o":172.77,"h":173.72,"l":170.23,"c":173.26},{"x":1762819200000,"o":172.69,"h":174.13,"l":171.87,"c":172.13},{"x":1762905600000,"o":173.74,"h":174.0,"l":169.83,"c":172.81},{"x":1762992000000,"o":170.48,"h":172.6,"l":168.8,"c":169.94},{"x":1763078400000,"o":168.4,"h":173.06,"l":167.81,"c":170.09},{"x":1763337600000,"o":169.38,"h":170.7,"l":165.64,"c":167.16},{"x":1763424000000,"o":165.42,"h":167.0,"l":162.32,"c":163.59},{"x":1763510400000,"o":163.33,"h":164.23,"l":161.51,"c":163.29},{"x":1763596800000,"o":166.1,"h":166.34,"l":159.46,"c":160.09},{"x":1763683200000,"o":160.46,"h":163.92,"l":159.0,"c":162.69},{"x":1763942400000,"o":162.68,"h":163.9,"l":160.76,"c":163.17},{"x":1764028800000,"o":162.47,"h":166.18,"l":162.2,"c":165.06},{"x":1764115200000,"o":163.45,"h":164.4,"l":159.97,"c":160.54},{"x":1764288000000,"o":161.6,"h":162.8,"l":161.0,"c":162.48},{"x":1764547200000,"o":160.33,"h":165.21,"l":159.8,"c":164.41},{"x":1764633600000,"o":165.72,"h":166.69,"l":164.8,"c":164.88},{"x":1764720000000,"o":164.4,"h":166.6,"l":162.69,"c":166.58},{"x":1764806400000,"o":168.2,"h":169.3,"l":166.14,"c":167.77},{"x":1764892800000,"o":168.17,"h":172.3,"l":167.6,"c":170.87},{"x":1765152000000,"o":170.85,"h":174.4,"l":170.09,"c":170.7},{"x":1765238400000,"o":170.52,"h":172.2,"l":169.8,"c":170.98},{"x":1765324800000,"o":170.11,"h":172.33,"l":169.11,"c":170.71},{"x":1765411200000,"o":170.6,"h":175.0,"l":170.22,"c":173.5},{"x":1765497600000,"o":173.48,"h":174.93,"l":171.58,"c":173.01},{"x":1765756800000,"o":159.6,"h":160.68,"l":152.11,"c":153.04},{"x":1765843200000,"o":154.89,"h":157.21,"l":153.91,"c":156.22},{"x":1765929600000,"o":157.0,"h":161.93,"l":156.29,"c":156.48},{"x":1766016000000,"o":156.51,"h":157.78,"l":151.15,"c":153.38},{"x":1766102400000,"o":152.97,"h":156.16,"l":152.54,"c":155.31},{"x":1766361600000,"o":156.86,"h":157.16,"l":153.15,"c":156.68},{"x":1766448000000,"o":155.5,"h":156.09,"l":151.63,"c":154.36},{"x":1766534400000,"o":153.5,"h":153.94,"l":152.01,"c":152.59},{"x":1766707200000,"o":152.5,"h":154.48,"l":152.21,"c":153.89},{"x":1766966400000,"o":153.07,"h":155.69,"l":152.79,"c":154.58},{"x":1767052800000,"o":153.85,"h":154.69,"l":153.25,"c":154.23},{"x":1767139200000,"o":153.99,"h":154.54,"l":152.68,"c":153.19},{"x":1767312000000,"o":153.08,"h":153.2,"l":145.64,"c":147.45},{"x":1767571200000,"o":146.51,"h":149.81,"l":145.79,"c":147.6},{"x":1767657600000,"o":147.42,"h":149.57,"l":146.7,"c":148.81},{"x":1767744000000,"o":148.0,"h":152.11,"l":147.75,"c":150.9},{"x":1767830400000,"o":149.94,"h":150.3,"l":146.18,"c":146.19},{"x":1767916800000,"o":147.35,"h":147.35,"l":141.43,"c":141.8},{"x":1768176000000,"o":141.64,"h":143.77,"l":141.15,"c":142.64},{"x":1768262400000,"o":142.14,"h":144.7,"l":137.18,"c":138.19},{"x":1768348800000,"o":137.39,"h":138.19,"l":132.61,"c":134.61},{"x":1768435200000,"o":135.15,"h":136.24,"l":129.93,"c":131.17},{"x":1768521600000,"o":129.7,"h":131.35,"l":126.85,"c":127.31},{"x":1768867200000,"o":126.57,"h":128.78,"l":125.03,"c":125.4},{"x":1768953600000,"o":128.0,"h":128.01,"l":123.78,"c":125.3},{"x":1769040000000,"o":126.0,"h":128.73,"l":125.1,"c":128.56},{"x":1769126400000,"o":128.65,"h":133.85,"l":128.23,"c":133.11},{"x":1769385600000,"o":134.55,"h":136.63,"l":133.27,"c":136.34},{"x":1769472000000,"o":135.83,"h":136.03,"l":130.86,"c":131.8},{"x":1769558400000,"o":132.27,"h":133.67,"l":129.14,"c":129.62},{"x":1769644800000,"o":118.53,"h":118.96,"l":113.13,"c":116.73},{"x":1769731200000,"o":117.54,"h":118.83,"l":115.89,"c":117.01},{"x":1769990400000,"o":118.8,"h":121.67,"l":116.35,"c":118.0},{"x":1770076800000,"o":115.02,"h":115.89,"l":108.1,"c":109.77},{"x":1770163200000,"o":107.19,"h":111.15,"l":105.25,"c":111.07},{"x":1770249600000,"o":109.26,"h":112.09,"l":101.73,"c":102.63},{"x":1770336000000,"o":101.68,"h":104.0,"l":98.94,"c":100.74},{"x":1770595200000,"o":100.0,"h":104.25,"l":98.0,"c":103.87},{"x":1770681600000,"o":104.99,"h":108.98,"l":104.9,"c":106.48},{"x":1770768000000,"o":105.58,"h":105.94,"l":99.42,"c":100.58},{"x":1770854400000,"o":101.92,"h":103.71,"l":99.27,"c":103.29},{"x":1770940800000,"o":105.15,"h":107.69,"l":104.59,"c":107.08},{"x":1771286400000,"o":109.56,"h":110.85,"l":103.88,"c":105.91},{"x":1771372800000,"o":105.93,"h":108.26,"l":103.4,"c":107.81},{"x":1771459200000,"o":108.07,"h":109.22,"l":106.19,"c":107.37},{"x":1771545600000,"o":106.0,"h":107.8,"l":103.82,"c":104.27},{"x":1771804800000,"o":101.94,"h":101.94,"l":99.18,"c":100.8},{"x":1771891200000,"o":100.96,"h":105.7,"l":100.51,"c":102.49},{"x":1771977600000,"o":101.63,"h":104.73,"l":100.16,"c":104.23},{"x":1772064000000,"o":107.45,"h":110.15,"l":106.57,"c":109.3},{"x":1772150400000,"o":105.0,"h":108.7,"l":104.0,"c":108.01},{"x":1772409600000,"o":105.98,"h":111.08,"l":105.1,"c":109.42},{"x":1772496000000,"o":108.0,"h":114.92,"l":107.51,"c":113.19},{"x":1772582400000,"o":112.11,"h":115.21,"l":111.5,"c":113.86},{"x":1772668800000,"o":114.77,"h":122.08,"l":114.13,"c":120.38},{"x":1772755200000,"o":120.5,"h":124.66,"l":120.18,"c":124.34},{"x":1773014400000,"o":123.06,"h":126.67,"l":121.29,"c":121.93},{"x":1773100800000,"o":120.99,"h":121.43,"l":114.66,"c":116.61},{"x":1773187200000,"o":117.4,"h":118.83,"l":113.6,"c":115.63},{"x":1773273600000,"o":115.28,"h":117.21,"l":112.42,"c":112.97},{"x":1773360000000,"o":112.81,"h":115.91,"l":111.71,"c":113.62},{"x":1773619200000,"o":116.9,"h":117.2,"l":113.8,"c":114.88},{"x":1773705600000,"o":115.4,"h":118.99,"l":114.2,"c":116.72},{"x":1773792000000,"o":115.0,"h":117.44,"l":113.53,"c":113.71},{"x":1773878400000,"o":114.18,"h":117.09,"l":111.95,"c":113.27},{"x":1773964800000,"o":111.3,"h":112.15,"l":109.12,"c":110.38},{"x":1774224000000,"o":110.76,"h":113.25,"l":109.89,"c":110.95},{"x":1774310400000,"o":109.14,"h":109.25,"l":104.32,"c":104.65},{"x":1774396800000,"o":106.5,"h":106.88,"l":101.14,"c":103.06},{"x":1774483200000,"o":102.42,"h":105.84,"l":100.88,"c":103.64},{"x":1774569600000,"o":102.64,"h":102.67,"l":98.34,"c":99.41},{"x":1774828800000,"o":100.06,"h":105.99,"l":99.5,"c":104.97},{"x":1774915200000,"o":105.54,"h":106.58,"l":104.06,"c":104.55},{"x":1775001600000,"o":105.23,"h":105.9,"l":102.01,"c":104.04},{"x":1775088000000,"o":101.79,"h":103.41,"l":98.46,"c":102.0},{"x":1775433600000,"o":102.97,"h":103.33,"l":100.4,"c":102.42},{"x":1775520000000,"o":102.77,"h":103.96,"l":99.5,"c":100.55},{"x":1775606400000,"o":104.76,"h":105.58,"l":96.96,"c":97.47},{"x":1775692800000,"o":96.5,"h":97.16,"l":88.66,"c":89.81},{"x":1775779200000,"o":88.91,"h":88.91,"l":81.24,"c":83.0},{"x":1776038400000,"o":84.77,"h":89.24,"l":84.18,"c":89.06},{"x":1776124800000,"o":90.74,"h":92.4,"l":87.12,"c":87.79},{"x":1776211200000,"o":90.2,"h":94.83,"l":89.2,"c":94.19},{"x":1776297600000,"o":97.61,"h":99.39,"l":95.37,"c":96.44},{"x":1776384000000,"o":97.95,"h":98.82,"l":96.13,"c":96.66},{"x":1776643200000,"o":97.44,"h":100.67,"l":96.81,"c":99.72},{"x":1776729600000,"o":100.35,"h":104.5,"l":99.06,"c":100.14},{"x":1776816000000,"o":101.5,"h":104.31,"l":101.03,"c":103.07},{"x":1776902400000,"o":87.25,"h":90.02,"l":83.58,"c":84.78},{"x":1776988800000,"o":85.78,"h":90.39,"l":84.93,"c":90.17},{"x":1777248000000,"o":89.06,"h":94.03,"l":87.81,"c":90.45},{"x":1777334400000,"o":91.1,"h":93.0,"l":90.13,"c":90.49},{"x":1777420800000,"o":89.06,"h":89.3,"l":87.1,"c":88.89},{"x":1777507200000,"o":87.95,"h":88.71,"l":85.88,"c":88.31},{"x":1777593600000,"o":90.93,"h":92.6,"l":87.87,"c":91.16},{"x":1777852800000,"o":91.27,"h":95.62,"l":91.1,"c":91.97},{"x":1777939200000,"o":92.25,"h":92.89,"l":89.14,"c":92.01},{"x":1778025600000,"o":91.6,"h":91.68,"l":88.21,"c":89.05},{"x":1778112000000,"o":92.17,"h":95.56,"l":91.89,"c":93.59},{"x":1778198400000,"o":91.13,"h":91.85,"l":88.99,"c":91.18},{"x":1778457600000,"o":91.04,"h":94.75,"l":90.47,"c":91.49},{"x":1778544000000,"o":92.47,"h":92.77,"l":88.69,"c":89.0},{"x":1778630400000,"o":88.58,"h":88.58,"l":86.01,"c":87.05},{"x":1778716800000,"o":87.32,"h":92.0,"l":85.44,"c":90.5},{"x":1778803200000,"o":92.09,"h":96.67,"l":91.97,"c":95.07},{"x":1779062400000,"o":98.86,"h":104.68,"l":97.85,"c":103.42},{"x":1779148800000,"o":110.14,"h":110.83,"l":100.77,"c":101.83},{"x":1779235200000,"o":100.75,"h":103.35,"l":97.5,"c":103.3},{"x":1779321600000,"o":100.99,"h":101.59,"l":98.11,"c":99.69},{"x":1779408000000,"o":102.18,"h":104.59,"l":99.43,"c":102.13}];
+const volumeData = [{"x":1716422400000,"y":4307500},{"x":1716508800000,"y":6783500},{"x":1716854400000,"y":7735000},{"x":1716940800000,"y":4388500},{"x":1717027200000,"y":25471500},{"x":1717113600000,"y":21509000},{"x":1717372800000,"y":9538500},{"x":1717459200000,"y":12456000},{"x":1717545600000,"y":13989500},{"x":1717632000000,"y":7054500},{"x":1717718400000,"y":5612500},{"x":1717977600000,"y":4652000},{"x":1718064000000,"y":5305000},{"x":1718150400000,"y":6480500},{"x":1718236800000,"y":5596500},{"x":1718323200000,"y":4790000},{"x":1718582400000,"y":5374500},{"x":1718668800000,"y":5932000},{"x":1718841600000,"y":5920000},{"x":1718928000000,"y":8611500},{"x":1719187200000,"y":6070500},{"x":1719273600000,"y":5154000},{"x":1719360000000,"y":4930000},{"x":1719446400000,"y":5907000},{"x":1719532800000,"y":8609000},{"x":1719792000000,"y":5606500},{"x":1719878400000,"y":4378000},{"x":1719964800000,"y":2887500},{"x":1720137600000,"y":5966000},{"x":1720396800000,"y":10606500},{"x":1720483200000,"y":12166500},{"x":1720569600000,"y":7494000},{"x":1720656000000,"y":6408000},{"x":1720742400000,"y":4547500},{"x":1721001600000,"y":4554500},{"x":1721088000000,"y":4983000},{"x":1721174400000,"y":7278500},{"x":1721260800000,"y":7589500},{"x":1721347200000,"y":5935000},{"x":1721606400000,"y":5258000},{"x":1721692800000,"y":5036500},{"x":1721779200000,"y":10473500},{"x":1721865600000,"y":32749000},{"x":1721952000000,"y":12050500},{"x":1722211200000,"y":9887500},{"x":1722297600000,"y":5955500},{"x":1722384000000,"y":6568500},{"x":1722470400000,"y":6691500},{"x":1722556800000,"y":7844500},{"x":1722816000000,"y":10098500},{"x":1722902400000,"y":7729000},{"x":1722988800000,"y":5312000},{"x":1723075200000,"y":7245500},{"x":1723161600000,"y":3997500},{"x":1723420800000,"y":2698000},{"x":1723507200000,"y":3829000},{"x":1723593600000,"y":4164500},{"x":1723680000000,"y":5828000},{"x":1723766400000,"y":4177500},{"x":1724025600000,"y":3207500},{"x":1724112000000,"y":3923500},{"x":1724198400000,"y":3049500},{"x":1724284800000,"y":3532500},{"x":1724371200000,"y":3510500},{"x":1724630400000,"y":2681500},{"x":1724716800000,"y":2407500},{"x":1724803200000,"y":4323000},{"x":1724889600000,"y":6228000},{"x":1724976000000,"y":9605000},{"x":1725321600000,"y":6307500},{"x":1725408000000,"y":3544500},{"x":1725494400000,"y":3944500},{"x":1725580800000,"y":5354000},{"x":1725840000000,"y":5645500},{"x":1725926400000,"y":4419500},{"x":1726012800000,"y":5012000},{"x":1726099200000,"y":4708500},{"x":1726185600000,"y":4564500},{"x":1726444800000,"y":5411500},{"x":1726531200000,"y":5169500},{"x":1726617600000,"y":4906000},{"x":1726704000000,"y":7421500},{"x":1726790400000,"y":18046000},{"x":1727049600000,"y":6065000},{"x":1727136000000,"y":5006500},{"x":1727222400000,"y":11444000},{"x":1727308800000,"y":7997500},{"x":1727395200000,"y":4533000},{"x":1727654400000,"y":4217500},{"x":1727740800000,"y":6565500},{"x":1727827200000,"y":4666000},{"x":1727913600000,"y":5969000},{"x":1728000000000,"y":5916000},{"x":1728259200000,"y":5618000},{"x":1728345600000,"y":5904000},{"x":1728432000000,"y":5661500},{"x":1728518400000,"y":5552500},{"x":1728604800000,"y":4270500},{"x":1728864000000,"y":2837000},{"x":1728950400000,"y":5408000},{"x":1729036800000,"y":5056000},{"x":1729123200000,"y":3577500},{"x":1729209600000,"y":7113000},{"x":1729468800000,"y":7086000},{"x":1729555200000,"y":5721500},{"x":1729641600000,"y":9249500},{"x":1729728000000,"y":17005000},{"x":1729814400000,"y":7474000},{"x":1730073600000,"y":6192500},{"x":1730160000000,"y":8205500},{"x":1730246400000,"y":4754000},{"x":1730332800000,"y":6666500},{"x":1730419200000,"y":4926500},{"x":1730678400000,"y":4742000},{"x":1730764800000,"y":4135000},{"x":1730851200000,"y":6233000},{"x":1730937600000,"y":6304000},{"x":1731024000000,"y":5475000},{"x":1731283200000,"y":6535500},{"x":1731369600000,"y":6458500},{"x":1731456000000,"y":6568500},{"x":1731542400000,"y":5788500},{"x":1731628800000,"y":7492500},{"x":1731888000000,"y":8753500},{"x":1731974400000,"y":9151000},{"x":1732060800000,"y":5709500},{"x":1732147200000,"y":5556500},{"x":1732233600000,"y":7184500},{"x":1732492800000,"y":9651000},{"x":1732579200000,"y":3722000},{"x":1732665600000,"y":4884500},{"x":1732838400000,"y":2915500},{"x":1733097600000,"y":5283000},{"x":1733184000000,"y":6421000},{"x":1733270400000,"y":10315000},{"x":1733356800000,"y":5377500},{"x":1733443200000,"y":4522000},{"x":1733702400000,"y":6117000},{"x":1733788800000,"y":7996000},{"x":1733875200000,"y":6224000},{"x":1733961600000,"y":3437000},{"x":1734048000000,"y":6735500},{"x":1734307200000,"y":5932500},{"x":1734393600000,"y":6115500},{"x":1734480000000,"y":7942500},{"x":1734566400000,"y":9859000},{"x":1734652800000,"y":10130000},{"x":1734912000000,"y":3933500},{"x":1734998400000,"y":2093500},{"x":1735171200000,"y":2181500},{"x":1735257600000,"y":5082500},{"x":1735516800000,"y":3600000},{"x":1735603200000,"y":4204500},{"x":1735776000000,"y":5123000},{"x":1735862400000,"y":4491500},{"x":1736121600000,"y":4254500},{"x":1736208000000,"y":5667000},{"x":1736294400000,"y":7108500},{"x":1736467200000,"y":7886500},{"x":1736726400000,"y":8563000},{"x":1736812800000,"y":6361500},{"x":1736899200000,"y":6437500},{"x":1736985600000,"y":3164500},{"x":1737072000000,"y":5409500},{"x":1737417600000,"y":7197000},{"x":1737504000000,"y":8184000},{"x":1737590400000,"y":5369500},{"x":1737676800000,"y":4588500},{"x":1737936000000,"y":11206500},{"x":1738022400000,"y":12188500},{"x":1738108800000,"y":13097000},{"x":1738195200000,"y":31037500},{"x":1738281600000,"y":14333500},{"x":1738540800000,"y":10080000},{"x":1738627200000,"y":9594000},{"x":1738713600000,"y":6696000},{"x":1738800000000,"y":6308500},{"x":1738886400000,"y":6936000},{"x":1739145600000,"y":5874500},{"x":1739232000000,"y":5080000},{"x":1739318400000,"y":8388000},{"x":1739404800000,"y":7817000},{"x":1739491200000,"y":7517000},{"x":1739836800000,"y":8363500},{"x":1739923200000,"y":8686000},{"x":1740009600000,"y":6756000},{"x":1740096000000,"y":10021000},{"x":1740355200000,"y":8464000},{"x":1740441600000,"y":10721500},{"x":1740528000000,"y":10012500},{"x":1740614400000,"y":7275500},{"x":1740700800000,"y":7839500},{"x":1740960000000,"y":7729500},{"x":1741046400000,"y":12295500},{"x":1741132800000,"y":7701500},{"x":1741219200000,"y":10821000},{"x":1741305600000,"y":12640500},{"x":1741564800000,"y":19492500},{"x":1741651200000,"y":14995500},{"x":1741737600000,"y":13709000},{"x":1741824000000,"y":9818000},{"x":1741910400000,"y":9266000},{"x":1742169600000,"y":8284000},{"x":1742256000000,"y":8840000},{"x":1742342400000,"y":7809000},{"x":1742428800000,"y":12965000},{"x":1742515200000,"y":14536500},{"x":1742774400000,"y":7997500},{"x":1742860800000,"y":8216000},{"x":1742947200000,"y":6743000},{"x":1743033600000,"y":7400000},{"x":1743120000000,"y":8792500},{"x":1743379200000,"y":14921000},{"x":1743465600000,"y":7715000},{"x":1743552000000,"y":8132000},{"x":1743638400000,"y":10439000},{"x":1743724800000,"y":14502000},{"x":1743984000000,"y":14391000},{"x":1744070400000,"y":10616000},{"x":1744156800000,"y":15460000},{"x":1744243200000,"y":10232000},{"x":1744329600000,"y":10515000},{"x":1744588800000,"y":8585000},{"x":1744675200000,"y":8676000},{"x":1744761600000,"y":9347500},{"x":1744848000000,"y":9019500},{"x":1745193600000,"y":8343500},{"x":1745280000000,"y":7914000},{"x":1745366400000,"y":15096000},{"x":1745452800000,"y":30415500},{"x":1745539200000,"y":14439000},{"x":1745798400000,"y":10262000},{"x":1745884800000,"y":6226500},{"x":1745971200000,"y":9739500},{"x":1746057600000,"y":9038500},{"x":1746144000000,"y":8347000},{"x":1746403200000,"y":6371000},{"x":1746489600000,"y":6402500},{"x":1746576000000,"y":8648500},{"x":1746662400000,"y":7344000},{"x":1746748800000,"y":4600500},{"x":1747008000000,"y":7160500},{"x":1747094400000,"y":7415500},{"x":1747180800000,"y":7073000},{"x":1747267200000,"y":4940000},{"x":1747353600000,"y":5804500},{"x":1747612800000,"y":10356000},{"x":1747699200000,"y":5375000},{"x":1747785600000,"y":6298000},{"x":1747872000000,"y":4282000},{"x":1747958400000,"y":6940500},{"x":1748304000000,"y":5512500},{"x":1748390400000,"y":4966500},{"x":1748476800000,"y":6329500},{"x":1748563200000,"y":13319500},{"x":1748822400000,"y":5013000},{"x":1748908800000,"y":5118500},{"x":1748995200000,"y":3589000},{"x":1749081600000,"y":4512000},{"x":1749168000000,"y":4798500},{"x":1749427200000,"y":4539000},{"x":1749513600000,"y":5946000},{"x":1749600000000,"y":3714000},{"x":1749686400000,"y":4241000},{"x":1749772800000,"y":6661000},{"x":1750032000000,"y":6154500},{"x":1750118400000,"y":4099000},{"x":1750204800000,"y":6047500},{"x":1750377600000,"y":10038500},{"x":1750636800000,"y":5499500},{"x":1750723200000,"y":7570000},{"x":1750809600000,"y":5968500},{"x":1750896000000,"y":6022000},{"x":1750982400000,"y":7571500},{"x":1751241600000,"y":5046500},{"x":1751328000000,"y":6220500},{"x":1751414400000,"y":4357000},{"x":1751500800000,"y":6029500},{"x":1751846400000,"y":5668000},{"x":1751932800000,"y":7301000},{"x":1752019200000,"y":5767000},{"x":1752105600000,"y":10016500},{"x":1752192000000,"y":10773500},{"x":1752451200000,"y":9062500},{"x":1752537600000,"y":6321500},{"x":1752624000000,"y":4925500},{"x":1752710400000,"y":6378000},{"x":1752796800000,"y":5778000},{"x":1753056000000,"y":5564000},{"x":1753142400000,"y":5878500},{"x":1753228800000,"y":9920000},{"x":1753315200000,"y":20350500},{"x":1753401600000,"y":9998000},{"x":1753660800000,"y":7373000},{"x":1753747200000,"y":6038500},{"x":1753833600000,"y":5471000},{"x":1753920000000,"y":10659500},{"x":1754006400000,"y":9055500},{"x":1754265600000,"y":6427500},{"x":1754352000000,"y":7242500},{"x":1754438400000,"y":5343000},{"x":1754524800000,"y":13993500},{"x":1754611200000,"y":9514000},{"x":1754870400000,"y":11849000},{"x":1754956800000,"y":14329000},{"x":1755043200000,"y":12268000},{"x":1755129600000,"y":8939500},{"x":1755216000000,"y":8794000},{"x":1755475200000,"y":12887000},{"x":1755561600000,"y":10921000},{"x":1755648000000,"y":9859500},{"x":1755734400000,"y":5635000},{"x":1755820800000,"y":5421500},{"x":1756080000000,"y":4306000},{"x":1756166400000,"y":13418500},{"x":1756252800000,"y":6011000},{"x":1756339200000,"y":15218000},{"x":1756425600000,"y":9409000},{"x":1756771200000,"y":6239000},{"x":1756857600000,"y":6690500},{"x":1756944000000,"y":8519500},{"x":1757030400000,"y":6419500},{"x":1757289600000,"y":8180500},{"x":1757376000000,"y":5988000},{"x":1757462400000,"y":8243000},{"x":1757548800000,"y":5865000},{"x":1757635200000,"y":3555500},{"x":1757894400000,"y":7730500},{"x":1757980800000,"y":6501500},{"x":1758067200000,"y":6423000},{"x":1758153600000,"y":7455500},{"x":1758240000000,"y":14036000},{"x":1758499200000,"y":6039500},{"x":1758585600000,"y":7035000},{"x":1758672000000,"y":10109500},{"x":1758758400000,"y":5945000},{"x":1758844800000,"y":4457000},{"x":1759104000000,"y":5115000},{"x":1759190400000,"y":7077000},{"x":1759276800000,"y":9149500},{"x":1759363200000,"y":7559000},{"x":1759449600000,"y":5832000},{"x":1759708800000,"y":6439000},{"x":1759795200000,"y":5974500},{"x":1759881600000,"y":5453000},{"x":1759968000000,"y":5197000},{"x":1760054400000,"y":7019500},{"x":1760313600000,"y":5926000},{"x":1760400000000,"y":4395000},{"x":1760486400000,"y":3817000},{"x":1760572800000,"y":5392000},{"x":1760659200000,"y":4200500},{"x":1760918400000,"y":5358000},{"x":1761004800000,"y":6299000},{"x":1761091200000,"y":6073000},{"x":1761177600000,"y":4223500},{"x":1761264000000,"y":5355000},{"x":1761523200000,"y":5735000},{"x":1761609600000,"y":4724500},{"x":1761696000000,"y":13434000},{"x":1761782400000,"y":15203000},{"x":1761868800000,"y":11872000},{"x":1762128000000,"y":8733000},{"x":1762214400000,"y":9724500},{"x":1762300800000,"y":7604000},{"x":1762387200000,"y":10231000},{"x":1762473600000,"y":8162500},{"x":1762732800000,"y":7044500},{"x":1762819200000,"y":5177000},{"x":1762905600000,"y":7603500},{"x":1762992000000,"y":8147000},{"x":1763078400000,"y":5917500},{"x":1763337600000,"y":5701000},{"x":1763424000000,"y":7640500},{"x":1763510400000,"y":9577000},{"x":1763596800000,"y":8095500},{"x":1763683200000,"y":7354000},{"x":1763942400000,"y":8947000},{"x":1764028800000,"y":7280000},{"x":1764115200000,"y":10035500},{"x":1764288000000,"y":4520500},{"x":1764547200000,"y":6934000},{"x":1764633600000,"y":6550500},{"x":1764720000000,"y":4619500},{"x":1764806400000,"y":5549000},{"x":1764892800000,"y":6473000},{"x":1765152000000,"y":7741000},{"x":1765238400000,"y":4894500},{"x":1765324800000,"y":8460500},{"x":1765411200000,"y":7037000},{"x":1765497600000,"y":7495000},{"x":1765756800000,"y":29629000},{"x":1765843200000,"y":16672500},{"x":1765929600000,"y":11774500},{"x":1766016000000,"y":9644000},{"x":1766102400000,"y":25257500},{"x":1766361600000,"y":11120300},{"x":1766448000000,"y":12572500},{"x":1766534400000,"y":3896800},{"x":1766707200000,"y":5450500},{"x":1766966400000,"y":7157700},{"x":1767052800000,"y":5110600},{"x":1767139200000,"y":5256100},{"x":1767312000000,"y":9896600},{"x":1767571200000,"y":9854900},{"x":1767657600000,"y":6428200},{"x":1767744000000,"y":6195600},{"x":1767830400000,"y":7426100},{"x":1767916800000,"y":11845400},{"x":1768176000000,"y":9900000},{"x":1768262400000,"y":12898300},{"x":1768348800000,"y":15646900},{"x":1768435200000,"y":14582800},{"x":1768521600000,"y":20052400},{"x":1768867200000,"y":19712200},{"x":1768953600000,"y":16119600},{"x":1769040000000,"y":12944200},{"x":1769126400000,"y":16605400},{"x":1769385600000,"y":17489700},{"x":1769472000000,"y":11804200},{"x":1769558400000,"y":21254100},{"x":1769644800000,"y":55125100},{"x":1769731200000,"y":28053900},{"x":1769990400000,"y":18889100},{"x":1770076800000,"y":34729600},{"x":1770163200000,"y":36718100},{"x":1770249600000,"y":36178800},{"x":1770336000000,"y":34727000},{"x":1770595200000,"y":23127400},{"x":1770681600000,"y":21869600},{"x":1770768000000,"y":26076000},{"x":1770854400000,"y":27213100},{"x":1770940800000,"y":22771200},{"x":1771286400000,"y":27343000},{"x":1771372800000,"y":18138700},{"x":1771459200000,"y":13224700},{"x":1771545600000,"y":15700300},{"x":1771804800000,"y":24200000},{"x":1771891200000,"y":18461700},{"x":1771977600000,"y":15493100},{"x":1772064000000,"y":26565100},{"x":1772150400000,"y":19085200},{"x":1772409600000,"y":14780500},{"x":1772496000000,"y":17606100},{"x":1772582400000,"y":17432000},{"x":1772668800000,"y":26568000},{"x":1772755200000,"y":25972300},{"x":1773014400000,"y":20324700},{"x":1773100800000,"y":21872600},{"x":1773187200000,"y":14594900},{"x":1773273600000,"y":18372100},{"x":1773360000000,"y":14846400},{"x":1773619200000,"y":12289400},{"x":1773705600000,"y":13368500},{"x":1773792000000,"y":10080100},{"x":1773878400000,"y":11361600},{"x":1773964800000,"y":18863000},{"x":1774224000000,"y":12219100},{"x":1774310400000,"y":17835200},{"x":1774396800000,"y":14728600},{"x":1774483200000,"y":11595300},{"x":1774569600000,"y":18109900},{"x":1774828800000,"y":18685600},{"x":1774915200000,"y":16821300},{"x":1775001600000,"y":12439700},{"x":1775088000000,"y":16629900},{"x":1775433600000,"y":9141300},{"x":1775520000000,"y":12008200},{"x":1775606400000,"y":19796900},{"x":1775692800000,"y":42131500},{"x":1775779200000,"y":58715600},{"x":1776038400000,"y":31675400},{"x":1776124800000,"y":25132700},{"x":1776211200000,"y":25835900},{"x":1776297600000,"y":21971800},{"x":1776384000000,"y":17754600},{"x":1776643200000,"y":20306600},{"x":1776729600000,"y":24147900},{"x":1776816000000,"y":35714800},{"x":1776902400000,"y":84103100},{"x":1776988800000,"y":39011800},{"x":1777248000000,"y":32789100},{"x":1777334400000,"y":20990400},{"x":1777420800000,"y":18646600},{"x":1777507200000,"y":22152200},{"x":1777593600000,"y":22911800},{"x":1777852800000,"y":21863500},{"x":1777939200000,"y":22756800},{"x":1778025600000,"y":23117900},{"x":1778112000000,"y":27960700},{"x":1778198400000,"y":24699000},{"x":1778457600000,"y":21402900},{"x":1778544000000,"y":22354600},{"x":1778630400000,"y":22107000},{"x":1778716800000,"y":25571500},{"x":1778803200000,"y":34569700},{"x":1779062400000,"y":51220700},{"x":1779148800000,"y":55624400},{"x":1779235200000,"y":30037700},{"x":1779321600000,"y":26474000},{"x":1779408000000,"y":23542800}];
+const sma50Data = [{"x":1722816000000,"y":149.68},{"x":1722902400000,"y":149.82},{"x":1722988800000,"y":149.97},{"x":1723075200000,"y":150.24},{"x":1723161600000,"y":150.56},{"x":1723420800000,"y":151.21},{"x":1723507200000,"y":151.86},{"x":1723593600000,"y":152.5},{"x":1723680000000,"y":153.14},{"x":1723766400000,"y":153.63},{"x":1724025600000,"y":154.15},{"x":1724112000000,"y":154.71},{"x":1724198400000,"y":155.23},{"x":1724284800000,"y":155.66},{"x":1724371200000,"y":156.09},{"x":1724630400000,"y":156.56},{"x":1724716800000,"y":156.98},{"x":1724803200000,"y":157.33},{"x":1724889600000,"y":157.73},{"x":1724976000000,"y":158.22},{"x":1725321600000,"y":158.56},{"x":1725408000000,"y":158.94},{"x":1725494400000,"y":159.27},{"x":1725580800000,"y":159.55},{"x":1725840000000,"y":159.88},{"x":1725926400000,"y":160.17},{"x":1726012800000,"y":160.52},{"x":1726099200000,"y":160.89},{"x":1726185600000,"y":161.26},{"x":1726444800000,"y":161.6},{"x":1726531200000,"y":162.08},{"x":1726617600000,"y":162.67},{"x":1726704000000,"y":163.37},{"x":1726790400000,"y":164.12},{"x":1727049600000,"y":164.79},{"x":1727136000000,"y":165.42},{"x":1727222400000,"y":165.93},{"x":1727308800000,"y":166.53},{"x":1727395200000,"y":167.1},{"x":1727654400000,"y":167.67},{"x":1727740800000,"y":168.12},{"x":1727827200000,"y":168.58},{"x":1727913600000,"y":169.21},{"x":1728000000000,"y":169.57},{"x":1728259200000,"y":169.88},{"x":1728345600000,"y":170.38},{"x":1728432000000,"y":170.94},{"x":1728518400000,"y":171.46},{"x":1728604800000,"y":171.96},{"x":1728864000000,"y":172.58},{"x":1728950400000,"y":173.17},{"x":1729036800000,"y":173.67},{"x":1729123200000,"y":174.23},{"x":1729209600000,"y":174.74},{"x":1729468800000,"y":175.17},{"x":1729555200000,"y":175.61},{"x":1729641600000,"y":175.97},{"x":1729728000000,"y":176.52},{"x":1729814400000,"y":176.99},{"x":1730073600000,"y":177.46},{"x":1730160000000,"y":177.94},{"x":1730246400000,"y":178.39},{"x":1730332800000,"y":178.77},{"x":1730419200000,"y":179.26},{"x":1730678400000,"y":179.76},{"x":1730764800000,"y":180.33},{"x":1730851200000,"y":180.98},{"x":1730937600000,"y":181.79},{"x":1731024000000,"y":182.5},{"x":1731283200000,"y":183.22},{"x":1731369600000,"y":184.07},{"x":1731456000000,"y":184.91},{"x":1731542400000,"y":185.73},{"x":1731628800000,"y":186.48},{"x":1731888000000,"y":187.08},{"x":1731974400000,"y":187.72},{"x":1732060800000,"y":188.31},{"x":1732147200000,"y":188.95},{"x":1732233600000,"y":189.68},{"x":1732492800000,"y":190.32},{"x":1732579200000,"y":191.06},{"x":1732665600000,"y":191.66},{"x":1732838400000,"y":192.18},{"x":1733097600000,"y":192.63},{"x":1733184000000,"y":193.16},{"x":1733270400000,"y":193.95},{"x":1733356800000,"y":194.89},{"x":1733443200000,"y":195.85},{"x":1733702400000,"y":196.8},{"x":1733788800000,"y":197.73},{"x":1733875200000,"y":198.85},{"x":1733961600000,"y":199.93},{"x":1734048000000,"y":200.85},{"x":1734307200000,"y":201.7},{"x":1734393600000,"y":202.53},{"x":1734480000000,"y":203.09},{"x":1734566400000,"y":203.63},{"x":1734652800000,"y":204.22},{"x":1734912000000,"y":204.82},{"x":1734998400000,"y":205.46},{"x":1735171200000,"y":206.15},{"x":1735257600000,"y":206.8},{"x":1735516800000,"y":207.4},{"x":1735603200000,"y":207.95},{"x":1735776000000,"y":208.5},{"x":1735862400000,"y":209.12},{"x":1736121600000,"y":209.8},{"x":1736208000000,"y":210.19},{"x":1736294400000,"y":210.58},{"x":1736467200000,"y":210.9},{"x":1736726400000,"y":211.15},{"x":1736812800000,"y":211.47},{"x":1736899200000,"y":211.96},{"x":1736985600000,"y":212.41},{"x":1737072000000,"y":212.88},{"x":1737417600000,"y":213.38},{"x":1737504000000,"y":213.91},{"x":1737590400000,"y":214.38},{"x":1737676800000,"y":214.85},{"x":1737936000000,"y":215.27},{"x":1738022400000,"y":215.76},{"x":1738108800000,"y":216.15},{"x":1738195200000,"y":216.04},{"x":1738281600000,"y":216.07},{"x":1738540800000,"y":216.13},{"x":1738627200000,"y":216.08},{"x":1738713600000,"y":216.1},{"x":1738800000000,"y":216.01},{"x":1738886400000,"y":215.8},{"x":1739145600000,"y":215.67},{"x":1739232000000,"y":215.43},{"x":1739318400000,"y":215.19},{"x":1739404800000,"y":214.95},{"x":1739491200000,"y":214.71},{"x":1739836800000,"y":214.47},{"x":1739923200000,"y":213.92},{"x":1740009600000,"y":213.3},{"x":1740096000000,"y":212.56},{"x":1740355200000,"y":211.78},{"x":1740441600000,"y":210.96},{"x":1740528000000,"y":210.14},{"x":1740614400000,"y":209.23},{"x":1740700800000,"y":208.47},{"x":1740960000000,"y":207.59},{"x":1741046400000,"y":206.75},{"x":1741132800000,"y":206.17},{"x":1741219200000,"y":205.34},{"x":1741305600000,"y":204.38},{"x":1741564800000,"y":203.16},{"x":1741651200000,"y":201.97},{"x":1741737600000,"y":200.95},{"x":1741824000000,"y":199.87},{"x":1741910400000,"y":198.98},{"x":1742169600000,"y":198.11},{"x":1742256000000,"y":197.21},{"x":1742342400000,"y":196.29},{"x":1742428800000,"y":195.28},{"x":1742515200000,"y":194.37},{"x":1742774400000,"y":193.58},{"x":1742860800000,"y":192.92},{"x":1742947200000,"y":192.22},{"x":1743033600000,"y":191.4},{"x":1743120000000,"y":190.38},{"x":1743379200000,"y":189.33},{"x":1743465600000,"y":188.29},{"x":1743552000000,"y":187.2},{"x":1743638400000,"y":185.8},{"x":1743724800000,"y":184.15},{"x":1743984000000,"y":182.59},{"x":1744070400000,"y":180.94},{"x":1744156800000,"y":179.56},{"x":1744243200000,"y":178.12},{"x":1744329600000,"y":177.21},{"x":1744588800000,"y":176.33},{"x":1744675200000,"y":175.52},{"x":1744761600000,"y":174.66},{"x":1744848000000,"y":173.64},{"x":1745193600000,"y":172.57},{"x":1745280000000,"y":171.61},{"x":1745366400000,"y":170.77},{"x":1745452800000,"y":170.49},{"x":1745539200000,"y":170.34},{"x":1745798400000,"y":170.13},{"x":1745884800000,"y":169.96},{"x":1745971200000,"y":169.79},{"x":1746057600000,"y":169.67},{"x":1746144000000,"y":169.71},{"x":1746403200000,"y":169.87},{"x":1746489600000,"y":170.02},{"x":1746576000000,"y":170.26},{"x":1746662400000,"y":170.39},{"x":1746748800000,"y":170.63},{"x":1747008000000,"y":170.97},{"x":1747094400000,"y":171.48},{"x":1747180800000,"y":171.96},{"x":1747267200000,"y":172.44},{"x":1747353600000,"y":173.13},{"x":1747612800000,"y":173.83},{"x":1747699200000,"y":174.78},{"x":1747785600000,"y":175.61},{"x":1747872000000,"y":176.3},{"x":1747958400000,"y":177.07},{"x":1748304000000,"y":177.8},{"x":1748390400000,"y":178.51},{"x":1748476800000,"y":179.26},{"x":1748563200000,"y":179.92},{"x":1748822400000,"y":180.68},{"x":1748908800000,"y":181.41},{"x":1748995200000,"y":182.06},{"x":1749081600000,"y":182.68},{"x":1749168000000,"y":183.45},{"x":1749427200000,"y":184.25},{"x":1749513600000,"y":185.1},{"x":1749600000000,"y":185.93},{"x":1749686400000,"y":186.71},{"x":1749772800000,"y":187.37},{"x":1750032000000,"y":188.29},{"x":1750118400000,"y":189.43},{"x":1750204800000,"y":190.41},{"x":1750377600000,"y":191.39},{"x":1750636800000,"y":192.01},{"x":1750723200000,"y":192.86},{"x":1750809600000,"y":193.74},{"x":1750896000000,"y":194.58},{"x":1750982400000,"y":195.41},{"x":1751241600000,"y":196.33},{"x":1751328000000,"y":197.29},{"x":1751414400000,"y":198.31},{"x":1751500800000,"y":199.42},{"x":1751846400000,"y":200.31},{"x":1751932800000,"y":200.64},{"x":1752019200000,"y":200.92},{"x":1752105600000,"y":201.04},{"x":1752192000000,"y":201.03},{"x":1752451200000,"y":201.05},{"x":1752537600000,"y":201.05},{"x":1752624000000,"y":201.01},{"x":1752710400000,"y":200.93},{"x":1752796800000,"y":200.92},{"x":1753056000000,"y":200.83},{"x":1753142400000,"y":200.78},{"x":1753228800000,"y":200.69},{"x":1753315200000,"y":200.61},{"x":1753401600000,"y":200.34},{"x":1753660800000,"y":200.17},{"x":1753747200000,"y":200.01},{"x":1753833600000,"y":199.75},{"x":1753920000000,"y":199.42},{"x":1754006400000,"y":198.99},{"x":1754265600000,"y":198.63},{"x":1754352000000,"y":198.18},{"x":1754438400000,"y":197.82},{"x":1754524800000,"y":197.2},{"x":1754611200000,"y":196.61},{"x":1754870400000,"y":195.97},{"x":1754956800000,"y":195.34},{"x":1755043200000,"y":194.75},{"x":1755129600000,"y":194.11},{"x":1755216000000,"y":193.52},{"x":1755475200000,"y":193.02},{"x":1755561600000,"y":192.45},{"x":1755648000000,"y":191.9},{"x":1755734400000,"y":191.37},{"x":1755820800000,"y":190.9},{"x":1756080000000,"y":190.39},{"x":1756166400000,"y":189.89},{"x":1756252800000,"y":189.43},{"x":1756339200000,"y":189.12},{"x":1756425600000,"y":188.86},{"x":1756771200000,"y":188.62},{"x":1756857600000,"y":188.38},{"x":1756944000000,"y":187.99},{"x":1757030400000,"y":187.62},{"x":1757289600000,"y":187.33},{"x":1757376000000,"y":186.98},{"x":1757462400000,"y":186.56},{"x":1757548800000,"y":186.27},{"x":1757635200000,"y":185.94},{"x":1757894400000,"y":185.55},{"x":1757980800000,"y":185.14},{"x":1758067200000,"y":184.85},{"x":1758153600000,"y":184.59},{"x":1758240000000,"y":184.56},{"x":1758499200000,"y":184.6},{"x":1758585600000,"y":184.46},{"x":1758672000000,"y":184.36},{"x":1758758400000,"y":184.17},{"x":1758844800000,"y":184.08},{"x":1759104000000,"y":183.99},{"x":1759190400000,"y":183.83},{"x":1759276800000,"y":183.63},{"x":1759363200000,"y":183.44},{"x":1759449600000,"y":183.11},{"x":1759708800000,"y":182.89},{"x":1759795200000,"y":182.56},{"x":1759881600000,"y":182.24},{"x":1759968000000,"y":182.01},{"x":1760054400000,"y":181.79},{"x":1760313600000,"y":181.83},{"x":1760400000000,"y":181.78},{"x":1760486400000,"y":181.77},{"x":1760572800000,"y":181.7},{"x":1760659200000,"y":181.82},{"x":1760918400000,"y":182.0},{"x":1761004800000,"y":182.34},{"x":1761091200000,"y":182.67},{"x":1761177600000,"y":182.97},{"x":1761264000000,"y":183.29},{"x":1761523200000,"y":183.6},{"x":1761609600000,"y":183.79},{"x":1761696000000,"y":183.89},{"x":1761782400000,"y":184.06},{"x":1761868800000,"y":184.23},{"x":1762128000000,"y":184.34},{"x":1762214400000,"y":184.37},{"x":1762300800000,"y":184.43},{"x":1762387200000,"y":184.32},{"x":1762473600000,"y":184.05},{"x":1762732800000,"y":183.84},{"x":1762819200000,"y":183.64},{"x":1762905600000,"y":183.42},{"x":1762992000000,"y":183.22},{"x":1763078400000,"y":182.97},{"x":1763337600000,"y":182.56},{"x":1763424000000,"y":182.09},{"x":1763510400000,"y":181.67},{"x":1763596800000,"y":181.11},{"x":1763683200000,"y":180.65},{"x":1763942400000,"y":180.13},{"x":1764028800000,"y":179.7},{"x":1764115200000,"y":179.11},{"x":1764288000000,"y":178.57},{"x":1764547200000,"y":178.01},{"x":1764633600000,"y":177.52},{"x":1764720000000,"y":177.14},{"x":1764806400000,"y":176.76},{"x":1764892800000,"y":176.5},{"x":1765152000000,"y":176.17},{"x":1765238400000,"y":175.83},{"x":1765324800000,"y":175.56},{"x":1765411200000,"y":175.38},{"x":1765497600000,"y":175.2},{"x":1765756800000,"y":174.61},{"x":1765843200000,"y":174.09},{"x":1765929600000,"y":173.6},{"x":1766016000000,"y":173.01},{"x":1766102400000,"y":172.44},{"x":1766361600000,"y":172.02},{"x":1766448000000,"y":171.42},{"x":1766534400000,"y":170.82},{"x":1766707200000,"y":170.29},{"x":1766966400000,"y":169.8},{"x":1767052800000,"y":169.27},{"x":1767139200000,"y":168.67},{"x":1767312000000,"y":167.85},{"x":1767571200000,"y":167.06},{"x":1767657600000,"y":166.28},{"x":1767744000000,"y":165.57},{"x":1767830400000,"y":164.71},{"x":1767916800000,"y":163.8},{"x":1768176000000,"y":163.0},{"x":1768262400000,"y":162.03},{"x":1768348800000,"y":161.04},{"x":1768435200000,"y":160.01},{"x":1768521600000,"y":159.01},{"x":1768867200000,"y":158.0},{"x":1768953600000,"y":157.07},{"x":1769040000000,"y":156.19},{"x":1769126400000,"y":155.39},{"x":1769385600000,"y":154.67},{"x":1769472000000,"y":153.85},{"x":1769558400000,"y":153.05},{"x":1769644800000,"y":151.98},{"x":1769731200000,"y":150.98},{"x":1769990400000,"y":150.06},{"x":1770076800000,"y":148.99},{"x":1770163200000,"y":148.01},{"x":1770249600000,"y":146.81},{"x":1770336000000,"y":145.56},{"x":1770595200000,"y":144.34},{"x":1770681600000,"y":143.26},{"x":1770768000000,"y":142.02},{"x":1770854400000,"y":140.8},{"x":1770940800000,"y":139.64},{"x":1771286400000,"y":138.43},{"x":1771372800000,"y":137.23},{"x":1771459200000,"y":135.96},{"x":1771545600000,"y":134.63},{"x":1771804800000,"y":133.23},{"x":1771891200000,"y":131.86},{"x":1771977600000,"y":130.48},{"x":1772064000000,"y":129.2},{"x":1772150400000,"y":128.3},{"x":1772409600000,"y":127.37},{"x":1772496000000,"y":126.5},{"x":1772582400000,"y":125.71},{"x":1772668800000,"y":125.01},{"x":1772755200000,"y":124.37},{"x":1773014400000,"y":123.72},{"x":1773100800000,"y":123.0},{"x":1773187200000,"y":122.23},{"x":1773273600000,"y":121.4},{"x":1773360000000,"y":120.59},{"x":1773619200000,"y":119.82},{"x":1773705600000,"y":119.21},{"x":1773792000000,"y":118.53},{"x":1773878400000,"y":117.82},{"x":1773964800000,"y":117.01},{"x":1774224000000,"y":116.3},{"x":1774310400000,"y":115.56},{"x":1774396800000,"y":114.77},{"x":1774483200000,"y":114.08},{"x":1774569600000,"y":113.37},{"x":1774828800000,"y":112.85},{"x":1774915200000,"y":112.39},{"x":1775001600000,"y":111.97},{"x":1775088000000,"y":111.5},{"x":1775433600000,"y":110.98},{"x":1775520000000,"y":110.33},{"x":1775606400000,"y":109.55},{"x":1775692800000,"y":108.71},{"x":1775779200000,"y":107.78},{"x":1776038400000,"y":107.22},{"x":1776124800000,"y":106.64},{"x":1776211200000,"y":106.16},{"x":1776297600000,"y":105.9},{"x":1776384000000,"y":105.61},{"x":1776643200000,"y":105.55},{"x":1776729600000,"y":105.54},{"x":1776816000000,"y":105.52},{"x":1776902400000,"y":105.09},{"x":1776988800000,"y":104.88},{"x":1777248000000,"y":104.62},{"x":1777334400000,"y":104.29},{"x":1777420800000,"y":103.95},{"x":1777507200000,"y":103.56},{"x":1777593600000,"y":103.24},{"x":1777852800000,"y":102.99},{"x":1777939200000,"y":102.82},{"x":1778025600000,"y":102.55},{"x":1778112000000,"y":102.33},{"x":1778198400000,"y":101.97},{"x":1778457600000,"y":101.64},{"x":1778544000000,"y":101.23},{"x":1778630400000,"y":100.71},{"x":1778716800000,"y":100.24},{"x":1778803200000,"y":99.74},{"x":1779062400000,"y":99.32},{"x":1779148800000,"y":98.92},{"x":1779235200000,"y":98.65},{"x":1779321600000,"y":98.33},{"x":1779408000000,"y":98.11}];
+const sma200Data = [{"x":1741737600000,"y":182.49},{"x":1741824000000,"y":182.54},{"x":1741910400000,"y":182.65},{"x":1742169600000,"y":182.76},{"x":1742256000000,"y":182.86},{"x":1742342400000,"y":183.06},{"x":1742428800000,"y":183.23},{"x":1742515200000,"y":183.39},{"x":1742774400000,"y":183.57},{"x":1742860800000,"y":183.73},{"x":1742947200000,"y":183.86},{"x":1743033600000,"y":183.99},{"x":1743120000000,"y":184.08},{"x":1743379200000,"y":184.17},{"x":1743465600000,"y":184.26},{"x":1743552000000,"y":184.37},{"x":1743638400000,"y":184.42},{"x":1743724800000,"y":184.41},{"x":1743984000000,"y":184.42},{"x":1744070400000,"y":184.41},{"x":1744156800000,"y":184.49},{"x":1744243200000,"y":184.53},{"x":1744329600000,"y":184.56},{"x":1744588800000,"y":184.61},{"x":1744675200000,"y":184.65},{"x":1744761600000,"y":184.66},{"x":1744848000000,"y":184.64},{"x":1745193600000,"y":184.61},{"x":1745280000000,"y":184.59},{"x":1745366400000,"y":184.59},{"x":1745452800000,"y":184.76},{"x":1745539200000,"y":184.97},{"x":1745798400000,"y":185.16},{"x":1745884800000,"y":185.35},{"x":1745971200000,"y":185.55},{"x":1746057600000,"y":185.74},{"x":1746144000000,"y":185.96},{"x":1746403200000,"y":186.2},{"x":1746489600000,"y":186.43},{"x":1746576000000,"y":186.66},{"x":1746662400000,"y":186.88},{"x":1746748800000,"y":187.09},{"x":1747008000000,"y":187.38},{"x":1747094400000,"y":187.58},{"x":1747180800000,"y":187.78},{"x":1747267200000,"y":188.02},{"x":1747353600000,"y":188.26},{"x":1747612800000,"y":188.47},{"x":1747699200000,"y":188.68},{"x":1747785600000,"y":188.91},{"x":1747872000000,"y":189.14},{"x":1747958400000,"y":189.35},{"x":1748304000000,"y":189.6},{"x":1748390400000,"y":189.83},{"x":1748476800000,"y":190.03},{"x":1748563200000,"y":190.24},{"x":1748822400000,"y":190.43},{"x":1748908800000,"y":190.62},{"x":1748995200000,"y":190.8},{"x":1749081600000,"y":190.99},{"x":1749168000000,"y":191.19},{"x":1749427200000,"y":191.38},{"x":1749513600000,"y":191.55},{"x":1749600000000,"y":191.73},{"x":1749686400000,"y":191.91},{"x":1749772800000,"y":192.07},{"x":1750032000000,"y":192.25},{"x":1750118400000,"y":192.44},{"x":1750204800000,"y":192.59},{"x":1750377600000,"y":192.7},{"x":1750636800000,"y":192.85},{"x":1750723200000,"y":193.01},{"x":1750809600000,"y":193.18},{"x":1750896000000,"y":193.37},{"x":1750982400000,"y":193.53},{"x":1751241600000,"y":193.7},{"x":1751328000000,"y":193.84},{"x":1751414400000,"y":193.96},{"x":1751500800000,"y":194.13},{"x":1751846400000,"y":194.27},{"x":1751932800000,"y":194.41},{"x":1752019200000,"y":194.53},{"x":1752105600000,"y":194.58},{"x":1752192000000,"y":194.58},{"x":1752451200000,"y":194.62},{"x":1752537600000,"y":194.65},{"x":1752624000000,"y":194.73},{"x":1752710400000,"y":194.8},{"x":1752796800000,"y":194.88},{"x":1753056000000,"y":194.95},{"x":1753142400000,"y":195.04},{"x":1753228800000,"y":195.12},{"x":1753315200000,"y":195.22},{"x":1753401600000,"y":195.27},{"x":1753660800000,"y":195.35},{"x":1753747200000,"y":195.43},{"x":1753833600000,"y":195.46},{"x":1753920000000,"y":195.46},{"x":1754006400000,"y":195.44},{"x":1754265600000,"y":195.42},{"x":1754352000000,"y":195.39},{"x":1754438400000,"y":195.39},{"x":1754524800000,"y":195.34},{"x":1754611200000,"y":195.3},{"x":1754870400000,"y":195.23},{"x":1754956800000,"y":195.17},{"x":1755043200000,"y":195.12},{"x":1755129600000,"y":195.02},{"x":1755216000000,"y":194.94},{"x":1755475200000,"y":194.88},{"x":1755561600000,"y":194.82},{"x":1755648000000,"y":194.76},{"x":1755734400000,"y":194.7},{"x":1755820800000,"y":194.64},{"x":1756080000000,"y":194.57},{"x":1756166400000,"y":194.46},{"x":1756252800000,"y":194.36},{"x":1756339200000,"y":194.27},{"x":1756425600000,"y":194.18},{"x":1756771200000,"y":194.05},{"x":1756857600000,"y":193.93},{"x":1756944000000,"y":193.78},{"x":1757030400000,"y":193.65},{"x":1757289600000,"y":193.58},{"x":1757376000000,"y":193.51},{"x":1757462400000,"y":193.41},{"x":1757548800000,"y":193.33},{"x":1757635200000,"y":193.21},{"x":1757894400000,"y":193.09},{"x":1757980800000,"y":192.97},{"x":1758067200000,"y":192.85},{"x":1758153600000,"y":192.76},{"x":1758240000000,"y":192.67},{"x":1758499200000,"y":192.57},{"x":1758585600000,"y":192.44},{"x":1758672000000,"y":192.25},{"x":1758758400000,"y":192.05},{"x":1758844800000,"y":191.86},{"x":1759104000000,"y":191.68},{"x":1759190400000,"y":191.47},{"x":1759276800000,"y":191.24},{"x":1759363200000,"y":191.0},{"x":1759449600000,"y":190.79},{"x":1759708800000,"y":190.57},{"x":1759795200000,"y":190.36},{"x":1759881600000,"y":190.21},{"x":1759968000000,"y":190.06},{"x":1760054400000,"y":189.86},{"x":1760313600000,"y":189.69},{"x":1760400000000,"y":189.5},{"x":1760486400000,"y":189.3},{"x":1760572800000,"y":189.11},{"x":1760659200000,"y":188.95},{"x":1760918400000,"y":188.81},{"x":1761004800000,"y":188.69},{"x":1761091200000,"y":188.56},{"x":1761177600000,"y":188.42},{"x":1761264000000,"y":188.29},{"x":1761523200000,"y":188.19},{"x":1761609600000,"y":188.1},{"x":1761696000000,"y":188.0},{"x":1761782400000,"y":187.9},{"x":1761868800000,"y":187.77},{"x":1762128000000,"y":187.63},{"x":1762214400000,"y":187.44},{"x":1762300800000,"y":187.22},{"x":1762387200000,"y":186.96},{"x":1762473600000,"y":186.69},{"x":1762732800000,"y":186.43},{"x":1762819200000,"y":186.15},{"x":1762905600000,"y":185.84},{"x":1762992000000,"y":185.55},{"x":1763078400000,"y":185.38},{"x":1763337600000,"y":185.2},{"x":1763424000000,"y":185.0},{"x":1763510400000,"y":184.81},{"x":1763596800000,"y":184.58},{"x":1763683200000,"y":184.37},{"x":1763942400000,"y":184.18},{"x":1764028800000,"y":183.98},{"x":1764115200000,"y":183.77},{"x":1764288000000,"y":183.6},{"x":1764547200000,"y":183.44},{"x":1764633600000,"y":183.27},{"x":1764720000000,"y":183.11},{"x":1764806400000,"y":182.96},{"x":1764892800000,"y":182.85},{"x":1765152000000,"y":182.76},{"x":1765238400000,"y":182.69},{"x":1765324800000,"y":182.62},{"x":1765411200000,"y":182.55},{"x":1765497600000,"y":182.49},{"x":1765756800000,"y":182.33},{"x":1765843200000,"y":182.2},{"x":1765929600000,"y":182.07},{"x":1766016000000,"y":181.92},{"x":1766102400000,"y":181.83},{"x":1766361600000,"y":181.77},{"x":1766448000000,"y":181.75},{"x":1766534400000,"y":181.71},{"x":1766707200000,"y":181.64},{"x":1766966400000,"y":181.6},{"x":1767052800000,"y":181.52},{"x":1767139200000,"y":181.45},{"x":1767312000000,"y":181.35},{"x":1767571200000,"y":181.25},{"x":1767657600000,"y":181.17},{"x":1767744000000,"y":181.09},{"x":1767830400000,"y":180.98},{"x":1767916800000,"y":180.82},{"x":1768176000000,"y":180.7},{"x":1768262400000,"y":180.56},{"x":1768348800000,"y":180.44},{"x":1768435200000,"y":180.3},{"x":1768521600000,"y":180.12},{"x":1768867200000,"y":179.92},{"x":1768953600000,"y":179.78},{"x":1769040000000,"y":179.7},{"x":1769126400000,"y":179.63},{"x":1769385600000,"y":179.58},{"x":1769472000000,"y":179.41},{"x":1769558400000,"y":179.28},{"x":1769644800000,"y":179.08},{"x":1769731200000,"y":178.86},{"x":1769990400000,"y":178.64},{"x":1770076800000,"y":178.39},{"x":1770163200000,"y":178.17},{"x":1770249600000,"y":177.93},{"x":1770336000000,"y":177.67},{"x":1770595200000,"y":177.37},{"x":1770681600000,"y":176.97},{"x":1770768000000,"y":176.52},{"x":1770854400000,"y":176.1},{"x":1770940800000,"y":175.7},{"x":1771286400000,"y":175.27},{"x":1771372800000,"y":174.85},{"x":1771459200000,"y":174.41},{"x":1771545600000,"y":173.95},{"x":1771804800000,"y":173.49},{"x":1771891200000,"y":173.02},{"x":1771977600000,"y":172.57},{"x":1772064000000,"y":172.13},{"x":1772150400000,"y":171.66},{"x":1772409600000,"y":171.17},{"x":1772496000000,"y":170.71},{"x":1772582400000,"y":170.24},{"x":1772668800000,"y":169.8},{"x":1772755200000,"y":169.4},{"x":1773014400000,"y":168.99},{"x":1773100800000,"y":168.56},{"x":1773187200000,"y":168.12},{"x":1773273600000,"y":167.68},{"x":1773360000000,"y":167.22},{"x":1773619200000,"y":166.77},{"x":1773705600000,"y":166.34},{"x":1773792000000,"y":165.9},{"x":1773878400000,"y":165.45},{"x":1773964800000,"y":164.99},{"x":1774224000000,"y":164.54},{"x":1774310400000,"y":164.04},{"x":1774396800000,"y":163.53},{"x":1774483200000,"y":163.02},{"x":1774569600000,"y":162.51},{"x":1774828800000,"y":162.03},{"x":1774915200000,"y":161.54},{"x":1775001600000,"y":161.07},{"x":1775088000000,"y":160.58},{"x":1775433600000,"y":160.08},{"x":1775520000000,"y":159.61},{"x":1775606400000,"y":159.12},{"x":1775692800000,"y":158.59},{"x":1775779200000,"y":158.01},{"x":1776038400000,"y":157.45},{"x":1776124800000,"y":156.88},{"x":1776211200000,"y":156.33},{"x":1776297600000,"y":155.78},{"x":1776384000000,"y":155.25},{"x":1776643200000,"y":154.74},{"x":1776729600000,"y":154.2},{"x":1776816000000,"y":153.68},{"x":1776902400000,"y":153.08},{"x":1776988800000,"y":152.51},{"x":1777248000000,"y":152.0},{"x":1777334400000,"y":151.51},{"x":1777420800000,"y":150.99},{"x":1777507200000,"y":150.48},{"x":1777593600000,"y":149.97},{"x":1777852800000,"y":149.47},{"x":1777939200000,"y":148.97},{"x":1778025600000,"y":148.45},{"x":1778112000000,"y":147.96},{"x":1778198400000,"y":147.46},{"x":1778457600000,"y":146.92},{"x":1778544000000,"y":146.39},{"x":1778630400000,"y":145.84},{"x":1778716800000,"y":145.3},{"x":1778803200000,"y":144.8},{"x":1779062400000,"y":144.37},{"x":1779148800000,"y":143.97},{"x":1779235200000,"y":143.56},{"x":1779321600000,"y":143.16},{"x":1779408000000,"y":142.75}];
+const events = [{"date":"2025-12-18","label":"5:1 Split","color":"#A78BFA","ts":1766016000000},{"date":"2026-02-10","label":"Trump buy","color":"#FCD34D","ts":1770681600000},{"date":"2026-02-27","label":"CEO buy $3M","color":"#34D399","ts":1772150400000},{"date":"2026-04-22","label":"Q1 earnings","color":"#F87171","ts":1776816000000},{"date":"2026-04-23","label":"Armis M&A","color":"#FB923C","ts":1776902400000}];
+
+// Custom plugin: draw candles after datasets render
+const candlePlugin = {
+  id: 'candleRenderer',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart') return;
+    const { ctx, scales: { x, y }, chartArea } = chart;
+    
+    // Calcolo larghezza candela proporzionale
+    let candleWidth = 3;
+    if (candleData.length >= 2) {
+      const x0 = x.getPixelForValue(candleData[0].x);
+      const x1 = x.getPixelForValue(candleData[1].x);
+      candleWidth = Math.max(1.5, Math.abs(x1 - x0) * 0.7);
+    }
+    
+    ctx.save();
+    candleData.forEach(d => {
+      const cx = x.getPixelForValue(d.x);
+      if (cx < chartArea.left - 5 || cx > chartArea.right + 5) return;
+      const yO = y.getPixelForValue(d.o);
+      const yH = y.getPixelForValue(d.h);
+      const yL = y.getPixelForValue(d.l);
+      const yC = y.getPixelForValue(d.c);
+      const bullish = d.c >= d.o;
+      const color = bullish ? '#10B981' : '#EF4444';
+      
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, yH);
+      ctx.lineTo(cx, yL);
+      ctx.stroke();
+      
+      ctx.fillStyle = color;
+      const bodyTop = Math.min(yO, yC);
+      const bodyHeight = Math.max(1, Math.abs(yC - yO));
+      ctx.fillRect(cx - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+    });
+    ctx.restore();
+  }
+};
+
+const eventLinePlugin = {
+  id: 'eventLines',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart') return;
+    const { ctx, scales: { x }, chartArea } = chart;
+    ctx.save();
+    ctx.font = 'bold 10px -apple-system, sans-serif';
+    
+    // Ordino eventi per data crescente, ogni evento ottiene il proprio livello dedicato
+    // (livello 0 = primo evento in ordine cronologico, 1 = secondo, ...)
+    // Così non c'è MAI rischio di sovrapposizione anche quando eventi sono vicini.
+    const sorted = events.slice().sort((a, b) => a.ts - b.ts);
+    const labelHeightPx = 16;
+    const topPadding = 10;
+    
+    sorted.forEach((ev, idx) => {
+      const cx = x.getPixelForValue(ev.ts);
+      if (cx < chartArea.left || cx > chartArea.right) return;
+      
+      const labelY = chartArea.top + topPadding + idx * labelHeightPx;
+      
+      // Linea verticale tratteggiata fino al bordo inferiore del chart
+      ctx.strokeStyle = ev.color;
+      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, chartArea.top);
+      ctx.lineTo(cx, chartArea.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Piccolo connettore orizzontale tra label e linea verticale (visivo)
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      
+      // Auto-flip a sinistra se label sforerebbe il bordo destro
+      const textWidth = ctx.measureText(ev.label).width;
+      const wouldOverflowRight = (cx + 14 + textWidth) > chartArea.right;
+      const labelX = wouldOverflowRight ? cx - textWidth - 10 : cx + 8;
+      const bgX = wouldOverflowRight ? cx - textWidth - 13 : cx + 5;
+      
+      // Connettore orizzontale
+      if (wouldOverflowRight) {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx - 4, labelY - 3);
+      } else {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx + 4, labelY - 3);
+      }
+      ctx.stroke();
+      
+      // Background semi-trasparente per leggibilità sopra le candele
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.fillRect(bgX, labelY - 10, textWidth + 8, 14);
+      
+      // Bordo sottile colorato attorno al box
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(bgX, labelY - 10, textWidth + 8, 14);
+      
+      // Testo
+      ctx.fillStyle = ev.color;
+      ctx.fillText(ev.label, labelX, labelY);
+    });
+    ctx.restore();
+  }
+};
+
+Chart.register(candlePlugin, eventLinePlugin);
+
+// Main price chart - uso line invisibile come carrier, candele disegnate dal plugin
+const priceCtx = document.getElementById('priceChart').getContext('2d');
+new Chart(priceCtx, {
+  type: 'line',
+  data: {
+    datasets: [
+      {
+        label: 'OHLC carrier',
+        data: candleData.map(d => ({x: d.x, y: d.c})),
+        borderColor: 'transparent',
+        backgroundColor: 'transparent',
+        pointRadius: 0,
+        showLine: false,
+        parsing: false,
+      },
+      {
+        label: 'SMA 50',
+        data: sma50Data,
+        borderColor: '#F59E0B',
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.1,
+        fill: false,
+        parsing: false,
+      },
+      {
+        label: 'SMA 200',
+        data: sma200Data,
+        borderColor: '#3B82F6',
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.1,
+        fill: false,
+        parsing: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1E293B',
+        titleColor: '#F1F5F9',
+        bodyColor: '#94A3B8',
+        borderColor: '#334155',
+        borderWidth: 1,
+        callbacks: {
+          title: function(ctx) {
+            const ts = ctx[0].parsed.x;
+            const d = new Date(ts);
+            return d.toISOString().slice(0, 10);
+          },
+          label: function(ctx) {
+            const ts = ctx.parsed.x;
+            const candle = candleData.find(c => c.x === ts);
+            if (candle) {
+              return ['O: $' + candle.o.toFixed(2), 'H: $' + candle.h.toFixed(2), 'L: $' + candle.l.toFixed(2), 'C: $' + candle.c.toFixed(2)];
+            }
+            return ctx.dataset.label + ': $' + (ctx.parsed.y ? ctx.parsed.y.toFixed(2) : 'N/A');
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
+        ticks: { color: '#94A3B8', maxRotation: 0, autoSkip: true, maxTicksLimit: 12 },
+        grid: { color: 'rgba(31, 41, 55, 0.5)' }
+      },
+      y: {
+        ticks: { color: '#94A3B8', callback: function(v) { return '$' + v; } },
+        grid: { color: 'rgba(31, 41, 55, 0.5)' },
+        title: { display: true, text: 'USD (split-adj)', color: '#94A3B8', font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// Volume chart
+const volCtx = document.getElementById('volumeChart').getContext('2d');
+new Chart(volCtx, {
+  type: 'bar',
+  data: {
+    datasets: [{
+      label: 'Volume',
+      data: volumeData,
+      backgroundColor: volumeData.map(function(v, i) {
+        if (i === 0) return '#64748B';
+        const prev = candleData[i-1];
+        const curr = candleData[i];
+        if (!prev || !curr) return '#64748B';
+        return curr.c >= prev.c ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)';
+      }),
+      borderWidth: 0,
+      parsing: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1E293B',
+        titleColor: '#F1F5F9',
+        bodyColor: '#94A3B8',
+        callbacks: {
+          title: function(ctx) {
+            const d = new Date(ctx[0].parsed.x);
+            return d.toISOString().slice(0, 10);
+          },
+          label: function(ctx) {
+            return 'Vol: ' + (ctx.parsed.y / 1e6).toFixed(1) + 'M';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'month' },
+        ticks: { display: false },
+        grid: { display: false }
+      },
+      y: {
+        ticks: { color: '#94A3B8', callback: function(v) { return (v/1e6).toFixed(0) + 'M'; }, maxTicksLimit: 4 },
+        grid: { color: 'rgba(31, 41, 55, 0.5)' },
+        title: { display: true, text: 'Volume', color: '#94A3B8', font: { size: 10 } }
+      }
+    }
+  }
+});
+
+
+
+// === ZOOM 6 MONTHS CHARTS ===
+// Filtra dati ultimi 6 mesi (~180 giorni calendar ≈ 124 trading days)
+const cutoff6M = new Date('2025-11-24').getTime();
+const candleData6M = candleData.filter(d => d.x >= cutoff6M);
+const volumeData6M = volumeData.filter(d => d.x >= cutoff6M);
+const sma50Data6M = sma50Data.filter(d => d.x >= cutoff6M);
+const sma200Data6M = sma200Data.filter(d => d.x >= cutoff6M);
+
+// Plugin candle per il chart 6M (riusa stessa logica ma legge candleData6M)
+const candlePlugin6M = {
+  id: 'candleRenderer6M',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart6M') return;
+    const { ctx, scales: { x, y }, chartArea } = chart;
+    let candleWidth = 6;
+    if (candleData6M.length >= 2) {
+      const x0 = x.getPixelForValue(candleData6M[0].x);
+      const x1 = x.getPixelForValue(candleData6M[1].x);
+      candleWidth = Math.max(2, Math.abs(x1 - x0) * 0.7);
+    }
+    ctx.save();
+    candleData6M.forEach(d => {
+      const cx = x.getPixelForValue(d.x);
+      if (cx < chartArea.left - 5 || cx > chartArea.right + 5) return;
+      const yO = y.getPixelForValue(d.o);
+      const yH = y.getPixelForValue(d.h);
+      const yL = y.getPixelForValue(d.l);
+      const yC = y.getPixelForValue(d.c);
+      const bullish = d.c >= d.o;
+      const color = bullish ? '#10B981' : '#EF4444';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, yH);
+      ctx.lineTo(cx, yL);
+      ctx.stroke();
+      ctx.fillStyle = color;
+      const bodyTop = Math.min(yO, yC);
+      const bodyHeight = Math.max(1, Math.abs(yC - yO));
+      ctx.fillRect(cx - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+    });
+    ctx.restore();
+  }
+};
+
+// Plugin event lines per chart 6M (riusa stessa logica del 24M)
+const eventLinePlugin6M = {
+  id: 'eventLines6M',
+  afterDatasetsDraw(chart) {
+    if (chart.canvas.id !== 'priceChart6M') return;
+    const { ctx, scales: { x }, chartArea } = chart;
+    ctx.save();
+    ctx.font = 'bold 10px -apple-system, sans-serif';
+    
+    // Filtra solo eventi dentro il range 6M
+    const sorted = events.slice().filter(e => e.ts >= cutoff6M).sort((a, b) => a.ts - b.ts);
+    const labelHeightPx = 16;
+    const topPadding = 10;
+    
+    sorted.forEach((ev, idx) => {
+      const cx = x.getPixelForValue(ev.ts);
+      if (cx < chartArea.left || cx > chartArea.right) return;
+      const labelY = chartArea.top + topPadding + idx * labelHeightPx;
+      
+      ctx.strokeStyle = ev.color;
+      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, chartArea.top);
+      ctx.lineTo(cx, chartArea.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      const textWidth = ctx.measureText(ev.label).width;
+      const wouldOverflowRight = (cx + 14 + textWidth) > chartArea.right;
+      const labelX = wouldOverflowRight ? cx - textWidth - 10 : cx + 8;
+      const bgX = wouldOverflowRight ? cx - textWidth - 13 : cx + 5;
+      
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      if (wouldOverflowRight) {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx - 4, labelY - 3);
+      } else {
+        ctx.moveTo(cx, labelY - 3);
+        ctx.lineTo(cx + 4, labelY - 3);
+      }
+      ctx.stroke();
+      
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.fillRect(bgX, labelY - 10, textWidth + 8, 14);
+      ctx.strokeStyle = ev.color;
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(bgX, labelY - 10, textWidth + 8, 14);
+      
+      ctx.fillStyle = ev.color;
+      ctx.fillText(ev.label, labelX, labelY);
+    });
+    ctx.restore();
+  }
+};
+
+Chart.register(candlePlugin6M, eventLinePlugin6M);
+
+// Price chart 6M
+const priceCtx6M = document.getElementById('priceChart6M').getContext('2d');
+new Chart(priceCtx6M, {
+  type: 'line',
+  data: {
+    datasets: [
+      {
+        label: 'OHLC carrier 6M',
+        data: candleData6M.map(d => ({x: d.x, y: d.c})),
+        borderColor: 'transparent',
+        backgroundColor: 'transparent',
+        pointRadius: 0,
+        showLine: false,
+        parsing: false,
+      },
+      {
+        label: 'SMA 50',
+        data: sma50Data6M,
+        borderColor: '#F59E0B',
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.1,
+        fill: false,
+        parsing: false,
+      },
+      {
+        label: 'SMA 200',
+        data: sma200Data6M,
+        borderColor: '#3B82F6',
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.1,
+        fill: false,
+        parsing: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1E293B',
+        titleColor: '#F1F5F9',
+        bodyColor: '#94A3B8',
+        borderColor: '#334155',
+        borderWidth: 1,
+        callbacks: {
+          title: function(ctx) {
+            const ts = ctx[0].parsed.x;
+            const d = new Date(ts);
+            return d.toISOString().slice(0, 10);
+          },
+          label: function(ctx) {
+            const ts = ctx.parsed.x;
+            const candle = candleData6M.find(c => c.x === ts);
+            if (candle) {
+              return ['O: $' + candle.o.toFixed(2), 'H: $' + candle.h.toFixed(2), 'L: $' + candle.l.toFixed(2), 'C: $' + candle.c.toFixed(2)];
+            }
+            return ctx.dataset.label + ': $' + (ctx.parsed.y ? ctx.parsed.y.toFixed(2) : 'N/A');
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
+        ticks: { color: '#94A3B8', maxRotation: 0, autoSkip: true, maxTicksLimit: 8 },
+        grid: { color: 'rgba(31, 41, 55, 0.5)' }
+      },
+      y: {
+        ticks: { color: '#94A3B8', callback: function(v) { return '$' + v; } },
+        grid: { color: 'rgba(31, 41, 55, 0.5)' },
+        title: { display: true, text: 'USD', color: '#94A3B8', font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// Volume chart 6M
+const volCtx6M = document.getElementById('volumeChart6M').getContext('2d');
+new Chart(volCtx6M, {
+  type: 'bar',
+  data: {
+    datasets: [{
+      label: 'Volume',
+      data: volumeData6M,
+      backgroundColor: volumeData6M.map(function(v, i) {
+        if (i === 0) return '#64748B';
+        const prev = candleData6M[i-1];
+        const curr = candleData6M[i];
+        if (!prev || !curr) return '#64748B';
+        return curr.c >= prev.c ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)';
+      }),
+      borderWidth: 0,
+      parsing: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1E293B',
+        titleColor: '#F1F5F9',
+        bodyColor: '#94A3B8',
+        callbacks: {
+          title: function(ctx) {
+            const d = new Date(ctx[0].parsed.x);
+            return d.toISOString().slice(0, 10);
+          },
+          label: function(ctx) {
+            return 'Vol: ' + (ctx.parsed.y / 1e6).toFixed(1) + 'M';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: { unit: 'month' },
+        ticks: { display: false },
+        grid: { display: false }
+      },
+      y: {
+        ticks: { color: '#94A3B8', callback: function(v) { return (v/1e6).toFixed(0) + 'M'; }, maxTicksLimit: 4 },
+        grid: { color: 'rgba(31, 41, 55, 0.5)' },
+        title: { display: true, text: 'Volume', color: '#94A3B8', font: { size: 10 } }
+      }
+    }
+  }
+});
+
+</script>
+
+</body>
+</html>
