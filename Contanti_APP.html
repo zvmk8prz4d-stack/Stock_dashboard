@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrazione Contanti</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #f4f4f9; margin: 0; }
+    .container { max-width: 100%; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    h2 { margin-top: 0; font-size: 22px; color: #333; }
+    label { display: block; margin-top: 15px; font-weight: 600; font-size: 14px; color: #555; }
+    input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px; margin-top: 6px; box-sizing: border-box; border-radius: 8px; border: 1px solid #ddd; font-size: 16px; background: #fafafa; }
+    input:focus { border-color: #007AFF; outline: none; background: #fff; }
+    button { background: #007AFF; color: white; border: none; margin-top: 25px; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
+    button:disabled { background: #a0cbf7; }
+    .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
+    .checkbox-group input { width: 20px; height: 20px; margin: 0; }
+    .checkbox-group label { margin: 0; font-weight: normal; }
+    #status { text-align: center; margin-top: 20px; font-weight: 600; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Registra Cassa</h2>
+    <form id="expenseForm">
+      <label>Data</label>
+      <input type="date" id="data" required>
+
+      <label>Valore (€) - Positivo (Spesa) / Negativo (Entrata)</label>
+      <input type="number" step="0.01" id="valore" required>
+
+      <label>Note / Descrizione</label>
+      <input type="text" id="note" required>
+
+      <label>Tipologia</label>
+      <input type="text" id="tipologia">
+
+      <label>Macro Tipo</label>
+      <input type="text" id="macroTipo">
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="rimborsabile">
+        <label>Rimborsabile 730</label>
+      </div>
+
+      <button type="submit">Invia a Fogli Google</button>
+    </form>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    document.getElementById('data').valueAsDate = new Date();
+
+    document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const btn = e.target.querySelector('button');
+      const status = document.getElementById('status');
+      btn.disabled = true;
+      status.innerText = "Invio in corso...";
+      status.style.color = "#555";
+
+      const dateObj = new Date(document.getElementById('data').value);
+      const formattedDate = dateObj.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      
+      let rawValore = document.getElementById('valore').value;
+      let formattedValore = rawValore.replace('.', ',');
+
+      const payload = {
+        data: formattedDate,
+        anno: dateObj.getFullYear(),
+        mese: dateObj.getMonth() + 1,
+        tipologia: document.getElementById('tipologia').value,
+        macroTipo: document.getElementById('macroTipo').value,
+        valore: formattedValore,
+        rimborsabile: document.getElementById('rimborsabile').checked ? 'SI' : '',
+        cartaCredito: '',
+        note: document.getElementById('note').value
+      };
+
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbyXYnm9zUz0NfoF7Us2Zz34a9D3ZjZg9s72pwL6M7gaaBKomA-Tw4ZhQJ96ZT0BVcIf4w/exec';
+
+      try {
+        const response = await fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        
+        status.innerText = "Riga aggiunta correttamente.";
+        status.style.color = "#28a745";
+        
+        document.getElementById('valore').value = '';
+        document.getElementById('note').value = '';
+        document.getElementById('tipologia').value = '';
+        document.getElementById('macroTipo').value = '';
+        document.getElementById('rimborsabile').checked = false;
+        
+      } catch (error) {
+        status.innerText = "Errore di connessione.";
+        status.style.color = "#dc3545";
+      }
+      
+      btn.disabled = false;
+      setTimeout(() => status.innerText = "", 3000);
+    });
+  </script>
+</body>
+</html>
