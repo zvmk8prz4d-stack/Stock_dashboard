@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F2F4F7">
+<title>Nutrizione · Cut</title>
+<style>
+  :root{
+    --bg:#F2F4F7; --surface:#FFFFFF; --surface2:#EDF1F6; --border:#DCE2EA;
+    --text:#1A2332; --muted:#69748A; --amber:#D9822B; --amber-ink:#9C5A14;
+    --prot:#D9822B; --carb:#2F6FD6; --fat:#8B5CF6; --ok:#2E9E6B; --warn:#C9453F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5;padding-bottom:48px;}
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px}
+  header{padding:22px 16px 16px;border-bottom:1px solid var(--border);background:var(--surface)}
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber-ink);font-weight:700}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.01em;margin:2px 0 4px}
+  .sub{color:var(--muted);font-size:13px}
+  .nav{display:flex;gap:8px;margin-top:14px}
+  .nav a{flex:1;text-align:center;text-decoration:none;font-size:13px;font-weight:700;padding:9px;
+    border-radius:10px;border:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.05em;background:var(--surface)}
+  .nav a.active{background:var(--amber);color:#fff;border-color:var(--amber)}
+
+  .macros{position:sticky;top:0;z-index:20;background:rgba(242,244,247,.95);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);padding:12px 16px}
+  .macros .inner{max-width:680px;margin:0 auto}
+  .kcal{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+  .kcal .big{font-size:26px;font-weight:800}.kcal .big span{font-size:14px;color:var(--muted);font-weight:600}
+  .kcal .tgt{font-size:12px;color:var(--muted)}
+  .bars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .bar .lab{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+  .bar .lab .v{color:var(--muted)}
+  .track{height:7px;border-radius:4px;background:var(--surface2);overflow:hidden}
+  .fill{height:100%;width:0;border-radius:4px;transition:width .35s ease}
+  .fill.p{background:var(--prot)}.fill.c{background:var(--carb)}.fill.f{background:var(--fat)}
+
+  .tabs{display:flex;gap:6px;margin:18px 0 6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab{white-space:nowrap;padding:9px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer}
+  .tab.active{background:var(--amber);color:#fff;border-color:var(--amber)}
+  .panel{display:none}.panel.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  .panel-head{display:flex;align-items:baseline;justify-content:space-between;margin:14px 2px 10px}
+  .panel-head h2{font-size:17px;font-weight:800}.panel-head .meta{font-size:12px;color:var(--muted)}
+
+  .meal{margin-bottom:12px}
+  .meal-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber-ink);font-weight:700;margin:0 2px 6px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  .row{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border)}
+  .row:last-child{border-bottom:none}.row:active{background:var(--surface2)}
+  .check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;color:transparent;transition:.15s;background:var(--surface)}
+  .row.done .check{background:var(--ok);border-color:var(--ok);color:#fff}
+  .row.done{background:#F4FBF7}
+  .food{flex:1;min-width:0}.food .n{font-weight:600;font-size:15px}
+  .row.done .food .n{color:var(--muted);text-decoration:line-through}
+  .food .q{font-size:12px;color:var(--muted)}
+  .mac{font-size:11px;color:var(--muted);text-align:right;flex:none;font-variant-numeric:tabular-nums}.mac b{color:var(--text)}
+
+  .note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:13px 15px;margin:10px 0;font-size:14px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  .note.warn{border-left-color:var(--warn)}
+  .note h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;color:var(--amber-ink)}
+  .note.warn h3{color:var(--warn)}
+  .note ul{margin:0;padding-left:18px}.note li{margin:5px 0;color:#3c4761}
+  .rules{list-style:none;padding:0}
+  .rules li{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+  .rules li:last-child{border-bottom:none}
+  .rules .k{font-weight:700;flex:none;width:120px;color:var(--amber-ink)}
+  .supp{width:100%;border-collapse:collapse;font-size:13px}
+  .supp td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+  .supp tr:last-child td{border-bottom:none}
+  .supp .s1{font-weight:700;white-space:nowrap}.supp .s2{color:var(--amber-ink);white-space:nowrap}
+  .reset{display:block;margin:18px auto 0;background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+  .foot{text-align:center;color:var(--muted);font-size:11px;margin-top:26px;line-height:1.7}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Cut · Ricomposizione</div>
+    <h1>Nutrizione</h1>
+    <div class="sub">TDEE ~2.450 · spunta i pasti, i macro si aggiornano</div>
+    <nav class="nav">
+      <a href="nutrizione.html" class="active">Nutrizione</a>
+      <a href="palestra.html">Palestra</a>
+    </nav>
+  </div>
+</header>
+
+<div class="macros"><div class="inner">
+  <div class="kcal"><div class="big" id="kcalNow">0 <span>kcal</span></div><div class="tgt">Target <b id="kcalTgt">2000</b> kcal</div></div>
+  <div class="bars">
+    <div class="bar"><div class="lab"><b>Proteine</b><span class="v"><span id="pNow">0</span>/<span id="pTgt">189</span>g</span></div><div class="track"><div class="fill p" id="pBar"></div></div></div>
+    <div class="bar"><div class="lab"><b>Carbo</b><span class="v"><span id="cNow">0</span>/<span id="cTgt">156</span>g</span></div><div class="track"><div class="fill c" id="cBar"></div></div></div>
+    <div class="bar"><div class="lab"><b>Grassi</b><span class="v"><span id="fNow">0</span>/<span id="fTgt">69</span>g</span></div><div class="track"><div class="fill f" id="fBar"></div></div></div>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab active" data-tab="train">Giorno Allenamento</div>
+    <div class="tab" data-tab="off">Giorno Riposo</div>
+    <div class="tab" data-tab="cheat">Pasto Sgarro</div>
+    <div class="tab" data-tab="supp">Integratori</div>
+  </div>
+
+  <section class="panel active" data-panel="train">
+    <div class="panel-head"><h2>Giorno Allenamento</h2><div class="meta">~2.000 kcal · carbo attorno al workout</div></div>
+    <div id="mealsTrain"></div>
+    <div class="note"><h3>Timing ore 6:00</h3>Allenamento a digiuno con EAA, oppure pasto pre minimo. Niente zuccheri semplici a stomaco vuoto (glicemia 90-100): meglio avena o banana matura.</div>
+    <button class="reset" onclick="resetDay('train')">Azzera spunte</button>
+  </section>
+
+  <section class="panel" data-panel="off">
+    <div class="panel-head"><h2>Giorno Riposo</h2><div class="meta">~1.800 kcal · carbo più bassi</div></div>
+    <div id="mealsOff"></div>
+    <div class="note"><h3>Logica</h3>Nei giorni senza pesi taglia i carboidrati (~ -50g), tieni alte le proteine (mai sotto ~150g) per preservare il muscolo in deficit.</div>
+    <button class="reset" onclick="resetDay('off')">Azzera spunte</button>
+  </section>
+
+  <section class="panel" data-panel="cheat">
+    <div class="panel-head"><h2>Pasto Sgarro</h2><div class="meta">1x / settimana</div></div>
+    <div class="note warn"><h3>Pasto, non giorno</h3>Un giorno libero intero può fare +2.500/3.000 kcal e cancellare 5-6 giorni di deficit. Con TDEE ~2.450 non hai il margine. Un singolo pasto sgarro sì.</div>
+    <ul class="rules">
+      <li><span class="k">Frequenza</span><span>1 volta a settimana (es. sabato sera)</span></li>
+      <li><span class="k">Tetto</span><span>Max +1.000 kcal sopra il pasto che sostituisce</span></li>
+      <li><span class="k">Prima</span><span>Negli altri pasti: proteine alte, carbo/grassi bassi</span></li>
+      <li><span class="k">Proteine</span><span>Anche nel giorno sgarro punta a ~150g</span></li>
+      <li><span class="k">Alcol</span><span>Vino ~120 kcal/calice · birra media ~200 kcal</span></li>
+      <li><span class="k">Dopo</span><span>Torna al piano. Non digiunare per compensare</span></li>
+      <li><span class="k">Timing</span><span>Mettilo prima di un giorno di allenamento</span></li>
+    </ul>
+    <div class="note"><h3>Vuoi un giorno intero?</h3>Trasformalo in refeed controllato: 1 giorno a mantenimento (~2.450 kcal), carbo alti e grassi bassi.</div>
+  </section>
+
+  <section class="panel" data-panel="supp">
+    <div class="panel-head"><h2>Integratori</h2><div class="meta">sicuri per profilo epatico</div></div>
+    <div class="card" style="padding:6px 10px"><table class="supp"><tbody id="suppBody"></tbody></table></div>
+    <div class="note warn"><h3>Esclusi</h3>Booster ormonali, fat burner multi-erba, dosi alte di vitamina A — rischio epatico. Nessun PED.</div>
+  </section>
+
+  <div class="foot">Valori indicativi · pesa gli alimenti a crudo · aggiorna il peso ogni settimana</div>
+</div>
+
+<script>
+const TRAIN=[
+  ["Pre-WO 5:30","EAA / caffè nero","opz.",0,0,0],["Post-WO 7:15","Whey protein","30g",24,2,1],
+  ["Post-WO 7:15","Fiocchi d'avena","50g",6,33,4],["Post-WO 7:15","Banana","100g",1,23,0],
+  ["Spuntino 10:30","Yogurt greco 0%","170g",17,6,0],["Spuntino 10:30","Mandorle","15g",3,3,8],
+  ["Pranzo 13:00","Petto di pollo","170g",53,0,6],["Pranzo 13:00","Riso basmati (crudo)","60g",4,47,1],
+  ["Pranzo 13:00","Verdura + 1 cucch. EVO","200g",3,10,10],["Spuntino 16:30","Bresaola","50g",16,0,2],
+  ["Cena 20:00","Pesce azzurro / salmone","160g",32,0,18],["Cena 20:00","Patate","150g",3,27,0],
+  ["Cena 20:00","Verdura cotta + EVO","200g",3,8,5],
+];
+const OFF=[
+  ["Colazione 8:00","Uova intere","2 (100g)",13,1,11],["Colazione 8:00","Albume","100g",11,1,0],
+  ["Colazione 8:00","Pane integrale","40g",3,19,1],["Spuntino 11:00","Yogurt greco 0%","170g",17,6,0],
+  ["Spuntino 11:00","Noci","15g",2,2,10],["Pranzo 13:30","Tacchino / pollo","170g",53,0,6],
+  ["Pranzo 13:30","Quinoa (cruda)","50g",6,33,4],["Pranzo 13:30","Verdura + 1 cucch. EVO","200g",3,10,10],
+  ["Spuntino 17:00","Fiocchi di latte","150g",17,5,4],["Cena 20:00","Merluzzo / pesce bianco","200g",36,0,2],
+  ["Cena 20:00","Patate","120g",2,22,0],["Cena 20:00","Verdura cotta + EVO","200g",3,8,6],
+];
+const SUPP=[
+  ["Creatina monoidrato","3-5 g/die","Qualsiasi ora · mantiene la forza in deficit"],
+  ["Whey protein","1-2 scoop","Post-WO / spuntino · per arrivare a ~190g"],
+  ["EAA","8-10 g","Pre-WO digiuno · solo se ti alleni a digiuno"],
+  ["Vitamina D3","2.000 UI/die","Mattino · carenza comune"],
+  ["Omega-3 EPA/DHA","1-2 g/die","Con un pasto · anti-infiammatorio"],
+  ["Magnesio glicinato","200-300 mg","Sera · recupero e sonno"],
+  ["Caffeina pre-WO","100-200 mg","Valuta tolleranza alle 6:00"],
+];
+const TARGETS={train:{kcal:2000,p:189,c:156,f:69},off:{kcal:1800,p:189,c:106,f:69}};
+const state={train:new Set(),off:new Set()};
+let current="train";
+function renderMeals(day,arr,id){const c=document.getElementById(id);let html="",last="";
+  arr.forEach((m,i)=>{if(m[0]!==last){if(last!=="")html+="</div>";html+=`<div class="meal"><div class="meal-title">${m[0]}</div><div class="card">`;last=m[0];}
+    const kcal=m[3]*4+m[4]*4+m[5]*9;
+    html+=`<div class="row" data-day="${day}" data-i="${i}"><div class="check">✓</div>
+      <div class="food"><div class="n">${m[1]}</div><div class="q">${m[2]} · ${kcal} kcal</div></div>
+      <div class="mac"><b>${m[3]}</b>P · <b>${m[4]}</b>C · <b>${m[5]}</b>G</div></div>`;});
+  html+="</div></div>";c.innerHTML=html;
+  c.querySelectorAll(".row").forEach(r=>r.addEventListener("click",()=>{const i=+r.dataset.i;
+    if(state[day].has(i)){state[day].delete(i);r.classList.remove("done");}else{state[day].add(i);r.classList.add("done");}
+    if(day===current)updateMacros();}));}
+function dataFor(d){return d==="train"?TRAIN:OFF;}
+function updateMacros(){const day=current;if(!TARGETS[day])return;const arr=dataFor(day),t=TARGETS[day];let p=0,cc=0,f=0;
+  state[day].forEach(i=>{p+=arr[i][3];cc+=arr[i][4];f+=arr[i][5];});const kcal=p*4+cc*4+f*9;
+  document.getElementById("kcalNow").innerHTML=kcal+' <span>kcal</span>';document.getElementById("kcalTgt").textContent=t.kcal;
+  set("p",p,t.p);set("c",cc,t.c);set("f",f,t.f);}
+function set(k,v,tgt){document.getElementById(k+"Now").textContent=v;document.getElementById(k+"Tgt").textContent=tgt;
+  document.getElementById(k+"Bar").style.width=Math.min(100,Math.round(v/tgt*100))+"%";}
+function resetDay(day){state[day].clear();document.querySelectorAll(`.row[data-day="${day}"]`).forEach(r=>r.classList.remove("done"));if(day===current)updateMacros();}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");const id=t.dataset.tab;document.querySelector(`.panel[data-panel="${id}"]`).classList.add("active");current=id;
+  const macros=document.querySelector(".macros");if(id==="train"||id==="off"){macros.style.display="block";updateMacros();}else{macros.style.display="none";}}));
+renderMeals("train",TRAIN,"mealsTrain");renderMeals("off",OFF,"mealsOff");
+document.getElementById("suppBody").innerHTML=SUPP.map(s=>`<tr><td class="s1">${s[0]}</td><td class="s2">${s[1]}</td><td>${s[2]}</td></tr>`).join("");
+updateMacros();
+</script>
+</body>
+</html>
