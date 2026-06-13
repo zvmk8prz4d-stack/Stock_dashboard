@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cassa Contanti</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #f5f5f0;
+      --surface:   #ffffff;
+      --surface2:  #f9f9f6;
+      --border:    #e4e4dc;
+      --border2:   #d0d0c8;
+      --accent:    #2563eb;
+      --accent-bg: #eff4ff;
+      --danger:    #dc2626;
+      --danger-bg: #fef2f2;
+      --green:     #16a34a;
+      --green-bg:  #f0fdf4;
+      --orange:    #ea580c;
+      --orange-bg: #fff7ed;
+      --text:      #1a1a1a;
+      --muted:     #6b7280;
+      --muted2:    #9ca3af;
+      --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    header p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 1px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ─── TABS ─── */
+    .tabs {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      gap: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ─── PANELS ─── */
+    .tab-panel { display: none; padding: 20px; }
+    .tab-panel.active { display: block; }
+
+    /* ─── FORM ─── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 5px;
+      letter-spacing: 0.3px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select {
+      width: 100%;
+      padding: 10px 13px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+      background: #fff;
+    }
+
+    input[readonly] {
+      color: var(--muted);
+      cursor: default;
+      background: var(--bg);
+    }
+
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 13px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .checkbox-row label {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text);
+      margin: 0;
+      cursor: pointer;
+      letter-spacing: 0;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: block; width: 100%;
+      padding: 12px 16px;
+      border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: all 0.15s;
+      text-align: center;
+    }
+
+    .btn-primary    { background: var(--accent); color: #fff; margin-top: 6px; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:disabled { background: #bfdbfe; cursor: not-allowed; }
+
+    .btn-secondary  { background: var(--surface); color: var(--text); border: 1px solid var(--border); margin-top: 6px; }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-search     { background: var(--orange); color: #fff; margin-top: 6px; }
+    .btn-search:hover { background: #c2410c; }
+
+    .btn-sm {
+      padding: 6px 12px;
+      border-radius: 6px; border: none;
+      font-size: 12px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: all 0.15s;
+    }
+
+    .btn-edit   { background: var(--accent-bg); color: var(--accent); }
+    .btn-edit:hover { background: #dbeafe; }
+    .btn-del    { background: var(--danger-bg); color: var(--danger); }
+    .btn-del:hover { background: #fee2e2; }
+    .btn-save   { background: var(--green-bg); color: var(--green); }
+    .btn-save:hover { background: #dcfce7; }
+    .btn-cancel { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+    .btn-cancel:hover { color: var(--text); }
+
+    /* ─── STATUS ─── */
+    .status {
+      font-size: 13px; font-weight: 500;
+      padding: 9px 13px;
+      border-radius: 8px;
+      margin-top: 10px;
+      min-height: 36px;
+      display: flex; align-items: center;
+      gap: 6px;
+    }
+
+    .status:empty { display: none; }
+    .status.ok     { background: var(--green-bg);  color: var(--green); }
+    .status.err    { background: var(--danger-bg); color: var(--danger); }
+    .status.loading{ background: var(--accent-bg); color: var(--accent); }
+
+    /* ─── RECORD CARDS ─── */
+    .record-list { margin-top: 16px; }
+
+    .record-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 15px;
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.15s;
+    }
+
+    .record-card:hover { border-color: var(--border2); }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .record-meta { flex: 1; min-width: 0; }
+
+    .record-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted2);
+      margin-bottom: 2px;
+    }
+
+    .record-tipo {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .record-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .record-tags { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+
+    .tag {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-weight: 500;
+    }
+    .tag-macro { background: #f1f5f9; color: #475569; }
+    .tag-rimb  { background: var(--green-bg); color: var(--green); }
+
+    .record-amount {
+      font-family: 'DM Mono', monospace;
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .amount-pos { color: var(--danger); }   /* spesa */
+    .amount-neg { color: var(--green); }    /* entrata */
+
+    .record-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    /* ─── INLINE EDIT ─── */
+    .edit-form {
+      background: var(--accent-bg);
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 8px;
+      animation: fadeDown 0.15s ease;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .edit-form .field { margin-bottom: 10px; }
+
+    .edit-form input[type="text"],
+    .edit-form input[type="number"],
+    .edit-form input[type="date"],
+    .edit-form select {
+      padding: 9px 12px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    .edit-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .edit-actions .btn-sm { flex: 1; padding: 9px 12px; font-size: 13px; font-weight: 600; }
+
+    /* ─── SECTION DIVIDER ─── */
+    .month-divider {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted2);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      padding: 18px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .month-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted2);
+      font-size: 14px;
+    }
+
+    .empty-state span {
+      display: block;
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💰 Cassa Contanti</h1>
+  <p>Registro movimenti contanti</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('insert', this)">➕ Inserisci</button>
+  <button class="tab-btn" onclick="switchTab('search', this)">🔍 Cerca</button>
+  <button class="tab-btn" onclick="switchTab('manage', this)">📋 Gestione</button>
+</div>
+
+<!-- ═══════════════════ TAB INSERT ═══════════════════ -->
+<div id="tab-insert" class="tab-panel active">
+  <div class="card">
+    <form id="expenseForm">
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="data" required>
+      </div>
+
+      <div class="field">
+        <label>Valore (€) — positivo = spesa · negativo = entrata</label>
+        <input type="number" step="0.01" id="valore" placeholder="es. 25.50 oppure -500.00" required>
+      </div>
+
+      <div class="field">
+        <label>Note / Descrizione</label>
+        <input type="text" id="note" placeholder="Descrizione del movimento..." required>
+      </div>
+
+      <div class="field">
+        <label>Tipologia</label>
+        <select id="tipologia" required>
+          <option value="" disabled selected>Seleziona tipologia...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Macro Tipo</label>
+        <input type="text" id="macroTipo" readonly>
+      </div>
+
+      <div class="field">
+        <div class="checkbox-row" onclick="document.getElementById('rimborsabile').click(); event.stopPropagation();">
+          <input type="checkbox" id="rimborsabile" onclick="event.stopPropagation();">
+          <label for="rimborsabile">Rimborsabile 730</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="btnSubmit">Invia a Google Sheets</button>
+    </form>
+    <div id="statusInsert" class="status"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TAB SEARCH ═══════════════════ -->
+<div id="tab-search" class="tab-panel">
+  <div class="card">
+    <div class="field">
+      <label>Cerca per data</label>
+      <input type="date" id="searchDate">
+    </div>
+    <button type="button" class="btn btn-search" onclick="searchByDate()">Cerca Registrazioni</button>
+    <div id="statusSearch" class="status"></div>
+  </div>
+  <div id="searchResults" class="record-list"></div>
+</div>
+
+<!-- ═══════════════════ TAB MANAGE ═══════════════════ -->
+<div id="tab-manage" class="tab-panel">
+  <button type="button" class="btn btn-secondary" onclick="loadAllRecords()">↻ Carica / Aggiorna elenco</button>
+  <div id="statusManage" class="status"></div>
+  <div id="manageList" class="record-list"></div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRXBsvTyHFFF3kXOFvA_-MaGGHNwzEupM7rWBnl2Z8CuXzRyTfODl5tAAl2rq0UDzI7Q/exec';
+
+const CATEGORIE_MAP = {
+  "Abbigliamento":"SPESE VARIE","Affitti attivi":"AFFITTO - MUTUO - STIPENDIO",
+  "Alimentari":"ALIMENTARI","Arredamento casa":"MANUTENZIONE CASA",
+  "Asilo":"ASILO","Assicurazione auto":"AUTO - CASA","Assicurazione casa":"AUTO - CASA",
+  "Assicurazione Mutuo":"AFFITTO - MUTUO - STIPENDIO","Bar - Ristoranti":"BAR-RISTORANTI",
+  "Barbiere":"SPESE VARIE","Benessere personale":"BENESSERE PERSONALE",
+  "Bollette acqua":"UTENZE CASA","Bollette acqua inquilini":"BOLLETTE INQUILINI",
+  "Bollette energia":"UTENZE CASA","Bollette energia inquilini":"BOLLETTE INQUILINI",
+  "Bollo auto":"AUTO - CASA","Canone Amazon photos":"CANONI MENSILI",
+  "Canone Amazon Prime":"CANONI MENSILI","Canone CC":"CANONI MENSILI",
+  "Canone Claude":"CANONI MENSILI","Canone Disney+":"CANONI MENSILI",
+  "Canone Icloud":"CANONI MENSILI","Canone internet":"CANONI MENSILI",
+  "Canone NowTv":"CANONI MENSILI","Canone Palestra":"BENESSERE PERSONALE",
+  "Carburante Ford":"AUTO - CASA","Carburante Yaris":"AUTO - CASA",
+  "Cedolare secca":"AUTO - CASA","Commissioni bonifico CC":"CANONI MENSILI",
+  "Commissioni versamento":"CANONI MENSILI","Competenze CC":"CANONI MENSILI",
+  "Corsi per Thomas":"SCUOLA","Dentista":"SPESE MEDICHE","Elettronica":"SPESE VARIE",
+  "Entrate diverse":"ENTRATE DIVERSE","Estinzione mutuo":"AFFITTO - MUTUO - STIPENDIO",
+  "Imis":"IMIS","Imposta bollo CC":"CANONI MENSILI","Interessi bancari":"ENTRATE DIVERSE",
+  "Investimenti":"FINANZA","Manutenzione auto":"AUTO - CASA",
+  "Manutenzione casa":"MANUTENZIONE CASA","Mezzi pubblici":"AUTO - CASA",
+  "Mountain Bike":"SPESE VARIE","Mutuo":"AFFITTO - MUTUO - STIPENDIO",
+  "Note spese lavoro":"NOTE SPESE LAVORO","Orto":"SPESE VARIE","Ottico":"SPESE MEDICHE",
+  "Pasti lavoro":"PASTI LAVORO","Prestito famiglia":"PRESTITI FAMIGLIA",
+  "Ricarica chiavetta lavoro":"SPESE VARIE","Ricarica telefonica":"SPESE VARIE",
+  "Rimborso bollette da inquilini":"BOLLETTE INQUILINI",
+  "Ristrutturazione casa":"RISTRUTTURAZIONE CASA","Scuola Thomas":"SCUOLA",
+  "Spese animali domestici":"SPESE VARIE","Spese mediche":"SPESE MEDICHE",
+  "Spese per Anna":"SPESE PER TERZI","Spese per mamma":"SPESE PER TERZI",
+  "Spese per Simone":"SPESE PER TERZI","Spese per trasferte":"SPESE TRASFERTE",
+  "Spese Vacanze":"VACANZE","Spese Varie":"SPESE VARIE",
+  "Stipendio Stefano":"AFFITTO - MUTUO - STIPENDIO","Tassa rifiuti":"AUTO - CASA",
+  "Telepass":"AUTO - CASA","TFR":"AFFITTO - MUTUO - STIPENDIO","Vino":"ALIMENTARI"
+};
+
+// ──────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  document.getElementById('data').valueAsDate = today;
+  document.getElementById('searchDate').valueAsDate = today;
+
+  const sel = document.getElementById('tipologia');
+  Object.keys(CATEGORIE_MAP).sort().forEach(k => sel.add(new Option(k, k)));
+
+  document.getElementById('tipologia').addEventListener('change', function() {
+    document.getElementById('macroTipo').value = CATEGORIE_MAP[this.value] || '';
+  });
+
+  document.getElementById('expenseForm').addEventListener('submit', handleInsert);
+});
+
+// ──────────────────────────────────────────
+// TABS
+// ──────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ──────────────────────────────────────────
+// UTILS
+// ──────────────────────────────────────────
+function formatDate(d) {
+  return String(d.getDate()).padStart(2,'0') + '/' +
+         String(d.getMonth()+1).padStart(2,'0') + '/' +
+         d.getFullYear();
+}
+
+function isoToDate(iso) {
+  const [y,m,d] = iso.split('-');
+  return new Date(+y, +m-1, +d);
+}
+
+function dateToISO(ddmmyyyy) {
+  if (!ddmmyyyy) return '';
+  const p = String(ddmmyyyy).split('/');
+  if (p.length !== 3) return '';
+  return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+}
+
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'status' + (type ? ' ' + type : '');
+  if (type === 'ok') setTimeout(() => { el.textContent=''; el.className='status'; }, 3000);
+}
+
+function amountClass(v) {
+  const n = parseFloat(String(v).replace(',','.'));
+  return n < 0 ? 'amount-neg' : 'amount-pos';
+}
+
+function formatAmount(v) {
+  const s = String(v).replace(',','.');
+  const n = parseFloat(s);
+  if (isNaN(n)) return v;
+  return (n < 0 ? '−' : '+') + '€' + Math.abs(n).toFixed(2).replace('.',',');
+}
+
+function buildTipoSelect(selected) {
+  return Object.keys(CATEGORIE_MAP).sort()
+    .map(k => `<option value="${k}"${k===selected?' selected':''}>${k}</option>`)
+    .join('');
+}
+
+// ──────────────────────────────────────────
+// INSERT
+// ──────────────────────────────────────────
+async function handleInsert(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  setStatus('statusInsert', '⏳ Verifica duplicati...', 'loading');
+
+  const dateISO = document.getElementById('data').value;
+  const dateObj = isoToDate(dateISO);
+  const fmtDate = formatDate(dateObj);
+
+  try {
+    const r = await fetch(SCRIPT_URL + '?checkDate=' + encodeURIComponent(fmtDate));
+    const j = await r.json();
+    if (j.exists) {
+      const ok = confirm(`Esistono già dati per il ${fmtDate}.\nProcedere con nuovo inserimento?`);
+      if (!ok) { btn.disabled=false; setStatus('statusInsert','',''); return; }
+    }
+  } catch(_) {}
+
+  setStatus('statusInsert', '⏳ Invio in corso...', 'loading');
+
+  const payload = {
+    action: 'append',
+    data:   fmtDate,
+    anno:   dateObj.getFullYear(),
+    mese:   dateObj.getMonth()+1,
+    tipologia:   document.getElementById('tipologia').value,
+    macroTipo:   document.getElementById('macroTipo').value,
+    valore:      document.getElementById('valore').value.replace('.',','),
+    rimborsabile: document.getElementById('rimborsabile').checked ? 'X' : '',
+    cartaCredito: '',
+    note:    document.getElementById('note').value
+  };
+
+  try {
+    await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'text/plain'} });
+    setStatus('statusInsert', '✓ Registrazione aggiunta correttamente.', 'ok');
+    document.getElementById('valore').value = '';
+    document.getElementById('note').value = '';
+    document.getElementById('tipologia').selectedIndex = 0;
+    document.getElementById('macroTipo').value = '';
+    document.getElementById('rimborsabile').checked = false;
+  } catch(_) {
+    setStatus('statusInsert', '✗ Errore di connessione. Riprova.', 'err');
+  }
+  btn.disabled = false;
+}
+
+// ──────────────────────────────────────────
+// SEARCH
+// ──────────────────────────────────────────
+async function searchByDate() {
+  const dateISO = document.getElementById('searchDate').value;
+  if (!dateISO) return;
+  const fmtDate = formatDate(isoToDate(dateISO));
+  const resultsDiv = document.getElementById('searchResults');
+  resultsDiv.innerHTML = '';
+  setStatus('statusSearch', '⏳ Ricerca in corso...', 'loading');
+
+  try {
+    const res = await fetch(SCRIPT_URL + '?fetchDate=' + encodeURIComponent(fmtDate));
+    const json = await res.json();
+    setStatus('statusSearch', '', '');
+
+    if (json.records && json.records.length > 0) {
+      json.records.forEach(rec => resultsDiv.appendChild(buildCard(rec, 'search')));
+    } else {
+      resultsDiv.innerHTML = '<div class="empty-state"><span>🔍</span>Nessuna registrazione per questa data.</div>';
+    }
+  } catch(err) {
+    setStatus('statusSearch', '✗ Errore. Verifica che lo script sia re-deployato.', 'err');
+  }
+}
+
+// ──────────────────────────────────────────
+// MANAGE
+// ──────────────────────────────────────────
+async function loadAllRecords() {
+  const container = document.getElementById('manageList');
+  container.innerHTML = '';
+  setStatus('statusManage', '⏳ Caricamento registrazioni...', 'loading');
+
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=fetchAll');
+    const records = await res.json();
+    setStatus('statusManage', '', '');
+
+    if (!records || records.length === 0) {
+      container.innerHTML = '<div class="empty-state"><span>📋</span>Nessuna registrazione trovata.</div>';
+      return;
+    }
+
+    // Raggruppa per mese
+    let currentKey = '';
+    records.forEach(rec => {
+      if (!rec.data) return;
+      const parts = String(rec.data).split('/');
+      const monthKey = parts.length === 3 ? `${parts[1]}/${parts[2]}` : '';
+      if (monthKey && monthKey !== currentKey) {
+        currentKey = monthKey;
+        const div = document.createElement('div');
+        div.className = 'month-divider';
+        div.textContent = monthLabel(parts[1], parts[2]);
+        container.appendChild(div);
+      }
+      container.appendChild(buildCard(rec, 'manage'));
+    });
+
+    setStatus('statusManage', `✓ ${records.length} registrazioni caricate.`, 'ok');
+  } catch(err) {
+    setStatus('statusManage', '✗ Errore caricamento. Verifica deploy script.', 'err');
+  }
+}
+
+function monthLabel(mm, yyyy) {
+  const names = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+                 'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  return (names[parseInt(mm,10)-1] || mm) + ' ' + yyyy;
+}
+
+// ──────────────────────────────────────────
+// BUILD CARD
+// ──────────────────────────────────────────
+function buildCard(rec, ctx) {
+  const card = document.createElement('div');
+  card.className = 'record-card';
+  card.id = `card-${rec.rowIndex}`;
+  card.dataset.rec = JSON.stringify(rec);
+
+  const cls = amountClass(rec.valore);
+  const amt = formatAmount(rec.valore);
+  const rimbTag = rec.rimborsabile === 'X'
+    ? '<span class="tag tag-rimb">730</span>' : '';
+  const macroTag = rec.macroTipo
+    ? `<span class="tag tag-macro">${rec.macroTipo}</span>` : '';
+
+  card.innerHTML = `
+    <div class="record-header">
+      <div class="record-meta">
+        <div class="record-date">${rec.data}</div>
+        <div class="record-tipo">${rec.tipologia || '—'}</div>
+        <div class="record-note">${rec.note || ''}</div>
+        <div class="record-tags">${macroTag}${rimbTag}</div>
+      </div>
+      <div class="record-amount ${cls}">${amt}</div>
+    </div>
+    <div class="record-actions">
+      <button class="btn-sm btn-edit" onclick="openEdit(${rec.rowIndex})">✎ Modifica</button>
+      <button class="btn-sm btn-del"  onclick="deleteRec(${rec.rowIndex}, '${ctx}')">✕ Elimina</button>
+    </div>`;
+
+  return card;
+}
+
+// ──────────────────────────────────────────
+// EDIT
+// ──────────────────────────────────────────
+function openEdit(rowIndex) {
+  document.getElementById('edit-inline')?.remove();
+
+  const card = document.getElementById('card-' + rowIndex);
+  if (!card) return;
+  const rec = JSON.parse(card.dataset.rec);
+
+  const form = document.createElement('div');
+  form.className = 'edit-form';
+  form.id = 'edit-inline';
+
+  form.innerHTML = `
+    <div class="field">
+      <label>Data</label>
+      <input type="date" id="ei-data" value="${dateToISO(rec.data)}">
+    </div>
+    <div class="field">
+      <label>Tipologia</label>
+      <select id="ei-tipo" onchange="document.getElementById('ei-macro').value=window._CM[this.value]||''">
+        ${buildTipoSelect(rec.tipologia)}
+      </select>
+    </div>
+    <div class="field">
+      <label>Macro Tipo</label>
+      <input type="text" id="ei-macro" readonly value="${rec.macroTipo || CATEGORIE_MAP[rec.tipologia] || ''}">
+    </div>
+    <div class="field">
+      <label>Valore (€)</label>
+      <input type="number" step="0.01" id="ei-valore" value="${String(rec.valore).replace(',','.')}">
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <input type="text" id="ei-note" value="${(rec.note||'').replace(/"/g,'&quot;')}">
+    </div>
+    <div class="field">
+      <div class="checkbox-row" onclick="document.getElementById('ei-rimb').click(); event.stopPropagation();">
+        <input type="checkbox" id="ei-rimb" ${rec.rimborsabile === 'X' ? 'checked' : ''} onclick="event.stopPropagation();">
+        <label for="ei-rimb">Rimborsabile 730</label>
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-sm btn-save"   onclick="submitEdit(${rowIndex})">✓ Salva</button>
+      <button class="btn-sm btn-cancel" onclick="document.getElementById('edit-inline').remove()">✕ Annulla</button>
+    </div>`;
+
+  card.insertAdjacentElement('afterend', form);
+  form.querySelector('#ei-data').focus();
+}
+
+async function submitEdit(rowIndex) {
+  const iso = document.getElementById('ei-data').value;
+  if (!iso) return alert('Data non valida.');
+  const d  = isoToDate(iso);
+  const fd = formatDate(d);
+  const tipologia   = document.getElementById('ei-tipo').value;
+  const macroTipo   = CATEGORIE_MAP[tipologia] || '';
+  const valore      = document.getElementById('ei-valore').value.replace('.',',');
+  const note        = document.getElementById('ei-note').value;
+  const rimborsabile = document.getElementById('ei-rimb').checked ? 'X' : '';
+
+  const btn = document.querySelector('#edit-inline .btn-save');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({
+        action:'update', rowIndex,
+        data:fd, anno:d.getFullYear(), mese:d.getMonth()+1,
+        tipologia, macroTipo, valore,
+        rimborsabile, cartaCredito:'', note
+      })
+    });
+
+    document.getElementById('edit-inline').remove();
+
+    // Aggiorna card in-place
+    const card = document.getElementById('card-' + rowIndex);
+    if (card) {
+      const updRec = {rowIndex, data:fd, tipologia, macroTipo, valore, rimborsabile, note};
+      const newCard = buildCard(updRec, card.dataset.ctx || 'manage');
+      card.replaceWith(newCard);
+    }
+  } catch(_) {
+    alert('Errore durante il salvataggio. Riprova.');
+    if (btn) { btn.textContent = '✓ Salva'; btn.disabled = false; }
+  }
+}
+
+// ──────────────────────────────────────────
+// DELETE
+// ──────────────────────────────────────────
+async function deleteRec(rowIndex, ctx) {
+  if (!confirm('Confermi eliminazione?\nOperazione irreversibile.')) return;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'delete', rowIndex})
+    });
+    document.getElementById('card-' + rowIndex)?.remove();
+    document.getElementById('edit-inline')?.remove();
+    if (ctx === 'search') searchByDate();
+  } catch(_) {
+    alert('Errore durante l\'eliminazione.');
+  }
+}
+
+window._CM = CATEGORIE_MAP;
+</script>
+</body>
+</html>
