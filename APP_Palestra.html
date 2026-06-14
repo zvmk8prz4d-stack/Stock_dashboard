@@ -260,10 +260,10 @@ function resetSession(k){
 // timer
 let tInt=null,tLeft=0,audioCtx=null;
 function ensureAudio(){try{if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();}catch(e){}}
-function playEndSound(){if(!audioCtx)return;const t0=audioCtx.currentTime;for(let i=0;i<3;i++){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=880;const t=t0+i*0.22;o.connect(g);g.connect(audioCtx.destination);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.35,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.18);o.start(t);o.stop(t+0.2);}}
+function playEndSound(){if(!audioCtx)return;const t0=audioCtx.currentTime;const n=8,step=0.3,dur=0.2;for(let i=0;i<n;i++){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="square";o.frequency.value=900;const t=t0+i*step;o.connect(g);g.connect(audioCtx.destination);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.6,t+0.01);g.gain.setValueAtTime(0.6,t+dur-0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur);}}
 function startTimer(sec){ensureAudio();clearInterval(tInt);tLeft=sec;document.getElementById("timer").classList.add("up");tr();tInt=setInterval(()=>{tLeft--;tr();if(tLeft<=0){clearInterval(tInt);tdone();}},1000);}
 function tr(){const m=Math.floor(tLeft/60),s=tLeft%60;const d=document.getElementById("tdisp");d.textContent=m+":"+String(s).padStart(2,"0");d.classList.toggle("go",tLeft<=10);}
-function tdone(){const d=document.getElementById("tdisp");d.textContent="GO";d.classList.add("go");playEndSound();if(navigator.vibrate)navigator.vibrate([200,80,200]);setTimeout(stopTimer,2200);}
+function tdone(){const d=document.getElementById("tdisp");d.textContent="GO";d.classList.add("go");playEndSound();if(navigator.vibrate)navigator.vibrate([300,120,300,120,300,120,300,120,300]);setTimeout(stopTimer,2900);}
 function stopTimer(){clearInterval(tInt);document.getElementById("timer").classList.remove("up");setTimeout(()=>document.getElementById("tdisp").classList.remove("go"),300);}
 
 // ---- PERSISTENZA ----
