@@ -233,7 +233,18 @@ function switchTab(k){current=k;document.querySelectorAll(".tab").forEach(t=>t.c
 function toggle(k,i){if(SESSIONS[k][i][1]===0)return;const el=document.querySelector(`.ex[data-k="${k}"][data-i="${i}"]`);if(state[k].has(i)){state[k].delete(i);el.classList.remove("done");}else{state[k].add(i);el.classList.add("done");}refreshProg(k);}
 function refreshProg(k){const idx=KEYS.indexOf(k);const tot=SESSIONS[k].filter(e=>e[1]>0).length;document.getElementById("prog-"+idx).innerHTML=`Esercizi <b>${state[k].size}</b>/${tot}`;document.getElementById("time-"+idx).textContent="~"+estMinutes(k);}
 function addSet(k,i){const s=setsCount[k][i];document.getElementById(`sets-${k}-${i}`).insertAdjacentHTML("beforeend",setRowHtml(k,i,s));setsCount[k][i]=s+1;refreshProg(k);}
-function openVideo(k,i){const name=SESSIONS[k][i][0];const q=encodeURIComponent(name.split('/')[0].trim()+' esecuzione corretta tecnica');window.open('https://www.youtube.com/results?search_query='+q,'_blank');}
+const VIDEO_Q={
+ "Panca piana bilanciere":"barbell bench press","Spinte spalle manubri":"dumbbell shoulder press",
+ "Panca inclinata manubri":"incline dumbbell press","Alzate laterali":"dumbbell lateral raise",
+ "Pushdown tricipiti":"tricep pushdown","Crunch ai cavi":"cable crunch",
+ "Rematore bilanciere":"barbell row","Lat machine / Trazioni":"lat pulldown",
+ "Pulley basso":"seated cable row","Rematore manubrio singolo":"dumbbell row",
+ "Curl bilanciere EZ":"ez bar curl","Squat bilanciere":"barbell squat",
+ "Pressa 45°":"leg press","Affondi camminata manubri":"dumbbell walking lunge",
+ "Stacco rumeno bilanciere":"romanian deadlift","Leg curl sdraiato":"lying leg curl",
+ "Leg extension":"leg extension","Plank / core":"plank",
+};
+function openVideo(k,i){const name=SESSIONS[k][i][0];const q=VIDEO_Q[name]||name;window.open('https://www.google.com/search?q='+encodeURIComponent('musclewiki '+q),'_blank');}
 
 // timer
 let tInt=null,tLeft=0;
