@@ -43,6 +43,8 @@
   .ex-info .scheme b{color:var(--amber-ink);font-weight:700}
   .rpe{flex:none;text-align:center;background:var(--surface2);border-radius:8px;padding:5px 9px;min-width:54px}
   .rpe .l{font-size:9px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}.rpe .v{font-size:14px;font-weight:800}
+  .vbtn{flex:none;background:#EAF1FB;border:1px solid var(--border);color:var(--blue);font-size:15px;font-weight:700;width:40px;height:40px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .vbtn:active{background:var(--blue);color:#fff}
   .ex-note{padding:0 14px 10px 51px;font-size:12.5px;color:#5b6678}
   .ex-note.fin{color:var(--amber-ink);font-weight:600}
   .ss{display:inline-block;background:#EAF1FB;color:var(--blue);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle}
@@ -91,11 +93,10 @@
 <body>
 <header><div class="wrap">
   <div class="top">
-    <div><div class="eyebrow">Cut · Upper / Lower · 50 min</div><h1>Palestra</h1>
+    <div><div class="eyebrow">Cut · Push / Pull / Legs / Upper</div><h1>Palestra</h1>
     <div class="sub">Segna kg e reps per ogni serie · invio a Drive a fine sessione</div></div>
     <button class="gear" onclick="openSettings()" title="Impostazioni Drive">⚙</button>
   </div>
-  <nav class="nav"><a href="nutrizione.html">Nutrizione</a><a href="palestra.html" class="active">Palestra</a></nav>
 </div></header>
 
 <div class="wrap">
@@ -105,10 +106,10 @@
 
   <div class="block"><h3>Perché 50 minuti bastano</h3>
     <ul class="kv">
-      <li><span class="k">Meno esercizi</span><span class="v">5-6 mirati invece di 8: in deficit conta l'intensità, non il volume infinito</span></li>
-      <li><span class="k">Superset</span><span class="v">Gli isolamenti li fai in coppia, zero pausa tra i due → tempo dimezzato</span></li>
+      <li><span class="k">Giorni feriali</span><span class="v">Push/Pull/Upper ~50 min: 5-6 esercizi, superset sugli isolamenti</span></li>
+      <li><span class="k">Giorno gambe</span><span class="v">Nel weekend hai più tempo (~60 min): volume più alto, è l'unica seduta gambe</span></li>
       <li><span class="k">Se sei in ritardo</span><span class="v">Taglia l'ultimo isolamento, MAI i composti pesanti</span></li>
-      <li><span class="k">Finisher</span><span class="v">Solo nei giorni Upper e solo se avanzi tempo</span></li>
+      <li><span class="k">Finisher</span><span class="v">Solo nei giorni Push/Pull/Upper e solo se avanzi tempo</span></li>
     </ul></div>
   <div class="block warn"><h3>NEAT senza tempo dedicato</h3>
     <ul class="kv">
@@ -122,7 +123,7 @@
       <li style="margin:7px 0"><b style="color:var(--text)">Squat:</b> bilanciere sul trapezio, fianchi indietro, schiena neutra, a femori paralleli.</li>
       <li style="margin:7px 0"><b style="color:var(--text)">Stacco rumeno:</b> ginocchia ferme, fianchi indietro, bilanciere lungo le cosce, schiena MAI curva.</li>
       <li style="margin:7px 0"><b style="color:var(--text)">Panca:</b> scapole retratte, gomiti a 45°, bilanciere alla linea capezzoli.</li>
-      <li style="margin:7px 0"><b style="color:var(--text)">Hip thrust:</b> spingi coi talloni, glutei contratti in cima.</li>
+      <li style="margin:7px 0"><b style="color:var(--text)">Rematore:</b> busto inclinato, tira verso l'ombelico, scapole indietro, schiena ferma.</li>
       <li style="margin:7px 0"><b style="color:var(--text)">Spinte spalle:</b> gomiti avanti, non bloccare bruscamente, addome contratto.</li>
     </ul>
     <div style="margin-top:12px;font-size:13px;color:#54607a">Video stesso stile: <a class="ext" href="https://musclewiki.com" target="_blank" rel="noopener">musclewiki.com</a></div></div>
@@ -151,39 +152,40 @@
 <script>
 /* [nome, serie, reps, rpe, rest(s), nota, supersetGroup] */
 const SESSIONS={
- "Upper A":[
+ "Push":[
    ["Panca piana bilanciere",4,"6-8","7-8",90,"",0],
+   ["Spinte spalle manubri",3,"8-10","8",90,"",0],
+   ["Panca inclinata manubri",3,"8-10","8",75,"",0],
+   ["Alzate laterali",3,"12-15","9",45,"Superset A · passa subito a Pushdown",1],
+   ["Pushdown tricipiti",3,"12-15","9",45,"Superset A",1],
+   ["Crunch ai cavi",3,"12-15","8-9",45,"Addominali",0],
+   ["FINISHER (se avanzi tempo)",0,"8-10 min","–",0,"Cyclette/tapis media",0],
+ ],
+ "Pull":[
+   ["Rematore bilanciere",4,"6-8","7-8",90,"",0],
+   ["Lat machine / Trazioni",4,"8-10","8",90,"",0],
+   ["Pulley basso",3,"10-12","8",75,"",0],
+   ["Rematore manubrio singolo",3,"10-12","8",75,"Dorso · unilaterale, controlla le asimmetrie",0],
+   ["Curl bilanciere EZ",3,"10-12","8-9",60,"",0],
+   ["FINISHER (se avanzi tempo)",0,"8-10 min","–",0,"Cyclette/tapis media",0],
+ ],
+ "Legs":[
+   ["Squat bilanciere",4,"6-8","7-8",120,"",0],
+   ["Pressa 45°",4,"10-12","8",90,"",0],
+   ["Affondi camminata manubri",3,"10/gamba","8",75,"",0],
+   ["Stacco rumeno bilanciere",4,"8-10","8",90,"Femorali e glutei · schiena neutra",0],
+   ["Leg curl sdraiato",3,"12-15","8-9",60,"Superset A · passa subito a Leg extension",1],
+   ["Leg extension",3,"12-15","8-9",60,"Superset A",1],
+   ["Plank / core",3,"45-60s","–",30,"Opzionale se avanzi tempo",0],
+ ],
+ "Upper":[
+   ["Panca piana bilanciere",4,"8-10","7-8",90,"",0],
    ["Rematore bilanciere",4,"8-10","8",90,"",0],
    ["Spinte spalle manubri",3,"10-12","8",75,"Superset A · passa subito a Lat machine",1],
    ["Lat machine",3,"10-12","8",75,"Superset A",1],
-   ["Alzate laterali",3,"12-15","9",45,"Superset B · passa subito a Pushdown",2],
+   ["Curl manubri alternato",3,"10-12","8-9",45,"Superset B · passa subito a Pushdown",2],
    ["Pushdown tricipiti",3,"12-15","9",45,"Superset B",2],
    ["FINISHER (se avanzi tempo)",0,"8-10 min","–",0,"Cyclette/tapis media",0],
- ],
- "Lower A":[
-   ["Squat bilanciere",4,"6-8","7-8",120,"",0],
-   ["Pressa 45°",3,"10-12","8",90,"",0],
-   ["Affondi camminata manubri",3,"10/gamba","8",75,"",0],
-   ["Leg extension",3,"12-15","8-9",45,"Superset A · passa subito a Leg curl",1],
-   ["Leg curl seduto",3,"12-15","8-9",45,"Superset A",1],
-   ["Calf raise in piedi",4,"12-15","9",45,"",0],
- ],
- "Upper B":[
-   ["Panca inclinata manubri",4,"8-10","7-8",90,"",0],
-   ["Rematore manubrio singolo",4,"8-10","8",90,"",0],
-   ["Lat machine presa neutra",3,"10-12","8",75,"Superset A · passa subito a Spinte",1],
-   ["Spinte spalle manubri",3,"10-12","8",75,"Superset A",1],
-   ["Curl manubri alternato",3,"10-12","8-9",45,"Superset B · passa subito a French press",2],
-   ["French press tricipiti",3,"10-12","8-9",45,"Superset B",2],
-   ["FINISHER (se avanzi tempo)",0,"8-10 min","–",0,"Cyclette/tapis media",0],
- ],
- "Lower B":[
-   ["Stacco rumeno bilanciere",4,"6-8","7-8",120,"Schiena neutra, allungamento femorali",0],
-   ["Hip thrust bilanciere",3,"10-12","8",90,"",0],
-   ["Leg curl sdraiato",3,"12-15","8-9",60,"Superset A · passa subito a Leg extension",1],
-   ["Leg extension",3,"12-15","8-9",60,"Superset A",1],
-   ["Calf raise seduto",4,"15-20","9",45,"",0],
-   ["Crunch ai cavi",3,"12-15","8-9",45,"",0],
  ],
 };
 const KEYS=Object.keys(SESSIONS);
@@ -212,6 +214,7 @@ KEYS.forEach((k,idx)=>{
       <div class="ex-main" onclick="toggle('${k}',${i})"><div class="check">✓</div>
         <div class="ex-info"><div class="n">${e[0]}${e[6]?`<span class="ss">SS ${e[6]===1?'A':'B'}</span>`:``}</div>
           <div class="scheme">${e[1]?`<b>${e[1]}</b> serie · <b>${e[2]}</b> reps`:e[2]}</div></div>
+        ${!isFin?`<button class="vbtn" onclick="event.stopPropagation();openVideo('${k}',${i})" title="Guarda l'esecuzione">▶</button>`:``}
         ${e[3]!=="–"?`<div class="rpe"><div class="l">RPE</div><div class="v">${e[3]}</div></div>`:``}</div>
       ${e[5]?`<div class="ex-note${isFin?' fin':''}">${e[5]}</div>`:``}
       ${!isFin?`<div class="sets" id="sets-${k}-${i}" onclick="event.stopPropagation()">${Array.from({length:e[1]},(_,s)=>setRowHtml(k,i,s)).join("")}</div>
@@ -230,6 +233,7 @@ function switchTab(k){current=k;document.querySelectorAll(".tab").forEach(t=>t.c
 function toggle(k,i){if(SESSIONS[k][i][1]===0)return;const el=document.querySelector(`.ex[data-k="${k}"][data-i="${i}"]`);if(state[k].has(i)){state[k].delete(i);el.classList.remove("done");}else{state[k].add(i);el.classList.add("done");}refreshProg(k);}
 function refreshProg(k){const idx=KEYS.indexOf(k);const tot=SESSIONS[k].filter(e=>e[1]>0).length;document.getElementById("prog-"+idx).innerHTML=`Esercizi <b>${state[k].size}</b>/${tot}`;document.getElementById("time-"+idx).textContent="~"+estMinutes(k);}
 function addSet(k,i){const s=setsCount[k][i];document.getElementById(`sets-${k}-${i}`).insertAdjacentHTML("beforeend",setRowHtml(k,i,s));setsCount[k][i]=s+1;refreshProg(k);}
+function openVideo(k,i){const name=SESSIONS[k][i][0];const q=encodeURIComponent(name.split('/')[0].trim()+' esecuzione corretta tecnica');window.open('https://www.youtube.com/results?search_query='+q,'_blank');}
 
 // timer
 let tInt=null,tLeft=0;
