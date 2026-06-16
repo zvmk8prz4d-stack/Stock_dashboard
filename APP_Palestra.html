@@ -59,6 +59,10 @@
   .tdiv{width:1px;align-self:stretch;background:var(--border);margin:0 3px;flex:none}
   .ex-note{padding:0 14px 10px 14px;font-size:12.5px;color:#9aa6ba}
   .ex-note.fin{color:var(--amber);font-weight:600}
+  .notewrap{padding:0 14px 14px 14px}
+  .exnote{width:100%;font-family:inherit;font-size:14px;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;resize:vertical;min-height:42px;line-height:1.4}
+  .exnote:focus{outline:none;border-color:var(--amber)}
+  .exnote::placeholder{color:#566378}
 
   .block{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:15px;margin:12px 0}
   .block h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);margin-bottom:10px}
@@ -237,6 +241,7 @@ KEYS.forEach((k,idx)=>{
         <button class="tbtn" onclick="startTimer(60)">60s</button>
         <button class="tbtn" onclick="startTimer(90)">90s</button>
         <button class="tbtn" onclick="startTimer(120)">120s</button></div>`:``}
+      ${!isFin?`<div class="notewrap"><textarea class="exnote" id="note-${k}-${i}" rows="1" placeholder="Note / sensazioni…"></textarea></div>`:``}
     </div>`;
   });
   p.innerHTML=h;panels.appendChild(p);
@@ -254,17 +259,18 @@ function resetSession(k){
   state[k].clear();
   SESSIONS[k].forEach((e,i)=>{if(e[1]===0)return;setsCount[k][i]=e[1];const c=document.getElementById(`sets-${k}-${i}`);if(c)c.innerHTML=Array.from({length:e[1]},(_,s)=>setRowHtml(k,i,s)).join("");});
   document.querySelectorAll(`.ex[data-k="${k}"]`).forEach(el=>el.classList.remove("done"));
+  document.querySelectorAll(`#panels .panel[data-k="${k}"] .exnote, .exnote[id^="note-${k}-"]`).forEach(n=>n.value="");
   refreshProg(k);saveState();
 }
 
 // timer
-let tInt=null,tLeft=0,audioCtx=null;
+let tInt=null,tEnd=null,tLeft=0,audioCtx=null;
 function ensureAudio(){try{if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();}catch(e){}}
-function playEndSound(){if(!audioCtx)return;const t0=audioCtx.currentTime;const n=8,step=0.3,dur=0.2;for(let i=0;i<n;i++){const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="square";o.frequency.value=900;const t=t0+i*step;o.connect(g);g.connect(audioCtx.destination);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.6,t+0.01);g.gain.setValueAtTime(0.6,t+dur-0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur);}}
-function startTimer(sec){ensureAudio();clearInterval(tInt);tLeft=sec;document.getElementById("timer").classList.add("up");tr();tInt=setInterval(()=>{tLeft--;tr();if(tLeft<=0){clearInterval(tInt);tdone();}},1000);}
+function playEndSound(){try{if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume();}catch(e){}if(!audioCtx)return;const t0=audioCtx.currentTime,dur=2.2;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="square";let t=t0,hi=false;while(t<t0+dur){o.frequency.setValueAtTime(hi?1100:760,t);hi=!hi;t+=0.18;}g.gain.setValueAtTime(0.5,t0);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur);}
+function startTimer(sec){ensureAudio();clearInterval(tInt);clearTimeout(tEnd);tInt=null;tEnd=null;tLeft=sec;document.getElementById("timer").classList.add("up");tr();tInt=setInterval(()=>{tLeft--;tr();if(tLeft<=0){clearInterval(tInt);tInt=null;tdone();}},1000);}
 function tr(){const m=Math.floor(tLeft/60),s=tLeft%60;const d=document.getElementById("tdisp");d.textContent=m+":"+String(s).padStart(2,"0");d.classList.toggle("go",tLeft<=10);}
-function tdone(){const d=document.getElementById("tdisp");d.textContent="GO";d.classList.add("go");playEndSound();if(navigator.vibrate)navigator.vibrate([300,120,300,120,300,120,300,120,300]);setTimeout(stopTimer,2900);}
-function stopTimer(){clearInterval(tInt);document.getElementById("timer").classList.remove("up");setTimeout(()=>document.getElementById("tdisp").classList.remove("go"),300);}
+function tdone(){const d=document.getElementById("tdisp");d.textContent="GO";d.classList.add("go");playEndSound();if(navigator.vibrate)navigator.vibrate([300,120,300,120,300,120,300,120,300]);tEnd=setTimeout(stopTimer,2900);}
+function stopTimer(){clearInterval(tInt);clearTimeout(tEnd);tInt=null;tEnd=null;document.getElementById("timer").classList.remove("up");setTimeout(()=>document.getElementById("tdisp").classList.remove("go"),300);}
 
 // ---- PERSISTENZA ----
 const STATE_KEY="palestra_state_v1";
@@ -273,9 +279,11 @@ function scheduleSave(){clearTimeout(saveT);saveT=setTimeout(saveState,400);}
 function saveState(){
   const inputs={};
   document.querySelectorAll(".setrow input").forEach(inp=>{if(inp.value!=="")inputs[inp.id]=inp.value;});
+  const notes={};
+  document.querySelectorAll(".exnote").forEach(n=>{if(n.value!=="")notes[n.id]=n.value;});
   const done={},sc={};
   KEYS.forEach(k=>{done[k]=[...state[k]];sc[k]={...setsCount[k]};});
-  try{localStorage.setItem(STATE_KEY,JSON.stringify({date:dt.value,inputs,done,sc}));}catch(e){}
+  try{localStorage.setItem(STATE_KEY,JSON.stringify({date:dt.value,inputs,notes,done,sc}));}catch(e){}
 }
 function loadState(){
   let s;try{s=JSON.parse(localStorage.getItem(STATE_KEY));}catch(e){}
@@ -285,10 +293,12 @@ function loadState(){
   if(s.sc)KEYS.forEach(k=>{if(s.sc[k])Object.keys(s.sc[k]).forEach(i=>{const target=+s.sc[k][i];while(setsCount[k][i]<target)addSetRow(k,+i);});});
   // ripristina i valori inseriti
   if(s.inputs)Object.keys(s.inputs).forEach(id=>{const el=document.getElementById(id);if(el)el.value=s.inputs[id];});
+  // ripristina le note
+  if(s.notes)Object.keys(s.notes).forEach(id=>{const el=document.getElementById(id);if(el)el.value=s.notes[id];});
   // ripristina i completati
   if(s.done)KEYS.forEach(k=>{(s.done[k]||[]).forEach(i=>{state[k].add(i);const el=document.querySelector(`.ex[data-k="${k}"][data-i="${i}"]`);if(el)el.classList.add("done");});refreshProg(k);});
 }
-document.addEventListener("input",e=>{if(e.target.matches(".setrow input"))scheduleSave();});
+document.addEventListener("input",e=>{if(e.target.matches(".setrow input")||e.target.matches(".exnote"))scheduleSave();});
 dt.addEventListener("change",saveState);
 
 // settings
@@ -303,7 +313,7 @@ document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="
 function collect(){const k=current,ex=SESSIONS[k],rows=[];
   ex.forEach((e,i)=>{if(e[1]===0)return;const sets=[];
     for(let s=0;s<setsCount[k][i];s++){const kg=(document.getElementById(`kg-${k}-${i}-${s}`)||{}).value||"";const rp=(document.getElementById(`rp-${k}-${i}-${s}`)||{}).value||"";if(kg!==""||rp!=="")sets.push({set:s+1,kg:kg,reps:rp});}
-    rows.push({ex:e[0],serie:e[1],repsTarget:e[2],rpe:e[3],sets:sets,done:state[k].has(i)?"sì":"no"});});
+    rows.push({ex:e[0],serie:e[1],repsTarget:e[2],rpe:e[3],sets:sets,done:state[k].has(i)?"sì":"no",note:(document.getElementById(`note-${k}-${i}`)||{}).value||""});});
   return {date:dt.value,session:k,rows};}
 function msg(t,kind){const m=document.getElementById("savemsg");m.style.color=kind==="warn"?"var(--warn)":"var(--ok)";m.textContent=t;clearTimeout(m._t);m._t=setTimeout(()=>m.textContent="",6000);}
 
@@ -322,9 +332,9 @@ async function endSession(){
 
 function exportXlsx(){
   const sess=collect();
-  const header=["Data","Sessione","Esercizio","Serie n.","Reps target","Kg","Reps fatte","RPE","Completato"];
+  const header=["Data","Sessione","Esercizio","Serie n.","Reps target","Kg","Reps fatte","RPE","Completato","Note"];
   const body=[];
-  sess.rows.forEach(r=>r.sets.forEach(s=>body.push([sess.date,sess.session,r.ex,s.set,r.repsTarget,numOrText(s.kg),s.reps,r.rpe,r.done])));
+  sess.rows.forEach(r=>r.sets.forEach(s=>body.push([sess.date,sess.session,r.ex,s.set,r.repsTarget,numOrText(s.kg),s.reps,r.rpe,r.done,r.note])));
   if(!body.length){msg("Niente da esportare","warn");return;}
   const blob=buildXlsx([{name:"Sessione",rows:[header,...body]}]);
   const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`Allenamento_${sess.session.replace(/\s/g,"")}_${sess.date}.xlsx`;document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1500);
