@@ -50,7 +50,12 @@
   .setrow input{flex:1;min-width:0;font-family:inherit;font-size:21px;font-weight:800;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center}
   .setrow input::placeholder{color:#566378;font-weight:600;font-size:15px}
   .setrow input:focus{outline:none;border-color:var(--amber);background:#2A3850}
-  .addset{margin:0 0 4px 14px;background:none;border:1px dashed var(--border);color:var(--muted);font-weight:700;font-size:12px;padding:8px 14px;border-radius:8px;cursor:pointer}
+  .setctrl{display:flex;justify-content:flex-end;gap:8px;padding:2px 14px 10px 14px}
+  .sbtn{width:46px;height:40px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:24px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+  .sbtn:active{background:var(--amber);color:#1A1206}
+  .addex{display:flex;gap:8px;padding:8px 14px 20px 14px}
+  .addsel{flex:1;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);background:var(--surface2);border:1px dashed var(--border);border-radius:9px;padding:12px 10px;color-scheme:dark}
+  .addsel:focus{outline:none;border-color:var(--amber)}
   .timerbtns{display:flex;gap:8px;padding:4px 14px 14px 14px}
   .tbtn{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-weight:700;font-size:13px;padding:10px 4px;border-radius:8px;cursor:pointer;font-variant-numeric:tabular-nums}
   .tbtn:active{background:var(--amber);color:#1A1206}
@@ -206,6 +211,54 @@ const VIDEO_Q={
  "Leg curl sdraiato":"lying leg curl","Leg extension":"leg extension","Lat machine":"lat pulldown","Plank / core":"plank",
 };
 const KEYS=Object.keys(SESSIONS);
+const BASE_LEN={};KEYS.forEach(k=>BASE_LEN[k]=SESSIONS[k].length);
+
+/* Catalogo esercizi selezionabili dal menu a tendina: {g:gruppo, n:nome, s:serie, r:reps, rpe, rest, q:query video} */
+const CATALOG=[
+ {g:"Petto",n:"Panca piana bilanciere",s:4,r:"6-8",rpe:"7-8",rest:90,q:"barbell bench press"},
+ {g:"Petto",n:"Panca inclinata manubri",s:3,r:"8-10",rpe:"8",rest:75,q:"incline dumbbell press"},
+ {g:"Petto",n:"Chest press",s:3,r:"10-12",rpe:"8",rest:75,q:"chest press machine"},
+ {g:"Petto",n:"Croci ai cavi",s:3,r:"12-15",rpe:"9",rest:45,q:"cable fly"},
+ {g:"Petto",n:"Dips petto",s:3,r:"8-12",rpe:"8",rest:75,q:"chest dips"},
+ {g:"Dorso",n:"Trazioni",s:4,r:"6-10",rpe:"8",rest:90,q:"pull up"},
+ {g:"Dorso",n:"Rematore bilanciere",s:4,r:"8-10",rpe:"8",rest:90,q:"barbell row"},
+ {g:"Dorso",n:"Lat machine",s:4,r:"8-10",rpe:"8",rest:90,q:"lat pulldown"},
+ {g:"Dorso",n:"Pulley basso",s:3,r:"10-12",rpe:"8",rest:75,q:"seated cable row"},
+ {g:"Dorso",n:"Rematore manubrio singolo",s:3,r:"10-12",rpe:"8",rest:75,q:"dumbbell row"},
+ {g:"Dorso",n:"Pullover ai cavi",s:3,r:"12-15",rpe:"9",rest:60,q:"cable pullover"},
+ {g:"Spalle",n:"Spinte spalle manubri",s:3,r:"8-10",rpe:"8",rest:90,q:"dumbbell shoulder press"},
+ {g:"Spalle",n:"Lento avanti bilanciere",s:4,r:"6-8",rpe:"7-8",rest:90,q:"barbell overhead press"},
+ {g:"Spalle",n:"Alzate laterali",s:3,r:"12-15",rpe:"9",rest:45,q:"dumbbell lateral raise"},
+ {g:"Spalle",n:"Alzate posteriori",s:3,r:"12-15",rpe:"9",rest:45,q:"rear delt fly"},
+ {g:"Spalle",n:"Tirate al mento",s:3,r:"10-12",rpe:"8",rest:60,q:"upright row"},
+ {g:"Gambe",n:"Squat bilanciere",s:4,r:"6-8",rpe:"7-8",rest:120,q:"barbell squat"},
+ {g:"Gambe",n:"Pressa 45°",s:4,r:"10-12",rpe:"8",rest:90,q:"leg press"},
+ {g:"Gambe",n:"Affondi camminata manubri",s:3,r:"10/gamba",rpe:"8",rest:75,q:"dumbbell walking lunge"},
+ {g:"Gambe",n:"Stacco rumeno bilanciere",s:4,r:"8-10",rpe:"8",rest:90,q:"romanian deadlift"},
+ {g:"Gambe",n:"Leg curl sdraiato",s:3,r:"12-15",rpe:"8-9",rest:60,q:"lying leg curl"},
+ {g:"Gambe",n:"Leg extension",s:3,r:"12-15",rpe:"8-9",rest:60,q:"leg extension"},
+ {g:"Gambe",n:"Calf raise in piedi",s:4,r:"15-20",rpe:"9",rest:45,q:"standing calf raise"},
+ {g:"Braccia",n:"Curl bilanciere EZ",s:3,r:"10-12",rpe:"8-9",rest:60,q:"ez bar curl"},
+ {g:"Braccia",n:"Curl manubri alternato",s:3,r:"10-12",rpe:"8-9",rest:45,q:"dumbbell curl"},
+ {g:"Braccia",n:"Curl martello",s:3,r:"10-12",rpe:"8-9",rest:45,q:"hammer curl"},
+ {g:"Braccia",n:"Pushdown tricipiti",s:3,r:"12-15",rpe:"9",rest:45,q:"tricep pushdown"},
+ {g:"Braccia",n:"French press tricipiti",s:3,r:"10-12",rpe:"8-9",rest:60,q:"skull crusher"},
+ {g:"Braccia",n:"Dips alle parallele",s:3,r:"8-12",rpe:"8",rest:75,q:"triceps dips"},
+ {g:"Addome",n:"Crunch ai cavi",s:3,r:"12-15",rpe:"8-9",rest:45,q:"cable crunch"},
+ {g:"Addome",n:"Plank",s:3,r:"45-60s",rpe:"–",rest:30,q:"plank"},
+ {g:"Addome",n:"Leg raise",s:3,r:"12-15",rpe:"8-9",rest:45,q:"hanging leg raise"},
+ {g:"Addome",n:"Russian twist",s:3,r:"20",rpe:"8",rest:30,q:"russian twist"},
+];
+let _g="",CAT_OPTS="";
+CATALOG.forEach((c,idx)=>{if(c.g!==_g){if(_g)CAT_OPTS+="</optgroup>";CAT_OPTS+=`<optgroup label="${c.g}">`;_g=c.g;}CAT_OPTS+=`<option value="${idx}">${c.n}</option>`;});
+CAT_OPTS+="</optgroup>";
+
+/* esercizi aggiunti dall'utente: persistiti a parte e riagganciati a SESSIONS all'avvio */
+const EXTRA_KEY="palestra_extra_v1";
+function loadExtra(){let ex;try{ex=JSON.parse(localStorage.getItem(EXTRA_KEY));}catch(e){}if(!ex)return;KEYS.forEach(k=>{if(Array.isArray(ex[k]))ex[k].forEach(row=>{SESSIONS[k].push(row);const c=CATALOG.find(x=>x.n===row[0]);if(c)VIDEO_Q[row[0]]=c.q;});});}
+function saveExtra(){const extra={};KEYS.forEach(k=>{extra[k]=SESSIONS[k].slice(BASE_LEN[k]);});try{localStorage.setItem(EXTRA_KEY,JSON.stringify(extra));}catch(e){}}
+loadExtra();
+
 const state={},setsCount={};
 KEYS.forEach(k=>{state[k]=new Set();setsCount[k]={};SESSIONS[k].forEach((e,i)=>{setsCount[k][i]=e[1]||0;});});
 let current=KEYS[0];
@@ -216,16 +269,9 @@ function setRowHtml(k,i,s){return `<div class="setrow"><span class="setn">S${s+1
   <input type="number" inputmode="decimal" step="0.5" id="kg-${k}-${i}-${s}" placeholder="kg">
   <input type="text" inputmode="numeric" id="rp-${k}-${i}-${s}" placeholder="reps"></div>`;}
 
-const tabs=document.getElementById("tabs"),panels=document.getElementById("panels");
-KEYS.forEach((k,idx)=>{
-  const t=document.createElement("div");t.className="tab"+(idx===0?" active":"");t.textContent=k;t.dataset.k=k;t.onclick=()=>switchTab(k);tabs.appendChild(t);
-  const p=document.createElement("section");p.className="panel"+(idx===0?" active":"");p.dataset.k=k;
-  const ex=SESSIONS[k];
-  let h=`<div class="panel-head"><h2>${k}</h2><button class="resetbtn" onclick="resetSession('${k}')">↺ Reset</button></div>
-    <div class="pmeta"><span class="done" id="prog-${idx}">Esercizi <b>0</b>/${ex.filter(e=>e[1]>0).length}</span><span class="t">Tempo stimato <b id="time-${idx}">~${estMinutes(k)}</b> min</span></div>`;
-  ex.forEach((e,i)=>{
-    const isFin=e[1]===0;
-    h+=`<div class="ex" data-k="${k}" data-i="${i}">
+function exCardHtml(k,i,e){
+  const isFin=e[1]===0;
+  return `<div class="ex" data-k="${k}" data-i="${i}">
       <div class="ex-head">
         ${!isFin?`<button class="vbtn" onclick="openVideo('${k}',${i})" title="Video">▶</button>`:``}
         <div class="ex-info"><div class="n">${e[0]}${e[6]?`<span class="ss">SS ${e[6]===1?'A':'B'}</span>`:``}</div>
@@ -234,7 +280,7 @@ KEYS.forEach((k,idx)=>{
       </div>
       ${e[5]?`<div class="ex-note${isFin?' fin':''}">${e[5]}</div>`:``}
       ${!isFin?`<div class="sets" id="sets-${k}-${i}">${Array.from({length:e[1]},(_,s)=>setRowHtml(k,i,s)).join("")}</div>
-        <button class="addset" onclick="addSet('${k}',${i})">+ serie</button>`:``}
+        <div class="setctrl"><button class="sbtn" onclick="removeSet('${k}',${i})" title="Togli serie">−</button><button class="sbtn" onclick="addSet('${k}',${i})" title="Aggiungi serie">+</button></div>`:``}
       ${e[4]>0?`<div class="timerbtns">
         <button class="tbtn rec" onclick="startTimer(${e[4]})">${e[4]}s</button>
         <span class="tdiv"></span>
@@ -243,15 +289,31 @@ KEYS.forEach((k,idx)=>{
         <button class="tbtn" onclick="startTimer(120)">120s</button></div>`:``}
       ${!isFin?`<div class="notewrap"><textarea class="exnote" id="note-${k}-${i}" rows="1" placeholder="Note / sensazioni…"></textarea></div>`:``}
     </div>`;
-  });
+}
+
+const tabs=document.getElementById("tabs"),panels=document.getElementById("panels");
+KEYS.forEach((k,idx)=>{
+  const t=document.createElement("div");t.className="tab"+(idx===0?" active":"");t.textContent=k;t.dataset.k=k;t.onclick=()=>switchTab(k);tabs.appendChild(t);
+  const p=document.createElement("section");p.className="panel"+(idx===0?" active":"");p.dataset.k=k;
+  const ex=SESSIONS[k];
+  let h=`<div class="panel-head"><h2>${k}</h2><button class="resetbtn" onclick="resetSession('${k}')">↺ Reset</button></div>
+    <div class="pmeta"><span class="done" id="prog-${idx}">Esercizi <b>0</b>/${ex.filter(e=>e[1]>0).length}</span><span class="t">Tempo stimato <b id="time-${idx}">~${estMinutes(k)}</b> min</span></div>
+    <div id="exlist-${k}">`;
+  ex.forEach((e,i)=>{h+=exCardHtml(k,i,e);});
+  h+=`</div>
+    <div class="addex"><select class="addsel" onchange="addExercise('${k}',this.value);this.value='-1'"><option value="-1">+ Aggiungi esercizio…</option>${CAT_OPTS}</select><button class="sbtn" onclick="removeLastExercise('${k}')" title="Togli ultimo esercizio aggiunto">−</button></div>`;
   p.innerHTML=h;panels.appendChild(p);
 });
+
+function addExercise(k,val){const idx=parseInt(val,10);if(isNaN(idx)||idx<0)return;const c=CATALOG[idx];const e=[c.n,c.s,c.r,c.rpe,c.rest,"",0];const i=SESSIONS[k].length;SESSIONS[k].push(e);setsCount[k][i]=e[1];VIDEO_Q[c.n]=c.q;document.getElementById(`exlist-${k}`).insertAdjacentHTML("beforeend",exCardHtml(k,i,e));refreshProg(k);saveExtra();saveState();}
+function removeLastExercise(k){if(SESSIONS[k].length<=BASE_LEN[k]){return;}const i=SESSIONS[k].length-1;SESSIONS[k].pop();delete setsCount[k][i];state[k].delete(i);const card=document.querySelector(`.ex[data-k="${k}"][data-i="${i}"]`);if(card)card.remove();refreshProg(k);saveExtra();saveState();}
 
 function switchTab(k){current=k;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.k===k));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.dataset.k===k));}
 function toggle(k,i){if(SESSIONS[k][i][1]===0)return;const el=document.querySelector(`.ex[data-k="${k}"][data-i="${i}"]`);if(state[k].has(i)){state[k].delete(i);el.classList.remove("done");}else{state[k].add(i);el.classList.add("done");}refreshProg(k);saveState();}
 function refreshProg(k){const idx=KEYS.indexOf(k);const tot=SESSIONS[k].filter(e=>e[1]>0).length;document.getElementById("prog-"+idx).innerHTML=`Esercizi <b>${state[k].size}</b>/${tot}`;document.getElementById("time-"+idx).textContent="~"+estMinutes(k);}
 function addSetRow(k,i){const s=setsCount[k][i];document.getElementById(`sets-${k}-${i}`).insertAdjacentHTML("beforeend",setRowHtml(k,i,s));setsCount[k][i]=s+1;}
 function addSet(k,i){addSetRow(k,i);refreshProg(k);saveState();}
+function removeSet(k,i){const cont=document.getElementById(`sets-${k}-${i}`);const rows=cont.querySelectorAll(".setrow");if(rows.length<=1)return;rows[rows.length-1].remove();setsCount[k][i]--;refreshProg(k);saveState();}
 function openVideo(k,i){const name=SESSIONS[k][i][0];const q=VIDEO_Q[name]||name;window.open('https://www.google.com/search?q='+encodeURIComponent('musclewiki '+q),'_blank');}
 
 function resetSession(k){
@@ -263,14 +325,15 @@ function resetSession(k){
   refreshProg(k);saveState();
 }
 
-// timer
-let tInt=null,tEnd=null,tLeft=0,audioCtx=null;
+// timer (basato su orologio reale: resta accurato anche se esci e rientri)
+let tInt=null,tEnd=null,tEndAt=0,audioCtx=null;
 function ensureAudio(){try{if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();}catch(e){}}
 function playEndSound(){try{if(audioCtx&&audioCtx.state==="suspended")audioCtx.resume();}catch(e){}if(!audioCtx)return;const t0=audioCtx.currentTime,dur=2.2;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="square";let t=t0,hi=false;while(t<t0+dur){o.frequency.setValueAtTime(hi?1100:760,t);hi=!hi;t+=0.18;}g.gain.setValueAtTime(0.5,t0);o.connect(g);g.connect(audioCtx.destination);o.start(t0);o.stop(t0+dur);}
-function startTimer(sec){ensureAudio();clearInterval(tInt);clearTimeout(tEnd);tInt=null;tEnd=null;tLeft=sec;document.getElementById("timer").classList.add("up");tr();tInt=setInterval(()=>{tLeft--;tr();if(tLeft<=0){clearInterval(tInt);tInt=null;tdone();}},1000);}
-function tr(){const m=Math.floor(tLeft/60),s=tLeft%60;const d=document.getElementById("tdisp");d.textContent=m+":"+String(s).padStart(2,"0");d.classList.toggle("go",tLeft<=10);}
-function tdone(){const d=document.getElementById("tdisp");d.textContent="GO";d.classList.add("go");playEndSound();if(navigator.vibrate)navigator.vibrate([300,120,300,120,300,120,300,120,300]);tEnd=setTimeout(stopTimer,2900);}
-function stopTimer(){clearInterval(tInt);clearTimeout(tEnd);tInt=null;tEnd=null;document.getElementById("timer").classList.remove("up");setTimeout(()=>document.getElementById("tdisp").classList.remove("go"),300);}
+function startTimer(sec){ensureAudio();clearInterval(tInt);clearTimeout(tEnd);tInt=null;tEnd=null;tEndAt=Date.now()+sec*1000;document.getElementById("timer").classList.add("up");tick();tInt=setInterval(tick,250);}
+function tick(){const d=document.getElementById("tdisp");const left=Math.round((tEndAt-Date.now())/1000);if(left<=0){clearInterval(tInt);tInt=null;d.textContent="GO";d.classList.add("go");tdone();return;}const m=Math.floor(left/60),s=left%60;d.textContent=m+":"+String(s).padStart(2,"0");d.classList.toggle("go",left<=10);}
+function tdone(){playEndSound();if(navigator.vibrate)navigator.vibrate([300,120,300,120,300,120,300,120,300]);tEnd=setTimeout(stopTimer,2900);}
+function stopTimer(){clearInterval(tInt);clearTimeout(tEnd);tInt=null;tEnd=null;tEndAt=0;document.getElementById("timer").classList.remove("up");setTimeout(()=>document.getElementById("tdisp").classList.remove("go"),300);}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&tInt)tick();});
 
 // ---- PERSISTENZA ----
 const STATE_KEY="palestra_state_v1";
