@@ -305,6 +305,77 @@
       margin-top: 10px;
     }
 
+    /* ─── SELEZIONE MULTIPLA ─── */
+    .bulk-bar {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 13px;
+      margin-top: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .bulk-bar.visible { display: flex; }
+
+    .bulk-all {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .bulk-all input[type="checkbox"] {
+      width: 17px; height: 17px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .bulk-all span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-bulk-del {
+      padding: 8px 14px;
+      border: none; border-radius: 7px;
+      background: var(--danger); color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    .btn-bulk-del:hover:not(:disabled) { background: #b91c1c; }
+    .btn-bulk-del:disabled { background: #ebebe4; color: var(--muted2); cursor: not-allowed; }
+
+    .record-select {
+      display: flex;
+      align-items: flex-start;
+      padding-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .record-select input[type="checkbox"] {
+      width: 17px; height: 17px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .record-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
     /* ─── INLINE EDIT ─── */
     .edit-form {
       background: var(--accent-bg);
@@ -442,6 +513,15 @@
 <!-- ═══════════════════ TAB MANAGE ═══════════════════ -->
 <div id="tab-manage" class="tab-panel">
   <button type="button" class="btn btn-secondary" onclick="loadAllRecords()">↻ Carica / Aggiorna elenco</button>
+
+  <div id="bulkBar" class="bulk-bar">
+    <label class="bulk-all">
+      <input type="checkbox" id="bulkAll" onchange="toggleSelectAll(this.checked)">
+      <span id="bulkAllLabel">Seleziona tutto</span>
+    </label>
+    <button type="button" class="btn-bulk-del" id="btnBulkDel" disabled onclick="deleteSelected()">✕ Elimina selezionati</button>
+  </div>
+
   <div id="statusManage" class="status"></div>
   <div id="manageList" class="record-list"></div>
 </div>
@@ -533,6 +613,16 @@ function dateToISO(ddmmyyyy) {
   return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
 }
 
+// Costruisce l'URL di lettura con un parametro sempre diverso: impedisce
+// al browser e alla cache di Google di restituire una copia vecchia.
+function readUrl(query) {
+  return SCRIPT_URL + '?' + query + '&_ts=' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+// Solo 'cache: no-store': niente header aggiuntivi, altrimenti il browser
+// farebbe una richiesta preliminare che Apps Script non sa gestire.
+const NO_CACHE = { cache: 'no-store' };
+
 function setStatus(id, msg, type) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -573,7 +663,7 @@ async function handleInsert(e) {
   const fmtDate = formatDate(dateObj);
 
   try {
-    const r = await fetch(SCRIPT_URL + '?checkDate=' + encodeURIComponent(fmtDate));
+    const r = await fetch(readUrl('checkDate=' + encodeURIComponent(fmtDate)), NO_CACHE);
     const j = await r.json();
     if (j.exists) {
       const ok = confirm(`Esistono già dati per il ${fmtDate}.\nProcedere con nuovo inserimento?`);
@@ -622,7 +712,7 @@ async function searchByDate() {
   setStatus('statusSearch', '⏳ Ricerca in corso...', 'loading');
 
   try {
-    const res = await fetch(SCRIPT_URL + '?fetchDate=' + encodeURIComponent(fmtDate));
+    const res = await fetch(readUrl('fetchDate=' + encodeURIComponent(fmtDate)), NO_CACHE);
     const json = await res.json();
     setStatus('statusSearch', '', '');
 
@@ -642,10 +732,13 @@ async function searchByDate() {
 async function loadAllRecords() {
   const container = document.getElementById('manageList');
   container.innerHTML = '';
+  document.getElementById('bulkAll').checked = false;
+  document.getElementById('bulkAll').indeterminate = false;
+  refreshBulkState();
   setStatus('statusManage', '⏳ Caricamento registrazioni...', 'loading');
 
   try {
-    const res = await fetch(SCRIPT_URL + '?action=fetchAll');
+    const res = await fetch(readUrl('action=fetchAll'), NO_CACHE);
     const records = await res.json();
     setStatus('statusManage', '', '');
 
@@ -670,6 +763,7 @@ async function loadAllRecords() {
       container.appendChild(buildCard(rec, 'manage'));
     });
 
+    refreshBulkState();
     setStatus('statusManage', `✓ ${records.length} registrazioni caricate.`, 'ok');
   } catch(err) {
     setStatus('statusManage', '✗ Errore caricamento. Verifica deploy script.', 'err');
@@ -690,6 +784,7 @@ function buildCard(rec, ctx) {
   card.className = 'record-card';
   card.id = `card-${rec.rowIndex}`;
   card.dataset.rec = JSON.stringify(rec);
+  card.dataset.ctx = ctx;
 
   const cls = amountClass(rec.valore);
   const amt = formatAmount(rec.valore);
@@ -698,8 +793,14 @@ function buildCard(rec, ctx) {
   const macroTag = rec.macroTipo
     ? `<span class="tag tag-macro">${rec.macroTipo}</span>` : '';
 
+  // Checkbox di selezione solo nella tab Gestione
+  const selectBox = ctx === 'manage'
+    ? `<div class="record-select"><input type="checkbox" class="rec-check" value="${rec.rowIndex}" onchange="onRecCheck(this)"></div>`
+    : '';
+
   card.innerHTML = `
     <div class="record-header">
+      ${selectBox}
       <div class="record-meta">
         <div class="record-date">${rec.data}</div>
         <div class="record-tipo">${rec.tipologia || '—'}</div>
@@ -801,6 +902,7 @@ async function submitEdit(rowIndex) {
       const updRec = {rowIndex, data:fd, tipologia, macroTipo, valore, rimborsabile, note};
       const newCard = buildCard(updRec, card.dataset.ctx || 'manage');
       card.replaceWith(newCard);
+      refreshBulkState();
     }
   } catch(_) {
     alert('Errore durante il salvataggio. Riprova.');
@@ -822,8 +924,74 @@ async function deleteRec(rowIndex, ctx) {
     document.getElementById('card-' + rowIndex)?.remove();
     document.getElementById('edit-inline')?.remove();
     if (ctx === 'search') searchByDate();
+    else refreshBulkState();
   } catch(_) {
     alert('Errore durante l\'eliminazione.');
+  }
+}
+
+// ──────────────────────────────────────────
+// SELEZIONE MULTIPLA + ELIMINAZIONE DI GRUPPO
+// ──────────────────────────────────────────
+function onRecCheck(cb) {
+  cb.closest('.record-card')?.classList.toggle('selected', cb.checked);
+  refreshBulkState();
+}
+
+function toggleSelectAll(checked) {
+  document.querySelectorAll('#manageList .rec-check').forEach(cb => {
+    cb.checked = checked;
+    cb.closest('.record-card')?.classList.toggle('selected', checked);
+  });
+  refreshBulkState();
+}
+
+function refreshBulkState() {
+  const all = document.querySelectorAll('#manageList .rec-check');
+  const sel = document.querySelectorAll('#manageList .rec-check:checked');
+
+  document.getElementById('bulkBar').classList.toggle('visible', all.length > 0);
+
+  const master = document.getElementById('bulkAll');
+  master.checked = all.length > 0 && sel.length === all.length;
+  master.indeterminate = sel.length > 0 && sel.length < all.length;
+
+  document.getElementById('bulkAllLabel').textContent =
+    sel.length > 0 ? `${sel.length} di ${all.length} selezionate` : 'Seleziona tutto';
+
+  const btn = document.getElementById('btnBulkDel');
+  btn.disabled = sel.length === 0;
+  btn.textContent = sel.length > 0
+    ? `✕ Elimina ${sel.length}`
+    : '✕ Elimina selezionati';
+}
+
+async function deleteSelected() {
+  const rows = Array.from(document.querySelectorAll('#manageList .rec-check:checked'))
+                    .map(cb => Number(cb.value));
+  if (rows.length === 0) return;
+
+  const plurale = rows.length === 1 ? 'registrazione' : 'registrazioni';
+  if (!confirm(`Eliminare ${rows.length} ${plurale}?\nOperazione irreversibile.`)) return;
+
+  const btn = document.getElementById('btnBulkDel');
+  btn.disabled = true;
+  btn.textContent = '⏳ Eliminazione...';
+  setStatus('statusManage', '⏳ Eliminazione in corso...', 'loading');
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'deleteMultiple', rowIndexes: rows })
+    });
+    document.getElementById('edit-inline')?.remove();
+    // Ricarico: dopo la cancellazione i numeri di riga a valle sono cambiati
+    await loadAllRecords();
+    setStatus('statusManage', `✓ ${rows.length} ${plurale} eliminate.`, 'ok');
+  } catch(_) {
+    setStatus('statusManage', '✗ Errore durante l\'eliminazione.', 'err');
+    refreshBulkState();
   }
 }
 
